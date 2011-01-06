@@ -1,0 +1,6 @@
+*.pyc
+*.pydevproject
+*.project
+*.sqlite3
+*.log
+initial_data.json

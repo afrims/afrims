@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.sessions",
     "django.contrib.contenttypes",
+    
+    "afrims.apps.reminder",
 
     # the rapidsms contrib apps.
     "rapidsms.contrib.default",
@@ -87,6 +89,7 @@ RAPIDSMS_TABS = [
     ("rapidsms.contrib.locations.views.locations",          "Map"),
     ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
+#    ("afrims.apps.reminder.views.dashboard", "Reminder"),
 ]
 
 
@@ -161,7 +164,6 @@ TEST_EXCLUDED_APPS = [
 
 # the project-level url patterns
 ROOT_URLCONF = "urls"
-
 
 # since we might hit the database from any thread during testing, the
 # in-memory sqlite database isn't sufficient. it spawns a separate
