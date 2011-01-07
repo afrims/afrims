@@ -6,12 +6,24 @@ from django.template.context import RequestContext
 from rapidsms.models import Contact
 from django.http import HttpResponse
 from django.core import serializers
+from apps.reminder.models import Group
 
 
 def dashboard(request):
     return render_to_response("reminder/base.html",RequestContext(request),{})
 
 def contacts_table(request):
+    return get_table_data(request, "contacts")
+
+def groups_table(request):
+    return get_table_data(request, "group")
+    
+    
+def get_table_data(request, type):
+    """ takes a Request object and a type string (== "contacts" or "group")
+    and spits back the data in a format DataTables (jquery plugin) can understand.
+    """
+    
     sEcho = request.GET.get('sEcho')
     iDisplayStart = request.GET.get('iDisplayStart')
     iDisplayLength = request.GET.get('iDisplayLength')
@@ -45,14 +57,25 @@ def contacts_table(request):
     
     resp = {"sEcho":sEcho}
     
-    queryset = Contact.objects.all();
+    if(type=="contacts"):
+        queryset = Contact.objects.all()
+    elif(type=="group"):
+        queryset = Group.objects.all()
+    else:
+        return HttpResponse("Invalid Data table type requested");
     
     resp.update({"iTotalRecords":queryset.count()})
     resp.update({"iTotalDisplayRecords":queryset.count()})
+    queryset = queryset[iDisplayStart:iDisplayStart+iDisplayLength]
     aaData = []
     
     for c in queryset:
-        aaData.append([c.id, c.name, c.default_connection.identity, c.language])
+        if(type=="contacts"):
+            groups = ", ".join(g.name for g in c.groups.all())
+            aaData.append([c.id, c.name, c.default_connection.identity, c.language, groups])
+        elif(type=="group"):
+            aaData.append([c.id, c.name, c.description]);
+            
     resp.update({"aaData":aaData})
     j = json.dumps(resp)
     return HttpResponse(j)

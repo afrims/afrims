@@ -8,6 +8,7 @@ from apps.reminder import views
 
 urlpatterns = patterns('',
     url(r'^contacts_table/$',views.contacts_table),
+    url(r'^groups_table/$',views.groups_table),
     url(r'^$', views.dashboard),
 
 )
