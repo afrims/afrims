@@ -19,6 +19,7 @@ $(document).ready(function() {
 		"bServerSide": true,
 		"bPaginate"      : true,
 		"sPaginationType": "full_numbers",
+		"bAutoWidth": false,
 		"bJQueryUI": true,
 		"sAjaxSource": "groups_table/",
 		"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
@@ -42,6 +43,7 @@ $(document).ready(function() {
 		"bProcessing": true,
 		"bServerSide": true,
 		"bPaginate"      : true,
+		"bAutoWidth": false,
 		"sPaginationType": "full_numbers",
 		"bJQueryUI": true,
 		"sAjaxSource": "contacts_table/",
@@ -56,7 +58,7 @@ $(document).ready(function() {
 			{ "bVisible": 0 }, /* ID column */
 			null,
 			null,
-			null,
+			{ "bVisible": 0 },
 			null, 
 		]
 	});
@@ -105,10 +107,11 @@ $(document).ready(function() {
 
 {% block stylesheets %}
 {{ block.super }}
-		<style type="text/css" title="currentStyle"> 
+		<style type="text/css" title="currentStyle">
 			@import "{{ MEDIA_URL }}reminder/css/demo_page.css"
 			@import "{{ MEDIA_URL }}reminder/css/demo_table.css";
 			@import "{{ MEDIA_URL }}reminder/css/demo_table_jui.css";
+			@import "{{ MEDIA_URL }}reminder/css/reminder.css"
 		</style> 
 {% endblock %}
 
@@ -118,15 +121,22 @@ $(document).ready(function() {
 
 
 					
-<div id="contacts-div"> 
+	<div id="contacts_holder">
+	<h1>Contacts List</h1>
+	</div>
+		
+	<div id="groups_holder">
+	<h1>Groups List</h1>
+	</div>
+	
 	<table cellpadding="0" cellspacing="0" border="0" class="display" id="contacts_table"> 
 		<thead> 
 			<tr> 
 				<th width="5%">ID</th> 
-				<th width="45%">Name</th> 
+				<th width="20%">Name</th> 
 				<th width="20%">Phone Number</th> 
 				<th width="10%">Language</th> 
-				<th width="*">Groups</th>
+				<th width="15">Groups</th>
 			</tr> 
 		</thead> 
 		<tbody> 
@@ -144,16 +154,16 @@ $(document).ready(function() {
 			</tr> 
 		</tfoot> 
 	</table> 
-</div> 
-	 
-	 
-<div id="groups-div"> 
+
+	
+	<div class="spacer" id="between_tables"></div> 
+
 	<table cellpadding="0" cellspacing="0" border="0" class="display" id="groups_table"> 
 		<thead> 
 			<tr> 
 				<th>ID</th> 
 				<th width="10%">Name</th> 
-				<th width="*">Description</th> 
+				<th width="15%">Description</th> 
 			</tr> 
 		</thead> 
 		<tbody> 
@@ -168,8 +178,9 @@ $(document).ready(function() {
 				<th>Description</th> 
 			</tr> 
 		</tfoot> 
-	</table> 					
-</div> 
+	</table> 	
+
+
 				
 <div class="spacer"></div> 
 			

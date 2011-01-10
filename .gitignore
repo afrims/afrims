@@ -2,5 +2,6 @@
 *.pydevproject
 *.project
 *.sqlite3
+*.log.*
 *.log
 initial_data.json
