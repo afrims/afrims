@@ -101,14 +101,6 @@
 	background-image: url('../images/forward_enabled.jpg');
 }
 
-#contacts_table {
-	width: 100%;
-	align: center;
-}
-#contacts_table .table {
-	width: 100%;
-}
-
 table.display tr.even.row_selected td {
 	background-color: #B0BED9;
 }

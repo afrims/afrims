@@ -65,7 +65,8 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     
     "afrims.apps.reminder",
-
+    "afrims.apps.broadcast",
+    
     # the rapidsms contrib apps.
     "rapidsms.contrib.default",
     "rapidsms.contrib.export",
@@ -73,7 +74,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.locations",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
-    "rapidsms.contrib.registration",
+#    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "rapidsms.contrib.echo",
 ]

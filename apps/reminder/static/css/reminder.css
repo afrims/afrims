@@ -1,0 +1,61 @@
+#contacts_table_wrapper {
+   /* border: 2px outset black;*/
+    clear: none;
+    float: left;
+    margin: 0px;
+    padding: 5px;
+    width: 50%;
+}
+
+#groups_table_wrapper {
+    /*border: 2px outset black;*/
+	width: *%;
+	clear: none;
+    float: right;
+    margin: 0px;
+    padding: 5px;
+    width: 25%;
+}
+
+#between_tables{
+	height: 300px;
+	width: 1px;
+	background-color: black;
+	float:left;
+	margin:10px;
+
+}
+
+#contacts_holder {
+	/* border: solid 1px black; */
+	float: left;
+	clear: none;
+	width:50%;
+	margin: 0px;
+	padding: 0px;
+	text-align: center;
+}
+
+#groups_holder {
+	/* border: solid 1px black; */
+	float: right;
+	clear: none;
+	width:50%;
+	margin: 0px;
+	padding: 0px;	
+	text-align: center;
+	
+}
+
+#groups_table_info {
+	visibility: hidden;
+}
+	
+#groups_table_length{
+	visibility: hidden;
+}
+
+	
+#contacts_table_length{
+	visibility: hidden;
+}

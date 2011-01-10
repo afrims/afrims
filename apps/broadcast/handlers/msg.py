@@ -19,7 +19,7 @@ class MsgHandler(BroadcastHandler):
     MALFORMED_MESSAGE_TEXT = "Sorry the system did not understand your message. Please try again."
     PATTERN = re.compile(r"^(\w)(\s+)(.{1,})$", re.IGNORECASE)
     
-    MESSAGE_EVERYONE_ALLOWED = True;
+    MESSAGE_EVERYONE_ALLOWED = False;
     
     ######## Canned Responses ##########
     def help(self):
@@ -60,7 +60,7 @@ class MsgHandler(BroadcastHandler):
         
         if(group.lower() == "all" and self.MESSAGE_EVERYONE_ALLOWED):
             #send this message to everyone. USE WITH CARE!
-            contacts = Contact.objects.all()
+            contacts = Contact.objects.all().exclude(self.msg.contact)
         else:
             #check to see if the specified group actually exists
             try:
