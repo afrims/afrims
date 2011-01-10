@@ -7,11 +7,96 @@
 
 
 <script type="text/javascript" charset="utf-8"> 
+var ocTable;
+var ogTable;
+var contactsSelected =  [];
+var groupsSelected = [];
 $(document).ready(function() {
-	$('#example').dataTable( {
+	
+
+	ogTable = $('#groups_table').dataTable( {
 		"bProcessing": true,
 		"bServerSide": true,
-		"sAjaxSource": "contacts_table/"
+		"bPaginate"      : true,
+		"sPaginationType": "full_numbers",
+		"bJQueryUI": true,
+		"sAjaxSource": "groups_table/",
+		"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+			if ( jQuery.inArray(aData[0], groupsSelected) != -1 )
+			{
+				$(nRow).addClass('row_selected');
+			}
+			return nRow;
+		},
+		"aoColumns": [
+			{ "bVisible": 0 }, /* ID column */
+			null,
+			null,
+		]
+	});
+	
+	
+	
+	
+	ocTable = $('#contacts_table').dataTable( {
+		"bProcessing": true,
+		"bServerSide": true,
+		"bPaginate"      : true,
+		"sPaginationType": "full_numbers",
+		"bJQueryUI": true,
+		"sAjaxSource": "contacts_table/",
+		"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+			if ( jQuery.inArray(aData[0], contactsSelected) != -1 )
+			{
+				$(nRow).addClass('row_selected');
+			}
+			return nRow;
+		},
+		"aoColumns": [
+			{ "bVisible": 0 }, /* ID column */
+			null,
+			null,
+			null,
+			null, 
+		]
+	});
+	
+	/* Click event handler */
+	$('#contacts_table tbody tr').live('click', function () {
+		var aData = ocTable.fnGetData( this );
+		var iId = aData[0];
+		
+		if ( jQuery.inArray(iId, contactsSelected) == -1 )
+		{
+			contactsSelected[contactsSelected.length++] = iId;
+		}
+		else
+		{
+			contactsSelected = jQuery.grep(contactsSelected, function(value) {
+				return value != iId;
+			} );
+		}
+		
+		$(this).toggleClass('row_selected');
+	} );
+	
+		/* Click event handler */
+	$('#groups_table tbody tr').live('click', function () {
+		var aData = ogTable.fnGetData( this );
+		var iId = aData[0];
+		
+		if ( jQuery.inArray(iId, groupsSelected) == -1 )
+		{
+			groupsSelected[groupsSelected.length++] = iId;
+		}
+		else
+		{
+			groupsSelected = jQuery.grep(groupsSelected, function(value) {
+				return value != iId;
+			} );
+		}
+		
+		$(this).toggleClass('row_selected');
 	} );
 } );
 </script> 
@@ -21,7 +106,9 @@ $(document).ready(function() {
 {% block stylesheets %}
 {{ block.super }}
 		<style type="text/css" title="currentStyle"> 
+			@import "{{ MEDIA_URL }}reminder/css/demo_page.css"
 			@import "{{ MEDIA_URL }}reminder/css/demo_table.css";
+			@import "{{ MEDIA_URL }}reminder/css/demo_table_jui.css";
 		</style> 
 {% endblock %}
 
@@ -29,33 +116,63 @@ $(document).ready(function() {
 <p>what</p>
 
 
-<div id="contacts_table">
-<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"> 
-	<thead> 
-		<tr> 
-			<th width="5%">ID</th> 
-			<th width="45%">Name</th> 
-			<th width="40%">Phone Number</th> 
-			<th width="10%">Language</th> 
-		</tr> 
-	</thead> 
-	<tbody> 
-		<tr> 
-			<td colspan="5" class="dataTables_empty">Loading data from server</td> 
-		</tr> 
-	</tbody> 
-	<tfoot> 
-		<tr> 
-			<th>ID</th> 
-			<th>Name</th> 
-			<th>Phone Number</th> 
-			<th>Language</th> 
-		</tr> 
-	</tfoot> 
-</table> 
-</div>
 
-
+					
+<div id="contacts-div"> 
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="contacts_table"> 
+		<thead> 
+			<tr> 
+				<th width="5%">ID</th> 
+				<th width="45%">Name</th> 
+				<th width="20%">Phone Number</th> 
+				<th width="10%">Language</th> 
+				<th width="*">Groups</th>
+			</tr> 
+		</thead> 
+		<tbody> 
+			<tr> 
+				<td colspan="5" class="dataTables_empty">Loading data from server</td> 
+			</tr> 
+		</tbody> 
+		<tfoot> 
+			<tr> 
+				<th>ID</th> 
+				<th>Name</th> 
+				<th>Phone Number</th> 
+				<th>Language</th> 
+				<th>Groups</th>
+			</tr> 
+		</tfoot> 
+	</table> 
+</div> 
+	 
+	 
+<div id="groups-div"> 
+	<table cellpadding="0" cellspacing="0" border="0" class="display" id="groups_table"> 
+		<thead> 
+			<tr> 
+				<th>ID</th> 
+				<th width="10%">Name</th> 
+				<th width="*">Description</th> 
+			</tr> 
+		</thead> 
+		<tbody> 
+			<tr> 
+				<td colspan="5" class="dataTables_empty">Loading data from server</td> 
+			</tr> 
+		</tbody> 
+		<tfoot> 
+			<tr> 
+				<th>ID</th> 
+				<th>Name</th> 
+				<th>Description</th> 
+			</tr> 
+		</tfoot> 
+	</table> 					
+</div> 
+				
+<div class="spacer"></div> 
+			
 
 
 {% endblock %}
