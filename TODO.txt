@@ -1,0 +1,5 @@
+Update Apache/settings.*
+Update bootstrap.py
+Update fabfile.py
+Update settings_staging.py
+(these were all copied wholesale from the cacktus repo: https://bitbucket.org/copelco/caktus-deployment/src/tip/example-django-project/ )

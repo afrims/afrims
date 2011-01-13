@@ -15,14 +15,22 @@ class DemoHandler(BroadcastHandler):
     group_name = ""
     keyword = "demo"    #This is the keyword used to trigger a response from this handler.
     msg_zero_args = "Please use some keywords. E.g. 'demo broadcast hello world'"
-    msg_xmas = "This is the example xmas message"
+    msg_xmas = "Merry Christmas! Will you be travelling for the holiday? Please reply with YES or NO"
     msg_bcast_no_text = "You must include a message after the broadcast keyword"
     msg_bcast_all_not_allowed = "You need to enable broadcasting to all in the demo! See the demo.py handler"
-    msg_scheduled_reminder = "Your second vaccine needs to be scheduled in the next 10 days. Someone will be calling you soon."
     msg_unrecognized_subkeyword = "Unrecognized subkeyword (demo handler)"
     msg_too_long = "Your message is too long to fit into one SMS. Please shorten and try again."
     BROADCAST_TO_ALL = True;
     
+#    HOLIDAY_MESSAGE_STATUS = (
+#                    (u'initial', u'Initial Message'),
+#                    (u'travelling',u'Is Travelling'),
+#                    (u'hasPhone', u'Travelling With Phone'),
+#                    (u'altNumber', u'Travelling Without Phone w/ alt number'),
+#                    (u'noAltNumber', u'Travelling Without Phone w/out alt number'),
+#                    (u'resolved', u''),
+#                    )
+
     
     def handle(self, text):
         tokens = text.split(' ')
