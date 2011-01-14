@@ -15,16 +15,22 @@ class DemoHandler(BroadcastHandler):
     group_name = ""
     keyword = "demo"    #This is the keyword used to trigger a response from this handler.
     msg_zero_args = "Please use some keywords. E.g. 'demo broadcast hello world'"
-    msg_xmas = "This is the example xmas message"
+    msg_xmas = "Merry Christmas! Will you be traveling for the holiday? Please reply with YES or NO"
     msg_bcast_no_text = "You must include a message after the broadcast keyword"
     msg_bcast_all_not_allowed = "You need to enable broadcasting to all in the demo! See the demo.py handler"
     msg_scheduled_reminder = "Your second vaccine needs to be scheduled in the next 10 days. Someone will be calling you soon."
     msg_unrecognized_subkeyword = "Unrecognized subkeyword (demo handler)"
     msg_too_long = "Your message is too long to fit into one SMS. Please shorten and try again."
+    msg_help_txt = "You've requested help with the system.\
+                    A System Administrator will be calling you shortly.\
+                    Please call your care provider in case of emergency."
+    msg_contact_not_registered = "You are not registered on the TrialConnect system.  To register please send: register YOUR_NAME"
     BROADCAST_TO_ALL = True;
     
     
     def handle(self, text):
+        if not self.msg.contact:
+            self.respond(self.msg_contact_not_registered)
         tokens = text.split(' ')
         if len(tokens) <= 0:
             return self.respond(self.msg_zero_args)
@@ -33,7 +39,7 @@ class DemoHandler(BroadcastHandler):
         self.group_name = 'all'  #bit of a hack here to make it work with the broadcast code below
         if subkw == 'broadcast':
             if len(tokens) > 1 and self.BROADCAST_TO_ALL:
-                contacts = Contact.objects.all().exclude(name=self.msg.contact.name)
+                contacts = Contact.objects.all().exclude(connection=self.msg.contact.default_connection)
                 txt_send = ""
                 for t in tokens[1:]:
                     txt_send += t.strip() + " "

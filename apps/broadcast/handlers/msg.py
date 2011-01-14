@@ -47,7 +47,16 @@ class MsgHandler(BroadcastHandler):
         if not msg_obj:
             self.malformed_message()
             return True
-        return msg_obj.groups()
+        groups = msg_obj.groups()
+        if not groups:
+            self.malformed_message()
+            return True
+        
+        if len(groups) == 0:
+            self.MALFORMED_MESSAGE_TEXT
+            return True
+        
+        return groups
     
     def handle(self, text):
         if self.msg.contact is None:
