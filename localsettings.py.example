@@ -29,6 +29,13 @@ DATABASES = {
     }
 }
 
+TESTING_DATABASES= {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",#
+        "NAME": "afrims.sqlite3",
+    }
+}
+
 DJANGO_LOG_FILE = "datahq.django.log"
 LOG_SIZE = 1000000
 LOG_LEVEL   = "DEBUG"
