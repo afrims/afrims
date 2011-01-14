@@ -5,3 +5,5 @@
 *.log.*
 *.log
 initial_data.json
+localsettings.py
+initial_data.*

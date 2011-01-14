@@ -7,16 +7,6 @@
 # -------------------------------------------------------------------- #
 
 
-# you should configure your database here before doing any real work.
-# see: http://docs.djangoproject.com/en/dev/ref/settings/#databases
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "rapidsms.sqlite3",
-    }
-}
-
-
 # the rapidsms backend configuration is designed to resemble django's
 # database configuration, as a nested dict of (name, configuration).
 #
@@ -64,9 +54,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     
+    "south",
+    
     "afrims.apps.reminder",
     "afrims.apps.broadcast",
-    
+    "afrims.apps.offsite",
     # the rapidsms contrib apps.
     "rapidsms.contrib.default",
     "rapidsms.contrib.export",
@@ -74,7 +66,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.locations",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
-#    "rapidsms.contrib.registration",
+    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "rapidsms.contrib.echo",
 ]
@@ -127,14 +119,6 @@ MEDIA_URL = "/static/"
 SITE_ID = 1
 
 
-# the default log settings are very noisy.
-LOG_LEVEL = "DEBUG"
-LOG_FILE = "rapidsms.log"
-LOG_FORMAT = "[%(name)s]: %(message)s"
-LOG_SIZE = 8192  # 8192 bits = 8 kb
-LOG_BACKUPS = 256  # number of logs to keep
-
-
 # these weird dependencies should be handled by their respective apps,
 # but they're not, so here they are. most of them are for django admin.
 TEMPLATE_CONTEXT_PROCESSORS = [
@@ -175,7 +159,14 @@ import os
 import tempfile
 import sys
 
-if 'test' in sys.argv:
+# import local settings if we find them
+try:
+    from localsettings import *
+except ImportError:
+    pass
+
+if ('test' in sys.argv) and ('sqlite' not in DATABASES['default']['ENGINE']):
+    DATABASES = TESTING_DATABASES
     for db_name in DATABASES:
         DATABASES[db_name]['TEST_NAME'] = os.path.join(
             tempfile.gettempdir(),
