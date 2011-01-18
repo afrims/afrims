@@ -59,7 +59,8 @@ def contacts_table(request):
     
     for c in queryset:
         groups = ", ".join(g.name for g in c.groups.all())
-        aaData.append([c.id, c.name, c.default_connection.identity, c.language, groups])
+        identity = c.default_connection.identity if c.default_connection else None
+        aaData.append([c.id, c.name, identity, c.language, groups])
   
     resp.update({"aaData":aaData})
 

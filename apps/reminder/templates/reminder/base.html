@@ -113,6 +113,7 @@ $(document).ready(function() {
 			@import "{{ MEDIA_URL }}reminder/css/demo_table_jui.css";
 			@import "{{ MEDIA_URL }}reminder/css/reminder.css"
 		</style> 
+		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reminder/css/reminder.css" /> 
 {% endblock %}
 
 {% block content %}
@@ -132,11 +133,11 @@ $(document).ready(function() {
 	<table cellpadding="0" cellspacing="0" border="0" class="display" id="contacts_table"> 
 		<thead> 
 			<tr> 
-				<th width="5%">ID</th> 
-				<th width="20%">Name</th> 
-				<th width="20%">Phone Number</th> 
-				<th width="10%">Language</th> 
-				<th width="15">Groups</th>
+				<th>ID</th> 
+				<th>Name</th> 
+				<th>Phone Number</th> 
+				<th>Language</th> 
+				<th>Groups</th>
 			</tr> 
 		</thead> 
 		<tbody> 

@@ -4,17 +4,21 @@
     float: left;
     margin: 0px;
     padding: 5px;
-    width: 50%;
+    width: 55%;
 }
 
 #groups_table_wrapper {
     /*border: 2px outset black;*/
-	width: *%;
 	clear: none;
     float: right;
     margin: 0px;
     padding: 5px;
-    width: 25%;
+    width: 40%;
+}
+
+#groups_table_wrapper .dataTables_filter {
+	width: 100%;
+
 }
 
 #between_tables{
@@ -53,6 +57,8 @@
 	
 #groups_table_length{
 	visibility: hidden;
+	width:0px;
+	height: 0px;
 }
 
 	
