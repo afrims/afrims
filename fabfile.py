@@ -19,8 +19,8 @@ RSYNC_EXCLUDE = (
     'fabfile.py',
     'bootstrap.py',
 )
-env.home = '/home/caktus/'
-env.project = 'caktus_website'
+env.home = '/home/afrims/'
+env.project = 'afrims_website'
 
 
 def _setup_path():
@@ -32,9 +32,9 @@ def _setup_path():
 
 def staging():
     """ use staging environment on remote host"""
-    env.user = 'caktus'
+    env.user = 'afrims'
     env.environment = 'staging'
-    env.hosts = ['173.203.208.254']
+    env.hosts = ['r.dimagi.vmracks.com']
     _setup_path()
 
 
