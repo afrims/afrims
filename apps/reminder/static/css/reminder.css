@@ -3,8 +3,8 @@
     clear: none;
     float: left;
     margin: 0px;
-    padding: 5px;
-    width: 55%;
+    padding: 0px;
+    width: 58%;
 }
 
 #groups_table_wrapper {
@@ -12,7 +12,7 @@
 	clear: none;
     float: right;
     margin: 0px;
-    padding: 5px;
+    padding: 0px;
     width: 40%;
 }
 
@@ -34,22 +34,33 @@
 	/* border: solid 1px black; */
 	float: left;
 	clear: none;
-	width:50%;
+	width:58%;
 	margin: 0px;
 	padding: 0px;
-	text-align: center;
+	text-align: left;
 }
 
 #groups_holder {
 	/* border: solid 1px black; */
 	float: right;
 	clear: none;
-	width:50%;
+	width:40%;
 	margin: 0px;
 	padding: 0px;	
-	text-align: center;
+	text-align: left;
 	
 }
+
+.dataTables_filter {
+	float:left;
+	text-align:right;
+	width: 100%;
+	padding-bottom: 5px;
+	height: 0px;
+	width: 0px;
+	visibility: hidden;
+}
+	
 
 #groups_table_info {
 	visibility: hidden;
@@ -64,4 +75,39 @@
 	
 #contacts_table_length{
 	visibility: hidden;
+	width:0px;
+	height: 0px;
+}
+
+.paging_full_numbers {
+    width: 330px !important;
+}
+
+.dataTables_info {
+    float: left;
+    width: 200px;
+    padding-top: 0px;
+}
+
+.dataTables_processing {
+    background-color: white;
+    border: 1px solid #000000;
+    color: #000000;
+    font-size: 11px;
+    margin-top: 20%;
+    padding: 2px 0;
+    text-align: center;
+    top: 0;
+    width: 350px;
+}
+
+#contacts_holder .toolbar{
+	padding-right: 5px;
+	color:white;
+	
+}
+
+#groups_holder .toolbar{
+	padding-right: 5px;
+	color:white;
 }

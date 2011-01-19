@@ -100,6 +100,14 @@ $(document).ready(function() {
 		
 		$(this).toggleClass('row_selected');
 	} );
+	
+	$('#contacts_search_box').keyup(function() {
+  		 ocTable.fnFilter($('#contacts_search_box').val()); 
+	});
+	
+	$('#groups_search_box').keyup(function() {
+  		 ogTable.fnFilter($('#groups_search_box').val()); 
+	});
 } );
 </script> 
 
@@ -116,18 +124,19 @@ $(document).ready(function() {
 		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reminder/css/reminder.css" /> 
 {% endblock %}
 
-{% block content %}
-<p>what</p>
-
-
-
-					
-	<div id="contacts_holder">
-	<h1>Contacts List</h1>
+{% block content %}		
+	<div id="contacts_holder" class="module">
+	<h2>Contacts List</h2>
+		<div class="toolbar">
+			Search: <input id="contacts_search_box" type="text" />
+		</div>
 	</div>
-		
-	<div id="groups_holder">
-	<h1>Groups List</h1>
+	
+	<div id="groups_holder" class="module">
+	<h2>Groups List</h2>
+		<div class="toolbar">
+			Search: <input id="groups_search_box" type="text" />
+		</div>
 	</div>
 	
 	<table cellpadding="0" cellspacing="0" border="0" class="display" id="contacts_table"> 
@@ -157,7 +166,7 @@ $(document).ready(function() {
 	</table> 
 
 	
-	<div class="spacer" id="between_tables"></div> 
+	<!-- <div class="spacer" id="between_tables"></div> --> 
 
 	<table cellpadding="0" cellspacing="0" border="0" class="display" id="groups_table"> 
 		<thead> 
