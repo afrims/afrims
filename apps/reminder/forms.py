@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import CheckboxSelectMultiple
-from django.forms.widgets import RadioSelect
+from django.forms.widgets import RadioSelect, HiddenInput
 
 class ReminderForm(forms.Form):
     repeat_frequencies = (
@@ -46,11 +46,14 @@ class ReminderForm(forms.Form):
     description = forms.CharField(max_length=255, required=True)
     repeat_frequency = forms.ChoiceField(choices=repeat_frequencies, required=True)
     date_time = forms.DateTimeField(required=False)
-    weekly_days = forms.MultipleChoiceField(choices=days_of_week, required=False)
+    weekly_days = forms.MultipleChoiceField(choices=days_of_week, required=False, widget=CheckboxSelectMultiple)
     yearly_months = forms.MultipleChoiceField(choices=months_of_year, required=False, widget=CheckboxSelectMultiple)
     start_date = forms.DateTimeField(required = True)
     end_date = forms.DateTimeField(required=False)
     has_end_date = forms.BooleanField(label='No End Date')
-
+    minutes = forms.CharField(max_length=255,widget=HiddenInput)
+    hours = forms.CharField(max_length=255,widget=HiddenInput)
+    days = forms.CharField(max_length=255,widget=HiddenInput)
+    months = forms.CharField(max_length=255,widget=HiddenInput)
     event_type = forms.MultipleChoiceField(widget=RadioSelect, choices=reminder_event_type, label='Select Event Type')
 
