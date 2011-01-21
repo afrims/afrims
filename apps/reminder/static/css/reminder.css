@@ -64,6 +64,8 @@
 
 #groups_table_info {
 	visibility: hidden;
+	width: 0px;
+	height: 0px;
 }
 	
 #groups_table_length{
@@ -110,4 +112,14 @@
 #groups_holder .toolbar{
 	padding-right: 5px;
 	color:white;
+}
+
+.dataTables_paginate .ui-state-default{
+	color:blue;
+	text-decoration:underline;
+}
+
+.dataTables_paginate .ui-state-disabled{
+	color:grey;
+		text-decoration:none;
 }

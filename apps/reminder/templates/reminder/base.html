@@ -124,7 +124,15 @@ $(document).ready(function() {
 		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reminder/css/reminder.css" /> 
 {% endblock %}
 
-{% block content %}		
+{% block content %}
+
+<form method="POST" action=".">
+  {{ form.as_ul }}
+  <input type=submit>
+</form>
+
+
+
 	<div id="contacts_holder" class="module">
 	<h2>Contacts List</h2>
 		<div class="toolbar">

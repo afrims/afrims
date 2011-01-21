@@ -8,10 +8,17 @@ from django.http import HttpResponse
 from django.core import serializers
 from apps.reminder.models import Group
 from django.db.models.query_utils import Q
+from afrims.apps.reminder.forms import ReminderForm
 
 
 def dashboard(request):
-    return render_to_response("reminder/base.html",RequestContext(request),{})
+    form = ReminderForm(request.POST or None)
+    if form.is_valid():
+        return HttpResponse('submit success with valid data')
+
+    return render_to_response('reminder/base.html',
+                              {'form':form},
+                              RequestContext(request))
 
 
 
