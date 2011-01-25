@@ -2,8 +2,10 @@
 *.pydevproject
 *.project
 *.sqlite3
+*.sqlite*
 *.log.*
 *.log
+*.idea
 initial_data.json
 localsettings.py
 initial_data.*

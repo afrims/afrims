@@ -8,10 +8,20 @@ from django.http import HttpResponse
 from django.core import serializers
 from apps.reminder.models import Group
 from django.db.models.query_utils import Q
+from afrims.apps.reminder.forms import ReminderForm
 
 
 def dashboard(request):
-    return render_to_response("reminder/base.html",RequestContext(request),{})
+
+    if request.method == 'POST':
+        form = ReminderForm(request.POST)
+        if form.is_valid():
+            return HttpResponse('submit success with valid data')
+    else:
+        form = ReminderForm()
+    return render_to_response('reminder/base.html',
+                              {'form':form},
+                              RequestContext(request))
 
 
 
@@ -59,7 +69,8 @@ def contacts_table(request):
     
     for c in queryset:
         groups = ", ".join(g.name for g in c.groups.all())
-        aaData.append([c.id, c.name, c.default_connection.identity, c.language, groups])
+        identity = c.default_connection.identity if c.default_connection else None
+        aaData.append([c.id, c.name, identity, c.language, groups])
   
     resp.update({"aaData":aaData})
 

@@ -29,7 +29,12 @@ INSTALLED_BACKENDS = {
     #},
     "message_tester": {
         "ENGINE": "rapidsms.backends.bucket",
-    }
+    },
+#    "droid": {
+#            "ENGINE": "rapidsms.backends.droid",
+#            "AP_PORT": '9999',
+#            "SERVER_PORT": '55625',
+#    }
 }
 
 

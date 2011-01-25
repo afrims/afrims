@@ -32,7 +32,7 @@ class MsgHandler(BroadcastHandler):
         self.respond(self, (self.NO_CONTACTS_IN_GROUP_TEXT % group))
         
     def malformed_message(self):
-        self.respon(self, self.MALFORMED_MESSAGE_TEXT)
+        self.respond(self, self.MALFORMED_MESSAGE_TEXT)
     
     
     
