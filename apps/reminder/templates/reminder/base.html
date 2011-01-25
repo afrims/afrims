@@ -16,8 +16,45 @@ var contactsSelected =  [];
 var groupsSelected = [];
 $(document).ready(function() {
     //////////////timepicker logic////////////
+    function add_extra_widgets(){
+        var hours_input, hours_label;
+        hours_input = '<tr><th><label class="hours_selected_label" for="id_hours_select_0" style="display: none;">Hour:</label></th><td> \
+                <input type="text" maxlength="5" name="hours" class="hours_selected" id="id_hours_select_0" style="display: none;"value="Click to Choose..." /></td>';
+
+        add_hour_button = '<tr><th /><td><button id="add_hour_button" type="button" style="display: none;">Add Another Hour</button></td></tr>';
+//        th = $("label[for='id_weekly_days']").parent();
+//        $(hours_input).insertAfter(th.parent())
+//        $('.hours_selected').timepicker({});
+        $(add_hour_button).insertAfter($("label[for='id_has_end_date']").parent().parent());
+        $('#add_hour_button').click(function() {
+            add_another_hour();
+        });
+    }
+
+    function add_another_hour(){
+        var count = $(".hours_selected").length;
+        var row = '<tr><th><label class="hours_selected_label" for="id_hours_select_'+count+'" style="display: none;">Hour:</label></th><td> \
+                <input type="text" maxlength="5" class="hours_selected" name="hours" id="id_hours_select_'+count+'" style="display: visible;"value="Click to Choose..." /></td>'
+
+        tr = $('#add_hour_button').parent().parent();
+        $(row).insertBefore(tr);
+        $('.hours_selected').show();
+        $('.hours_selected_label').show();
+        $('#id_hours_select_'+count).timepicker({
+                showMinute: false,
+                timeFormat: 'hh',
+                ampm: false
+        });
+    }
+
+
+
 	$('#id_start_date').datetimepicker();
     $('#id_end_date').datetimepicker();
+
+
+
+    add_extra_widgets();
 
 
 
@@ -26,11 +63,27 @@ $(document).ready(function() {
 
 
     $('#id_repeat_frequency').change(function () {
-          var str = "";
-          $('select option:selected').each(function () {
-                str += $(this).text() + " ";
-              });
-          alert($('#id_repeat_frequency').val());
+
+        var val = $('#id_repeat_frequency').val();
+        if (val == "daily"){
+            $("label[for='id_weekly_days']").hide();
+            $("#id_weekly_days").parent().children().hide();
+            $("label[for='id_yearly_months']").hide();
+            $("#id_yearly_months").parent().children().hide();
+
+            $(".hours_selected_label").show();
+            $('.hours_selected').show();
+            $('#add_hour_button').show();
+
+        }else if(val == "daily"){
+
+        }else if(val == "weekly"){
+
+        }else if(val == "monthly"){
+
+        }else if(val == "yearly"){
+
+        }
         });
 
     $('#id_has_end_date').parent().parent().css("display",'visible');
@@ -152,7 +205,7 @@ $(document).ready(function() {
 {% block stylesheets %}
 {{ block.super }}
 		<style type="text/css" title="currentStyle">
-			@import "{{ MEDIA_URL }}reminder/css/demo_page.css"
+			@import "{{ MEDIA_URL }}reminder/css/demo_page.css";
 			@import "{{ MEDIA_URL }}reminder/css/demo_table.css";
 			@import "{{ MEDIA_URL }}reminder/css/demo_table_jui.css";
             @import "{{ MEDIA_URL }}reminder/css/reminder.css";
@@ -180,8 +233,8 @@ $(document).ready(function() {
             {{ form.as_table }}
             </table>
         <input type=submit value="Create Schedule">
+        </form>
     </div>
-</form>
 </div>
 
 <div id="contacts_holder" class="module">
