@@ -19,7 +19,7 @@ RSYNC_EXCLUDE = (
     'fabfile.py',
     'bootstrap.py',
 )
-env.home = '/home/afrims/'
+env.home = '/opt/afrims/'
 env.project = 'afrims_website'
 
 
