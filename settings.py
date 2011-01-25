@@ -6,7 +6,7 @@
 #                          MAIN CONFIGURATION                          #
 # -------------------------------------------------------------------- #
 
-VERSION = 0.1 #This doesn't do anything yet, but what the hey.
+VERSION = 0.2 #This doesn't do anything yet, but what the hey.
 
 # the rapidsms backend configuration is designed to resemble django's
 # database configuration, as a nested dict of (name, configuration).
@@ -29,7 +29,12 @@ INSTALLED_BACKENDS = {
     #},
     "message_tester": {
         "ENGINE": "rapidsms.backends.bucket",
-    }
+    },
+#    "droid": {
+#            "ENGINE": "rapidsms.backends.droid",
+#            "AP_PORT": '9999',
+#            "SERVER_PORT": '55625',
+#    }
 }
 
 
