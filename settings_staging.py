@@ -6,7 +6,7 @@
 #                          MAIN CONFIGURATION                          #
 # -------------------------------------------------------------------- #
 
-VERSION = 0.2.1 #This doesn't do anything yet, but what the hey.
+VERSION = '0.2.1' #This doesn't do anything yet, but what the hey.
 
 # the rapidsms backend configuration is designed to resemble django's
 # database configuration, as a nested dict of (name, configuration).
