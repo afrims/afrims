@@ -12,7 +12,6 @@ class ReminderForm(forms.Form):
                         )
 
     days_of_week = (
-                    ('*','Every Day'),
                     ('0','Monday'),
                     ('1','Tuesday'),
                     ('2','Wednesday'),
