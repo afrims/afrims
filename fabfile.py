@@ -10,6 +10,8 @@ from fabric.decorators import hosts
 RSYNC_EXCLUDE = (
     '.DS_Store',
     '.hg',
+    '.git',
+    '.gitignore',
     '*.pyc',
     '*.example',
     '*.db',
@@ -20,15 +22,14 @@ RSYNC_EXCLUDE = (
     'bootstrap.py',
 )
 env.home = '/opt/afrims/'
-env.project = 'afrims_website'
+env.project = 'afrims'
+env.virtualenv_root = '/opt/afrims/env/afrims_env'
 
 
 def _setup_path():
-    env.root = os.path.join(env.home, 'www', env.environment)
+    env.root = env.home
     env.code_root = os.path.join(env.root, env.project)
-    env.virtualenv_root = os.path.join(env.root, 'env')
     env.settings = '%(project)s.settings_%(environment)s' % env
-
 
 def staging():
     """ use staging environment on remote host"""
@@ -47,7 +48,7 @@ def bootstrap():
     """ initialize remote host environment (virtualenv, deploy, update) """
     require('root', provided_by=('staging', 'production'))
     run('mkdir -p %(root)s' % env)
-    run('mkdir -p %s' % os.path.join(env.home, 'www', 'log'))
+    run('mkdir -p %s' % os.path.join(env.home, 'log'))
     create_virtualenv()
     deploy()
     update_requirements()
@@ -82,7 +83,7 @@ def deploy():
         delete=True,
         extra_opts=extra_opts,
     )
-    touch()
+    restart_web()
 
 
 def update_requirements():
@@ -96,12 +97,13 @@ def update_requirements():
         run(' '.join(cmd))
 
 
-def touch():
-    """ touch wsgi file to trigger reload """
+def restart_web():
+    """ restart server and router upstart processes """
     require('code_root', provided_by=('staging', 'production'))
-    apache_dir = os.path.join(env.code_root, 'apache')
-    with cd(apache_dir):
-        run('touch %s.wsgi' % env.environment)
+    manage_dir = os.path.join(env.code_root)
+    with cd(manage_dir):
+        run('sudo  restart %s' % env.project)
+        run('sudo restart %s_router' % env.project)
 
 
 def update_apache_conf():

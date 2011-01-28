@@ -6,7 +6,7 @@
 #                          MAIN CONFIGURATION                          #
 # -------------------------------------------------------------------- #
 
-VERSION = 0.2 #This doesn't do anything yet, but what the hey.
+VERSION = '0.2.1' #This doesn't do anything yet, but what the hey.
 
 # the rapidsms backend configuration is designed to resemble django's
 # database configuration, as a nested dict of (name, configuration).
@@ -29,6 +29,13 @@ INSTALLED_BACKENDS = {
     #},
     "message_tester": {
         "ENGINE": "rapidsms.backends.bucket",
+    },
+    "txtnation" : {"ENGINE":  "rapidsms.backends.http",
+                   "host":"trialconnect.dimagi.com",
+            "port": 9088,
+            "gateway_url": "http://client.txtnation.com/mbill.php",
+            "params_outgoing": "reply=%(reply)s&id=%(id)s&network=%(network)s&number=%(phone_number)s&message=%(message)s&ekey=1464e1271e5581cc480a5cfd5e794717&cc=dimagi&currency=THB&value=0&title=trialcnct",
+            "params_incoming": "action=action&id=%(id)s&number=%(phone_number)s&network=%(network)s&message=%(message)s&shortcode=%(sc)s&country=%(country_code)&billing=%(bill_code)s"
     },
 #    "droid": {
 #            "ENGINE": "rapidsms.backends.droid",
@@ -61,6 +68,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     
     "south",
+    #"gunicorn",
     
     "afrims.apps.reminder",
     "afrims.apps.broadcast",
@@ -84,9 +92,10 @@ INSTALLED_APPS = [
 RAPIDSMS_TABS = [
     ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
     ("rapidsms.contrib.registration.views.registration",    "Registration"),
-    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
-    ("rapidsms.contrib.locations.views.locations",          "Map"),
-    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
+#    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
+#    ("rapidsms.contrib.locations.views.locations",          "Map"),
+#    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
+    ("apps.reminder.views.dashboard", "Reminders"),
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
 #    ("afrims.apps.reminder.views.dashboard", "Reminder"),
 ]
