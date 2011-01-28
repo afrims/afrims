@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     
     "south",
-    #"gunicorn",
+    "gunicorn",
     
     "afrims.apps.reminder",
     "afrims.apps.broadcast",
