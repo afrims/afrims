@@ -31,7 +31,7 @@ INSTALLED_BACKENDS = {
         "ENGINE": "rapidsms.backends.bucket",
     },
     "txtnation" : {"ENGINE":  "rapidsms.backends.http",
-                   "host":"trialconnect.dimagi.com",
+                   "host":"0.0.0.0",
             "port": 9088,
             "gateway_url": "http://client.txtnation.com/mbill.php",
             "params_outgoing": "reply=%(reply)s&id=%(id)s&network=%(network)s&number=%(phone_number)s&message=%(message)s&ekey=1464e1271e5581cc480a5cfd5e794717&cc=dimagi&currency=THB&value=0&title=trialcnct",
