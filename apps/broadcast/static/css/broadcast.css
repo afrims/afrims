@@ -1,0 +1,264 @@
+#contacts_table_wrapper, #groups_table_wrapper{
+   /* border: 2px outset black;*/
+    clear: none;
+    float: left;
+    margin-bottom: 5px;
+    padding: 0px;
+    width: 58%;
+    margin-top:0px;
+    min-height:2px;
+}
+
+#groups_table_wrapper {
+    float: right;
+    width: 40%;
+}
+
+
+#groups_table_wrapper .dataTables_filter {
+	width: 100%;
+    padding:0px;
+    padding-bottom:0px;
+    margin:0px;
+
+}
+
+#between_tables{
+	height: 300px;
+	width: 1px;
+	background-color: black;
+	float:left;
+	margin:10px;
+
+}
+
+#contacts_holder {
+	/* border: solid 1px black; */
+	float: left;
+	clear: none;
+	width:58%;
+	margin: 0px;
+	padding: 0px;
+	text-align: left;
+}
+
+#groups_holder {
+	/* border: solid 1px black; */
+	float: right;
+	clear: none;
+	width:40%;
+	margin: 0px;
+	padding: 0px;	
+	text-align: left;
+	
+}
+
+.dataTables_filter {
+	float:left;
+	text-align:right;
+	width: 100%;
+	padding-bottom: 0px;
+	height: 0px;
+	width: 0px;
+	visibility: hidden;
+}
+	
+
+#groups_table_info {
+	visibility: hidden;
+	width: 0px;
+	height: 0px;
+}
+	
+#groups_table_length{
+	visibility: hidden;
+	width:0px;
+	height: 0px;
+}
+
+	
+#contacts_table_length{
+	visibility: hidden;
+	width:0px;
+	height: 0px;
+}
+
+.paging_full_numbers {
+    width: 325px !important;
+}
+
+.dataTables_info {
+    float: left;
+    width: 200px;
+    padding-top: 0px;
+}
+
+.dataTables_processing {
+    background-color: white;
+    border: 1px solid #000000;
+    color: #000000;
+    font-size: 11px;
+    margin-top: 20%;
+    padding: 2px 0;
+    text-align: center;
+    top: 0;
+    width: 350px;
+}
+
+#contacts_holder .toolbar{
+	padding-right: 5px;
+	color:white;
+	
+}
+
+#groups_holder .toolbar{
+	padding-right: 5px;
+	color:white;
+}
+
+/*.dataTables_paginate .ui-state-default{*/
+	/*color:blue;*/
+	/*text-decoration:underline;*/
+/*}*/
+
+/*.dataTables_paginate .ui-state-disabled{*/
+	/*color:grey;*/
+		/*text-decoration:none;*/
+/*}*/
+
+/* css for timepicker */
+.ui-timepicker-div .ui-widget-header{ margin-bottom: 8px; }
+.ui-timepicker-div dl{ text-align: left; }
+.ui-timepicker-div dl dt{ height: 25px; }
+.ui-timepicker-div dl dd{ margin: -25px 0 10px 65px; }
+.ui-timepicker-div td { font-size: 90%; }
+
+
+#form_holder {
+}
+
+$groups_table .ui-widget-header {
+    border: 1px solid black;
+    background: black url(/static/rapidsms/images/h2-bg.png) 50% 50% repeat-x;
+    color: #ffffff; font-weight: bold;
+}
+
+/* Multiselect
+----------------------------------*/
+.ui-multiselect { padding:2px 0 2px 4px; text-align:left }
+.ui-multiselect span.ui-icon { float:right }
+
+.ui-multiselect-header { margin-bottom:3px; padding:3px 0 3px 4px }
+.ui-multiselect-header ul { font-size:0.9em }
+.ui-multiselect-header ul li { float:left; padding:0 10px 0 0 }
+.ui-multiselect-header a { text-decoration:none }
+.ui-multiselect-header a:hover { text-decoration:underline }
+.ui-multiselect-header span.ui-icon { float:left }
+.ui-multiselect-header li.ui-multiselect-close { float:right; text-align:right; padding-right:0 }
+
+.ui-multiselect-menu { display:none; padding:3px; position:absolute; z-index:10000 }
+.ui-multiselect-checkboxes { position:relative /* fixes bug in IE6/7 */; overflow-y:scroll }
+.ui-multiselect-checkboxes label { cursor:default; display:block; border:1px solid transparent; padding:3px 1px }
+.ui-multiselect-checkboxes label input { position:relative; top:1px }
+.ui-multiselect-checkboxes li { clear:both; font-size:0.9em; padding-right:3px }
+.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label { text-align:center; font-weight:bold; border-bottom:1px solid }
+.ui-multiselect-checkboxes li.ui-multiselect-optgroup-label a { display:block; padding:3px; margin:1px 0; text-decoration:none }
+
+/* remove label borders in IE6 because IE6 does not support transparency */
+* html .ui-multiselect-checkboxes label { border:none }
+
+
+
+#id_start_date,#id_end_date, .hours_selected{
+    margin:2px;
+    border: 1px solid #BFBFBF;
+	background: url(/static/reminder/images/calendar.png) no-repeat 0px 3px;
+	padding-left: 20px;
+	/*height: 28px;*/
+	width: 120px;
+}
+
+#broadcast_controls{
+    margin-top: 5px;
+    clear:both;
+}
+
+#form_holder {
+    /*padding: 5px;*/
+}
+
+.form_elements {
+    margin:10px;
+}
+
+
+
+.form_elements tbody tr:last-child th, tbody,tbody tr:first-child th, td, tbody th:first-child, tbody td:first-child,
+ tbody td:first-child
+{
+    padding:2px;
+    border: 0px;
+}
+.form_elements li{
+    margin-left: 10px;
+}
+
+.form_elements li label{
+    width: 10em;
+    /*float: left;*/
+    /*clear:none;*/
+}
+
+.form_elements li label
+{}
+
+#info {
+    clear:both;
+    text-align:center;
+}
+
+.nullity {
+    visibility:hidden;
+    padding:0px;
+    margin:0px;
+    width:0px;
+    height:0px;
+    border:0px;
+}
+
+#tables_holder {
+    padding:2px;
+}
+
+.ui-corner-br {
+    -moz-border-radius-bottomright: 0px;
+    border-bottom-right-radius:0px;
+}
+.ui-corner-bl {
+    -moz-border-radius-bottomleft: 0px;
+    border-bottom-left-radius:0px;
+}
+
+tr.even, tr.odd {
+    background-color: #FFFFFF;
+    border: 1px solid #DDDDDD
+}
+
+.table_footer {
+/*background: black url(/static/rapidsms/images/h2-bg.png) 50% 50% repeat-x;*/
+    border:0px;
+}
+
+#info p {
+    margin:0px;
+    padding:10px;
+    border: 1px solid #DDDDDD
+}
+#contacts_holder h2, #groups_holder h2, #broadcast_controls h2{
+    background: url("images/tab-bg.png") repeat-x scroll 0 0 #2FA5D1;
+    border:0px;
+}
+
+#contacts_holder{
+    border:0px; 
+}

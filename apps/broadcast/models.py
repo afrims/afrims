@@ -5,7 +5,9 @@ from rapidsms.models import Contact
 from datetime import datetime
 
 class BroadcastMessage(models.Model):
-    
+    '''
+    this is the internal model
+    '''
     contact = models.ForeignKey(Contact, related_name="broadcast_messages")
     group   = models.CharField(max_length=30)
     text    = models.TextField()
