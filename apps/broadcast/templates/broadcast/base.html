@@ -12,10 +12,7 @@
 
 
 <script type="text/javascript" charset="utf-8"> 
-var ocTable;
-var ogTable;
-var contactsSelected =  [];
-var groupsSelected = [];
+
 $(document).ready(function() {
     //////////////////////////////////////////
     ///////////////Form Logic/////////////////
@@ -116,9 +113,11 @@ $(document).ready(function() {
     <h2>Add New Schedule</h2>
 
     <div id="form_holder">
-        <form method="POST" action=".">
+        <form method="POST" action="." id="broadcast_form">
+            {% csrf_token %}
             <table class="form_elements">
             {{ form.as_table }}
+            {{ form.errors }}
             </table>
         <input type=submit value="Send Message">
         </form>

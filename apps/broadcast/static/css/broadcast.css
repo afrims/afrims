@@ -262,3 +262,7 @@ tr.even, tr.odd {
 #contacts_holder{
     border:0px; 
 }
+
+.errorlist li ul{
+    color: red;
+}

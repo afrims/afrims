@@ -5,7 +5,10 @@
  * Time: 4:55:57 PM
  * To change this template use File | Settings | File Templates.
  */
-
+var ocTable;
+var ogTable;
+var contactsSelected =  [];
+var groupsSelected = [];
 function init_groups_and_contacts_tables(){
     ////////Contact and Group Table setup
 	ogTable = $('#groups_table').dataTable( {
@@ -74,6 +77,7 @@ function init_groups_and_contacts_tables(){
 		}
 
 		$(this).toggleClass('row_selected');
+        $('#id_contacts').val(contactsSelected)
 	} );
 
 		/* Click event handler */
@@ -93,6 +97,7 @@ function init_groups_and_contacts_tables(){
 		}
 
 		$(this).toggleClass('row_selected');
+        $('#id_groups').val(groupsSelected)
 	} );
 
 	$('#contacts_search_box').keyup(function() {
@@ -111,4 +116,14 @@ function init_groups_and_contacts_tables(){
 
     $('#contacts_table_wrapper .ui-widget-header:last').addClass('table_footer')
     $('#groups_table_wrapper .ui-widget-header:last').addClass('table_footer')
+
+
+    //Add submit handler to the form to grab the selected contacts from the groups and/or contacts table
+    //and populate the groups and/or contacts FormFields respectively
+
+    $('#broadcast_form').submit(function(){
+//        alert('GROUPS:'+groupsSelected+'||CONTACTS:'+contactsSelected)
+
+       alert('GROUPS:'+$('#id_groups').val()+'||CONTACTS:'+$('#id_contacts').val())
+    });
 }
