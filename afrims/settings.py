@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     
     "south",
-    "gunicorn",
+    # "gunicorn",
     
     "afrims.apps.reminder",
     "afrims.apps.broadcast",
@@ -141,24 +141,13 @@ TEST_EXCLUDED_APPS = [
 # the project-level url patterns
 ROOT_URLCONF = "afrims.urls"
 
-# since we might hit the database from any thread during testing, the
-# in-memory sqlite database isn't sufficient. it spawns a separate
-# virtual database for each thread, and syncdb is only called for the
-# first. this leads to confusing "no such table" errors. We create
-# a named temporary instance instead.
-import os
-import tempfile
-import sys
+RAPIDSMS_TABS = [
+    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
+    ("rapidsms.contrib.registration.views.registration",    "Registration"),
+#    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
+#    ("rapidsms.contrib.locations.views.locations",          "Map"),
+#    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
+    ("apps.reminder.views.dashboard", "Reminders"),
+    ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
+]
 
-# import local settings if we find them
-try:
-    from localsettings import *
-except ImportError:
-    pass
-
-if ('test' in sys.argv) and ('sqlite' not in DATABASES['default']['ENGINE']):
-    DATABASES = TESTING_DATABASES
-    for db_name in DATABASES:
-        DATABASES[db_name]['TEST_NAME'] = os.path.join(
-            tempfile.gettempdir(),
-            "%s.rapidsms.test.sqlite3" % db_name)

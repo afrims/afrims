@@ -39,7 +39,6 @@ TESTING_DATABASES= {
     }
 }
 
-
 INSTALLED_BACKENDS = {
     #"att": {
     #    "ENGINE": "rapidsms.backends.gsm",
