@@ -8,18 +8,7 @@
 
 VERSION = '0.2.1' #This doesn't do anything yet, but what the hey.
 
-# the rapidsms backend configuration is designed to resemble django's
-# database configuration, as a nested dict of (name, configuration).
-#
-# the ENGINE option specifies the module of the backend; the most common
-# backend types (for a GSM modem or an SMPP server) are bundled with
-# rapidsms, but you may choose to write your own.
-#
-# all other options are passed to the Backend when it is instantiated,
-# to configure it. see the documentation in those modules for a list of
-# the valid options for each.
-
-
+BROADCAST_SENDER_BACKEND='message_tester'
 
 # to help you get started quickly, many django/rapidsms apps are enabled
 # by default. you may wish to remove some and/or add your own.
@@ -42,6 +31,7 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.sessions",
     "django.contrib.contenttypes",
+    
     
     "south",
     # "gunicorn",
@@ -68,11 +58,12 @@ INSTALLED_APPS = [
 RAPIDSMS_TABS = [
     ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
     ("rapidsms.contrib.registration.views.registration",    "Registration"),
-#    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
+    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
 #    ("rapidsms.contrib.locations.views.locations",          "Map"),
 #    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
     ("apps.reminder.views.dashboard", "Reminders"),
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
+    ("apps.broadcast.views.dashboard", "Broadcast"),
 #    ("afrims.apps.reminder.views.dashboard", "Reminder"),
 ]
 
@@ -139,15 +130,8 @@ TEST_EXCLUDED_APPS = [
 ]
 
 # the project-level url patterns
-ROOT_URLCONF = "afrims.urls"
 
-RAPIDSMS_TABS = [
-    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
-    ("rapidsms.contrib.registration.views.registration",    "Registration"),
-#    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
-#    ("rapidsms.contrib.locations.views.locations",          "Map"),
-#    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
-    ("apps.reminder.views.dashboard", "Reminders"),
-    ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
-]
+LANGUAGE_CODE='en'
+
+ROOT_URLCONF = "afrims.urls"
 
