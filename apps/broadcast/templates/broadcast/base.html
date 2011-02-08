@@ -16,7 +16,17 @@
 $(document).ready(function() {
     //////////////////////////////////////////
     ///////////////Form Logic/////////////////
-    init_groups_and_contacts_tables()
+    var show_contacts = {{ show_contacts }};
+    init_groups_and_contacts_tables(show_contacts)
+
+    if(!show_contacts){
+        $('#contacts_table').hide()
+        $('#contacts_holder').hide()
+        $('#groups_table').css('width','100%');
+        $('#groups_holder').css('width','100%');
+        $('#groups_table_wrapper').css('width','100%');
+
+    }
     $('#id_contacts').parent().parent().hide()
     $('#id_groups').parent().parent().hide()
 

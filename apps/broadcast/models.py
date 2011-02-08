@@ -1,15 +1,14 @@
 # vim: ai ts=4 sts=4 et sw=4
 from django.db import models
 from rapidsms.contrib.messagelog.models import Message
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Connection
 from datetime import datetime
 
 class BroadcastMessage(models.Model):
     '''
     this is the internal model
     '''
-    contact = models.ForeignKey(Contact, related_name="broadcast_messages")
-    group   = models.CharField(max_length=30)
+    connection = models.ForeignKey(Connection, null=False, blank=False)
     text    = models.TextField()
     date       = models.DateTimeField(default=datetime.utcnow)
     recipients = models.ManyToManyField(Contact, blank=True,

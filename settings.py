@@ -9,7 +9,7 @@
 VERSION = '0.2.1' #This doesn't do anything yet, but what the hey.
 
 
-
+BROADCAST_SENDER_BACKEND='message_tester'
 
 # to help you get started quickly, many django/rapidsms apps are enabled
 # by default. you may wish to remove some and/or add your own.
@@ -132,6 +132,8 @@ TEST_EXCLUDED_APPS = [
 
 # the project-level url patterns
 ROOT_URLCONF = "urls"
+
+LANGUAGE_CODE='en'
 
 # since we might hit the database from any thread during testing, the
 # in-memory sqlite database isn't sufficient. it spawns a separate
