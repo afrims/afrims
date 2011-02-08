@@ -8,7 +8,6 @@
 
 VERSION = '0.2.1' #This doesn't do anything yet, but what the hey.
 
-
 BROADCAST_SENDER_BACKEND='message_tester'
 
 # to help you get started quickly, many django/rapidsms apps are enabled
@@ -35,7 +34,7 @@ INSTALLED_APPS = [
     
     
     "south",
-    "gunicorn",
+    # "gunicorn",
     
     "afrims.apps.reminder",
     "afrims.apps.broadcast",
@@ -131,28 +130,8 @@ TEST_EXCLUDED_APPS = [
 ]
 
 # the project-level url patterns
-ROOT_URLCONF = "urls"
 
 LANGUAGE_CODE='en'
 
-# since we might hit the database from any thread during testing, the
-# in-memory sqlite database isn't sufficient. it spawns a separate
-# virtual database for each thread, and syncdb is only called for the
-# first. this leads to confusing "no such table" errors. We create
-# a named temporary instance instead.
-import os
-import tempfile
-import sys
+ROOT_URLCONF = "afrims.urls"
 
-# import local settings if we find them
-try:
-    from localsettings import *
-except ImportError:
-    pass
-
-if ('test' in sys.argv) and ('sqlite' not in DATABASES['default']['ENGINE']):
-    DATABASES = TESTING_DATABASES
-    for db_name in DATABASES:
-        DATABASES[db_name]['TEST_NAME'] = os.path.join(
-            tempfile.gettempdir(),
-            "%s.rapidsms.test.sqlite3" % db_name)

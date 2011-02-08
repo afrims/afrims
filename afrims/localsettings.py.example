@@ -1,3 +1,5 @@
+from afrims.settings import *
+
 # you should configure your database here before doing any real work.
 # see: http://docs.djangoproject.com/en/dev/ref/settings/#databases
 
@@ -18,6 +20,7 @@
 #    }
 #}
 
+
 # for postgresql:
 DATABASES = {
     "default": {
@@ -36,17 +39,21 @@ TESTING_DATABASES= {
     }
 }
 
-# the rapidsms backend configuration is designed to resemble django's
-# database configuration, as a nested dict of (name, configuration).
-#
-# the ENGINE option specifies the module of the backend; the most common
-# backend types (for a GSM modem or an SMPP server) are bundled with
-# rapidsms, but you may choose to write your own.
-#
-# all other options are passed to the Backend when it is instantiated,
-# to configure it. see the documentation in those modules for a list of
-# the valid options for each.
 INSTALLED_BACKENDS = {
+    #"att": {
+    #    "ENGINE": "rapidsms.backends.gsm",
+    #    "PORT": "/dev/ttyUSB0"
+    #},
+    #"verizon": {
+    #    "ENGINE": "rapidsms.backends.gsm,
+    #    "PORT": "/dev/ttyUSB1"
+    #},
+	#"droid": {
+	#            "ENGINE": "rapidsms.backends.droid",
+	#            "AP_PORT": '9999',
+	#            "SERVER_PORT": '55625',
+	#    }
+	
     "message_tester": {
         "ENGINE": "rapidsms.backends.bucket",
     },
@@ -57,11 +64,7 @@ INSTALLED_BACKENDS = {
             "params_outgoing": "reply=%(reply)s&id=%(id)s&network=%(network)s&number=%(phone_number)s&message=%(message)s&ekey=<SECRET_EKEY>&cc=dimagi&currency=THB&value=0&title=trialcnct",
             "params_incoming": "action=action&id=%(id)s&number=%(phone_number)s&network=%(network)s&message=%(message)s&shortcode=%(sc)s&country=%(country_code)&billing=%(bill_code)s"
     },
-#    "droid": {
-#            "ENGINE": "rapidsms.backends.droid",
-#            "AP_PORT": '9999',
-#            "SERVER_PORT": '55625',
-#    }
+
 }
 
 DJANGO_LOG_FILE = "afrims.django.log"
