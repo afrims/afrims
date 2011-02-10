@@ -14,6 +14,8 @@ from rapidsms.messages.incoming import IncomingMessage
 from afrims.apps.broadcast.models import Broadcast
 from afrims.apps.broadcast.app import BroadcastApp
 
+from afrims.apps.reminder.models import Group
+
 
 class CreateDataTest(TestCase):
     """ Base test case that provides helper functions to create data """
@@ -28,13 +30,24 @@ class CreateDataTest(TestCase):
         }
         defaults.update(data)
         return Contact.objects.create(**defaults)
-    
+
+    def create_group(self, data={}):
+        defaults = {
+            'name': self.random_string(12),
+        }
+        defaults.update(data)
+        return Group.objects.create(**defaults)
+
     def create_broadcast(self, data={}):
         defaults = {
             'body': self.random_string(160),
         }
         defaults.update(data)
-        return Broadcast.objects.create(**defaults)
+        groups = defaults.pop('groups', [])
+        broadcast = Broadcast.objects.create(**defaults)
+        if groups:
+            broadcast.groups = groups
+        return broadcast
 
 
 class BroadcastDateTest(CreateDataTest):
@@ -75,4 +88,27 @@ class BroadcastDateTest(CreateDataTest):
         broadcast.schedule_frequency = 'one-time'
         self.assertEqual(broadcast.get_next_date(),
                          broadcast.schedule_start_date)
+
+
+class BroadcastAppTest(CreateDataTest):
+
+    def setUp(self):
+        self.contact = self.create_contact()
+        self.router = MockRouter()
+        self.app = BroadcastApp(router=self.router)
+
+    def test_queue_creation(self):
+        """ Test messages are queued properly """
+        c1 = self.create_contact()
+        g1 = self.create_group()
+        c1.groups.add(g1)
+        c2 = self.create_contact()
+        g2 = self.create_group()
+        c2.groups.add(g2)
+        broadcast = self.create_broadcast(data={'groups': [g1]})
+        self.app.queue_outgoing_messages(broadcast)
+        self.assertEqual(broadcast.messages.count(), 1)
+        contacts = broadcast.messages.values_list('recipient', flat=True)
+        self.assertTrue(c1.pk in contacts)
+        self.assertFalse(c2.pk in contacts)
 

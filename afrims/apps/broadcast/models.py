@@ -33,6 +33,7 @@ class Broadcast(models.Model):
     groups = models.ManyToManyField(Group, related_name='broadcasts')
 
     def get_next_date(self):
+        # TODO: update to use rrule and discrete frequencies
         if self.schedule_start_date and self.schedule_frequency:
             next_date = self.schedule_start_date
             frequency_map = {

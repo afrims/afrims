@@ -5,6 +5,7 @@
 import time
 from rapidsms.conf import settings
 from rapidsms.apps.base import AppBase
+from rapidsms.models import Contact
 from rapidsms.backends.base import BackendBase
 from rapidsms.messages import IncomingMessage, OutgoingMessage
 from django.conf import settings
@@ -36,7 +37,7 @@ class BroadcastApp(AppBase):
         contacts = contacts.filter(groups__broadcasts=broadcast)
         self.info('queing {0} broadcast messages'.format(contacts.count()))
         for contact in contacts:
-            contact.broadcast_messages.create(broadcast=broadcast)
+            broadcast.messages.create(recipient=contact)
 
     def send_messages(self, dry_run=False):
         self.debug('{0} running'.format(self.cron_name))
