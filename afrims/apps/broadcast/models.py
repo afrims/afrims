@@ -10,6 +10,15 @@ from rapidsms.contrib.messagelog.models import Message
 from afrims.apps.reminder.models import Group
 
 
+class BroadcastReadyManager(models.Manager):
+    def get_query_set(self):
+        qs = super(BroadcastReadyManager, self).get_query_set()
+        qs = qs.filter(date_next_notified__lt=datetime.datetime.now())
+        qs = qs.exclude(schedule_start_date__isnull=True,
+                        schedule_frequency='')
+        return qs
+
+
 class Broadcast(models.Model):
     """ General broadcast message """
 
@@ -31,6 +40,9 @@ class Broadcast(models.Model):
                                           choices=REPEAT_CHOICES, default='')
     body = models.TextField()
     groups = models.ManyToManyField(Group, related_name='broadcasts')
+
+    objects = models.Manager()
+    ready = BroadcastReadyManager()
 
     def get_next_date(self):
         """ calculate next date based on configured characteristics """

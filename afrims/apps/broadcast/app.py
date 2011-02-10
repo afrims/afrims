@@ -11,6 +11,15 @@ from rapidsms.messages import IncomingMessage, OutgoingMessage
 from django.conf import settings
 
 
+def scheduler_callback(router):
+    """
+    Basic rapidsms.contrib.scheduler.models.EventSchedule callback
+    function that runs BroadcastApp.cronjob()
+    """
+    app = router.get_app("broadcast")
+    app.cronjob()
+
+
 class BroadcastApp(AppBase):
     """ RapidSMS app to send broadcast messages """
 
@@ -19,6 +28,7 @@ class BroadcastApp(AppBase):
     cron_callback = 'afrims.apps.broadcast.app.scheduler_callback'
 
     def start(self):
+        """ setup event schedule to run cron job every minute """
         try:
             schedule = EventSchedule.objects.get(description=self.name)
         except EventSchedule.DoesNotExist:
@@ -31,40 +41,48 @@ class BroadcastApp(AppBase):
                 setattr(schedule, key, val)
         schedule.save()
         self.info('started')
+        #    try:
+        #        self.backend
+        #
+        #    except KeyError:
+        #        self.info(
+        #            "To use the message tester app, you must add a bucket " +\
+        #            "backend named 'message_tester' to your INSTALLED_BACKENDS")
 
     def queue_outgoing_messages(self):
         """ generate queued messages for scheduled broadcasts """
         now = datetime.datetime.now()
-        broadcasts = Broadcast.objects.filter(date_next_notified__lt=now)
-        broadcasts = broadcasts.exclude(schedule_start_date__isnull=True,
-                                        schedule_frequency='')
-        for broadcast in broadcasts:
+        for broadcast in Broadcast.ready.all():
             broadcast.queue_outgoing_messages()
             broadcast.set_next_date()
             broadcast.save()
 
-    def send_messages(self, dry_run=False):
-        self.debug('{0} running'.format(self.cron_name))
-        # grab all broadcasts ready to go out and queue their messages
-        self.queue_outgoing_messages()
-
-        messages = BroadcastMessage.objects.filter(status='queued')
+    def send_messages(self):
+        """ send queued for delivery messages """
+        messages = BroadcastMessage.objects.filter(status='queued')[:50]
         self.info('found {0} messages'.format(messages.count()))
         for message in messages:
             connection = message.recipient.default_connection
-            msg = OutgoingMessage(connection=recipient, template=message.text)
+            msg = OutgoingMessage(connection=recipient,
+                                  template=message.broadcast.body)
             success = True
-            if not dry_run:
-                try:
-                    msg.send()
-                except Exception, e:
-                    self.exception(e)
-                    success = False
+            try:
+                msg.send()
+            except Exception, e:
+                self.exception(e)
+                success = False
             if success:
-                message.status = str(OutgoingLog.DELIVERED)
+                message.status = 'sent'
             else:
-                message.status = str(OutgoingLog.FAILED)
+                message.status = 'failed'
             message.save()
+
+    def cronjob(self):
+        self.debug('{0} running'.format(self.cron_name))
+        # grab all broadcasts ready to go out and queue their messages
+        self.queue_outgoing_messages()
+        # send queued messages
+        self.send_messages()
 
     def _wait_for_message(self, msg):
         countdown = settings.MESSAGE_TESTER_TIMEOUT
@@ -79,16 +97,6 @@ class BroadcastApp(AppBase):
             # avoid pegging the cpu.
             countdown -= interval
             time.sleep(interval)
-
-
-    #def start(self):
-    #    try:
-    #        self.backend
-    #
-    #    except KeyError:
-    #        self.info(
-    #            "To use the message tester app, you must add a bucket " +\
-    #            "backend named 'message_tester' to your INSTALLED_BACKENDS")
 
 
     @property

@@ -112,3 +112,14 @@ class BroadcastAppTest(CreateDataTest):
         self.assertTrue(c1.pk in contacts)
         self.assertFalse(c2.pk in contacts)
 
+    def test_ready_manager(self):
+        """ test Broadcast.ready manager returns broadcasts ready to go out """
+        now = datetime.datetime.now()
+        delta = relativedelta(days=1)
+        start = now - (delta * 2)
+        b1 = self.create_broadcast({'schedule_frequency': 'daily',
+                                    'date_next_notified': now,
+                                    'schedule_start_date': now - (delta * 2)})
+        ready = Broadcast.ready.values_list('id', flat=True)
+        self.assertTrue(b1.pk in ready)
+
