@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
-
-
 import time
+
+from django.conf import settings
+
 from rapidsms.conf import settings
 from rapidsms.apps.base import AppBase
 from rapidsms.models import Contact
 from rapidsms.backends.base import BackendBase
 from rapidsms.messages import IncomingMessage, OutgoingMessage
-from django.conf import settings
+from rapidsms.contrib.scheduler.models import EventSchedule
+
+from afrims.apps.broadcast.models import Broadcast, BroadcastMessage
 
 
 def scheduler_callback(router):
@@ -16,7 +19,7 @@ def scheduler_callback(router):
     Basic rapidsms.contrib.scheduler.models.EventSchedule callback
     function that runs BroadcastApp.cronjob()
     """
-    app = router.get_app("broadcast")
+    app = router.get_app("afrims.apps.broadcast")
     app.cronjob()
 
 
@@ -60,7 +63,7 @@ class BroadcastApp(AppBase):
     def send_messages(self):
         """ send queued for delivery messages """
         messages = BroadcastMessage.objects.filter(status='queued')[:50]
-        self.info('found {0} messages'.format(messages.count()))
+        self.info('found {0} messages to send'.format(messages.count()))
         for message in messages:
             connection = message.recipient.default_connection
             msg = OutgoingMessage(connection=recipient,
