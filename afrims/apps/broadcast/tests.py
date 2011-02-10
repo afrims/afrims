@@ -106,7 +106,7 @@ class BroadcastAppTest(CreateDataTest):
         g2 = self.create_group()
         c2.groups.add(g2)
         broadcast = self.create_broadcast(data={'groups': [g1]})
-        self.app.queue_outgoing_messages(broadcast)
+        broadcast.queue_outgoing_messages()
         self.assertEqual(broadcast.messages.count(), 1)
         contacts = broadcast.messages.values_list('recipient', flat=True)
         self.assertTrue(c1.pk in contacts)

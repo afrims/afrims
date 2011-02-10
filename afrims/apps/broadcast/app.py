@@ -32,23 +32,22 @@ class BroadcastApp(AppBase):
         schedule.save()
         self.info('started')
 
-    def queue_outgoing_messages(self, broadcast):
-        contacts = Contact.objects.distinct()
-        contacts = contacts.filter(groups__broadcasts=broadcast)
-        self.info('queing {0} broadcast messages'.format(contacts.count()))
-        for contact in contacts:
-            broadcast.messages.create(recipient=contact)
-
-    def send_messages(self, dry_run=False):
-        self.debug('{0} running'.format(self.cron_name))
+    def queue_outgoing_messages(self):
+        """ generate queued messages for scheduled broadcasts """
         now = datetime.datetime.now()
-        broadcasts = Broadcast.active.filter(date_next_notified__lt=now)
+        broadcasts = Broadcast.objects.filter(date_next_notified__lt=now)
         broadcasts = broadcasts.exclude(schedule_start_date__isnull=True,
                                         schedule_frequency='')
         for broadcast in broadcasts:
             broadcast.queue_outgoing_messages()
-            
-        
+            broadcast.set_next_date()
+            broadcast.save()
+
+    def send_messages(self, dry_run=False):
+        self.debug('{0} running'.format(self.cron_name))
+        # grab all broadcasts ready to go out and queue their messages
+        self.queue_outgoing_messages()
+
         messages = BroadcastMessage.objects.filter(status='queued')
         self.info('found {0} messages'.format(messages.count()))
         for message in messages:

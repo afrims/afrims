@@ -33,6 +33,7 @@ class Broadcast(models.Model):
     groups = models.ManyToManyField(Group, related_name='broadcasts')
 
     def get_next_date(self):
+        """ calculate next date based on configured characteristics """
         # TODO: update to use rrule and discrete frequencies
         if self.schedule_start_date and self.schedule_frequency:
             next_date = self.schedule_start_date
@@ -47,6 +48,22 @@ class Broadcast(models.Model):
                 while next_date < now:
                     next_date += delta
             return next_date
+
+    def set_next_date(self):
+        """ update broadcast to be ready for next date """
+        now = datetime.datetime.now()
+        # Disable this broadcast if it was a one-time notification (we just
+        # sent it). This will make get_next_date() return None below.
+        if self.schedule_frequency == 'one-time':
+            self.schedule_frequency = ''
+        self.date_last_notified = now
+        self.date_next_notified = self.get_next_date()
+
+    def queue_outgoing_messages(self):
+        """ generate queued outgoing messages """
+        contacts = Contact.objects.distinct().filter(groups__broadcasts=self)
+        for contact in contacts:
+            self.messages.create(recipient=contact)
 
     def save(self, **kwargs):
         if not self.pk:
