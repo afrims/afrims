@@ -38,12 +38,23 @@ class CreateDataTest(TestCase):
         defaults.update(data)
         return Group.objects.create(**defaults)
 
-    def create_broadcast(self, data={}):
+    def create_broadcast(self, when='', data={}):
         defaults = {
             'body': self.random_string(160),
         }
         defaults.update(data)
         groups = defaults.pop('groups', [])
+        # simple helper flag to create broadcasts in the past or future
+        now = datetime.datetime.now()
+        delta = relativedelta(days=1)
+        if when == 'past':
+            defaults.update({'schedule_frequency': 'daily',
+                             'date_next_notified': now,
+                             'schedule_start_date': now - (delta * 2)})
+        elif when == 'future':
+            defaults.update({'schedule_frequency': 'daily',
+                             'date_next_notified': now + delta,
+                             'schedule_start_date': now})
         broadcast = Broadcast.objects.create(**defaults)
         if groups:
             broadcast.groups = groups
@@ -98,7 +109,7 @@ class BroadcastAppTest(CreateDataTest):
         self.app = BroadcastApp(router=self.router)
 
     def test_queue_creation(self):
-        """ Test messages are queued properly """
+        """ Test broadcast messages are queued properly """
         c1 = self.create_contact()
         g1 = self.create_group()
         c1.groups.add(g1)
@@ -114,12 +125,10 @@ class BroadcastAppTest(CreateDataTest):
 
     def test_ready_manager(self):
         """ test Broadcast.ready manager returns broadcasts ready to go out """
-        now = datetime.datetime.now()
-        delta = relativedelta(days=1)
-        start = now - (delta * 2)
-        b1 = self.create_broadcast({'schedule_frequency': 'daily',
-                                    'date_next_notified': now,
-                                    'schedule_start_date': now - (delta * 2)})
+        b1 = self.create_broadcast(when='past')
+        b2 = self.create_broadcast(when='future')
         ready = Broadcast.ready.values_list('id', flat=True)
         self.assertTrue(b1.pk in ready)
+        self.assertFalse(b2.pk in ready)
+
 
