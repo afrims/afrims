@@ -10,9 +10,10 @@ from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.models import Connection, Contact, Backend
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.messages.incoming import IncomingMessage
+from rapidsms.tests.scripted import TestScript
 
 from afrims.apps.broadcast.models import Broadcast
-from afrims.apps.broadcast.app import BroadcastApp
+from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 
 from afrims.apps.reminder.models import Group
 
@@ -24,12 +25,28 @@ class CreateDataTest(TestCase):
         chars = string.letters + extra_chars
         return ''.join([random.choice(chars) for i in range(length)])
 
+    def create_backend(self, data={}):
+        defaults = {
+            'name': self.random_string(12),
+        }
+        defaults.update(data)
+        return Backend.objects.create(**defaults)
+
     def create_contact(self, data={}):
         defaults = {
             'name': self.random_string(12),
         }
         defaults.update(data)
         return Contact.objects.create(**defaults)
+
+    def create_connection(self, data={}):
+        defaults = {
+            'identity': self.random_string(10),
+        }
+        defaults.update(data)
+        if 'backend' not in defaults:
+            defaults['backend'] = self.create_backend()
+        return Connection.objects.create(**defaults)
 
     def create_group(self, data={}):
         defaults = {
@@ -118,11 +135,6 @@ class BroadcastDateTest(CreateDataTest):
 
 class BroadcastAppTest(CreateDataTest):
 
-    def setUp(self):
-        self.contact = self.create_contact()
-        self.router = MockRouter()
-        self.app = BroadcastApp(router=self.router)
-
     def test_queue_creation(self):
         """ Test broadcast messages are queued properly """
         c1 = self.create_contact()
@@ -146,4 +158,29 @@ class BroadcastAppTest(CreateDataTest):
         self.assertTrue(b1.pk in ready)
         self.assertFalse(b2.pk in ready)
 
+
+class BroadcastScriptedTest(TestScript, CreateDataTest):
+    def test_entire_stack(self):
+        self.startRouter()
+        contact = self.create_contact()
+        backend = self.create_backend(data={'name': 'mockbackend'})
+        connection = self.create_connection({'contact': contact,
+                                             'backend': backend})
+        # ready broadcast
+        g1 = self.create_group()
+        contact.groups.add(g1)
+        b1 = self.create_broadcast(when='past', data={'groups': [g1]})
+        # non-ready broadcast
+        g2 = self.create_group()
+        contact.groups.add(g2)
+        b2 = self.create_broadcast(when='future', data={'groups': [g2]})
+        # run cronjob
+        scheduler_callback(self.router)
+        queued = contact.broadcast_messages.filter(status='queued').count()
+        sent = contact.broadcast_messages.filter(status='sent').count()
+        # nothing should be queued (future broadcast isn't ready)
+        self.assertEqual(queued, 0)
+        # only one message should be sent
+        self.assertEqual(sent, 1)
+        self.stopRouter()
 

@@ -44,13 +44,6 @@ class BroadcastApp(AppBase):
                 setattr(schedule, key, val)
         schedule.save()
         self.info('started')
-        #    try:
-        #        self.backend
-        #
-        #    except KeyError:
-        #        self.info(
-        #            "To use the message tester app, you must add a bucket " +\
-        #            "backend named 'message_tester' to your INSTALLED_BACKENDS")
 
     def queue_outgoing_messages(self):
         """ generate queued messages for scheduled broadcasts """
@@ -66,7 +59,7 @@ class BroadcastApp(AppBase):
         self.info('found {0} messages to send'.format(messages.count()))
         for message in messages:
             connection = message.recipient.default_connection
-            msg = OutgoingMessage(connection=recipient,
+            msg = OutgoingMessage(connection=connection,
                                   template=message.broadcast.body)
             success = True
             try:
