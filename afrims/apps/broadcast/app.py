@@ -10,11 +10,61 @@ from rapidsms.messages import IncomingMessage, OutgoingMessage
 from django.conf import settings
 
 
-class App(AppBase):
-    """
-    What
-    """
+class BroadcastApp(AppBase):
+    """ RapidSMS app to send broadcast messages """
 
+    cron_schedule = {'minutes': '*'}
+    cron_name = 'broadcast-cron-job'
+    cron_callback = 'afrims.apps.broadcast.app.scheduler_callback'
+
+    def start(self):
+        try:
+            schedule = EventSchedule.objects.get(description=self.name)
+        except EventSchedule.DoesNotExist:
+            schedule = EventSchedule.objects.create(description=self.name,
+                                                    callback=self.cron_callback,
+                                                    minutes='*')
+        schedule.callback = self.cron_callback
+        for key, val in self.cron_schedule.iteritems():
+            if hasattr(schedule, key):
+                setattr(schedule, key, val)
+        schedule.save()
+        self.info('started')
+
+    def queue_outgoing_messages(self, broadcast):
+        contacts = Contact.objects.distinct()
+        contacts = contacts.filter(groups__broadcasts=broadcast)
+        self.info('queing {0} broadcast messages'.format(contacts.count()))
+        for contact in contacts:
+            contact.broadcast_messages.create(broadcast=broadcast)
+
+    def send_messages(self, dry_run=False):
+        self.debug('{0} running'.format(self.cron_name))
+        now = datetime.datetime.now()
+        broadcasts = Broadcast.active.filter(date_next_notified__lt=now)
+        broadcasts = broadcasts.exclude(schedule_start_date__isnull=True,
+                                        schedule_frequency='')
+        for broadcast in broadcasts:
+            broadcast.queue_outgoing_messages()
+            
+        
+        messages = BroadcastMessage.objects.filter(status='queued')
+        self.info('found {0} messages'.format(messages.count()))
+        for message in messages:
+            connection = message.recipient.default_connection
+            msg = OutgoingMessage(connection=recipient, template=message.text)
+            success = True
+            if not dry_run:
+                try:
+                    msg.send()
+                except Exception, e:
+                    self.exception(e)
+                    success = False
+            if success:
+                message.status = str(OutgoingLog.DELIVERED)
+            else:
+                message.status = str(OutgoingLog.FAILED)
+            message.save()
 
     def _wait_for_message(self, msg):
         countdown = settings.MESSAGE_TESTER_TIMEOUT
@@ -31,14 +81,14 @@ class App(AppBase):
             time.sleep(interval)
 
 
-    def start(self):
-        try:
-            self.backend
-
-        except KeyError:
-            self.info(
-                "To use the message tester app, you must add a bucket " +\
-                "backend named 'message_tester' to your INSTALLED_BACKENDS")
+    #def start(self):
+    #    try:
+    #        self.backend
+    #
+    #    except KeyError:
+    #        self.info(
+    #            "To use the message tester app, you must add a bucket " +\
+    #            "backend named 'message_tester' to your INSTALLED_BACKENDS")
 
 
     @property
@@ -64,11 +114,9 @@ class App(AppBase):
         idents = idents.split(',')
 
         for ident in idents:
-            try:
-                conn = Connection.objects.get(identity=ident)
-                msg = OutgoingMessage(connection__identity=ident,template=msg_text)
-                msg.send()
+            conn = Connection.objects.get(identity=ident)
+            msg = OutgoingMessage(connection__identity=ident,template=msg_text)
+            msg.send()
 
         return True
-
 
