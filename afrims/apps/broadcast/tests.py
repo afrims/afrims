@@ -100,6 +100,21 @@ class BroadcastDateTest(CreateDataTest):
         self.assertEqual(broadcast.get_next_date(),
                          broadcast.schedule_start_date)
 
+    def test_next_date_increment(self):
+        """ set_next_date will only increment ready broadcasts """
+        # ready broadcasts will increment
+        broadcast = self.create_broadcast(when='past')
+        old_notify_date = broadcast.date_next_notified
+        broadcast.set_next_date()
+        new_notify_date = broadcast.date_next_notified
+        self.assertTrue(new_notify_date > old_notify_date)
+        # non-ready broadcasts will remain the same
+        broadcast = self.create_broadcast(when='future')
+        old_notify_date = broadcast.date_next_notified
+        broadcast.set_next_date()
+        new_notify_date = broadcast.date_next_notified
+        self.assertEqual(new_notify_date, old_notify_date)
+
 
 class BroadcastAppTest(CreateDataTest):
 
