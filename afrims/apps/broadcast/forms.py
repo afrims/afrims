@@ -7,7 +7,7 @@ from afrims.apps.broadcast.models import Broadcast
 
 
 class BroadcastForm(forms.ModelForm):
-    """ Form to send a send a broadcast message """
+    """ Form to send a broadcast message """
 
     class Meta(object):
         model = Broadcast
