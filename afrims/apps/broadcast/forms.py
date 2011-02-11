@@ -1,63 +1,31 @@
-__author__ = 'adewinter'
 from django import forms
 from django.forms import CheckboxSelectMultiple
 from django.forms.widgets import RadioSelect, HiddenInput
+from django.utils.encoding import smart_unicode
+
+from afrims.apps.broadcast.models import Broadcast
 
 
+class BroadcastForm(forms.ModelForm):
+    """ Form to send a send a broadcast message """
 
-class ContactListField(forms.CharField):
-     def to_python(self, value):
-        "Normalize data to a list of strings."
+    class Meta(object):
+        model = Broadcast
+        exclude = ('date_created', 'date_last_notified', 'date_next_notified')
 
-        # Return an empty list if no input was given.
-        if not value:
-            return []
-        return value.split(',')
-
-
-class BroadcastForm(forms.Form):
-    sender_number = forms.CharField(max_length=15, required=True)
-    contacts = ContactListField(max_length=None, required=False, error_messages={'required': 'Please select one or more contacts to send the message to'}) #list of contact ID's as selected by the Datatable present on the template page
-    groups = ContactListField(max_length=None, label='Groups List Selection', required=False, error_messages={'required': 'Please select a group/groups to send the message to'}) #list of group ID's as selected by the Datable present on the template page
-    message_text = forms.CharField(widget=forms.Textarea, max_length=255)
-
-
-
-
-    def clean(self):
-        cleaned_data = self.cleaned_data
-        contacts = cleaned_data.get("contacts")
-        groups = cleaned_data.get("groups")
-
-        if not contacts and not groups:
-            print 'HURROO ERROR IN FORM %s %s' % (groups, contacts)
-            raise forms.ValidationError("You must select some recipients (either Contacts, or Groups, or both)")
-
-        # Always return the full collection of cleaned data.
-        return cleaned_data
-
-    def clean_contacts(self):
-        c = self.cleaned_data['contacts']
-        newc = []
-        try:
-            for item in c:
-                newc.append(int(item))
-
-        except ValueError:
-            raise forms.ValidationError("Validation Error in Contacts FormField")
-
-        return newc
-
-    def clean_groups(self):
-        g = self.cleaned_data['groups']
-        newg = []
-        try:
-            for item in g:
-                newg.append(int(item))
-
-        except ValueError:
-            raise forms.ValidationError("Validation Error in Groups FormField %s" % str(g))
-        return newg
-                
-
+    def __init__(self, *args, **kwargs):
+        super(BroadcastForm, self).__init__(*args, **kwargs)
+        picker_class = 'datetimepicker'
+        self.fields['schedule_start_date'].widget.attrs['class'] = picker_class
+        self.fields['schedule_end_date'].widget.attrs['class'] = picker_class
+        widget_class = 'multiselect'
+        self.fields['weekdays'].help_text = ''
+        self.fields['weekdays'].widget.attrs['class'] = widget_class
+        self.fields['months'].help_text = ''
+        self.fields['months'].widget.attrs['class'] = widget_class
+        self.fields['groups'].help_text = ''
+        self.fields['groups'].widget.attrs['class'] = widget_class
+        self.fields.keyOrder = ('schedule_start_date', 'schedule_end_date',
+                                'schedule_frequency', 'weekdays', 'months',
+                                'body', 'groups')
 

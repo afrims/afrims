@@ -9,6 +9,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core import serializers
 from apps.reminder.models import Group
 from django.db.models.query_utils import Q
+from django.db import transaction
+from django.core.urlresolvers import reverse
 
 from afrims.apps.utils import table
 from afrims.apps.broadcast.forms import BroadcastForm
@@ -19,42 +21,29 @@ from rapidsms.models import Connection
 from rapidsms.models import Backend
 from apps.broadcast import utils
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import messages
 
 import logging
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-''' Select whether to show the Contacts selection table in the broadcast UI tab '''
-SHOW_CONTACTS_SELECTION = 'false' #use JavaScript true/false syntax!
 
-def dashboard(request):
-
+@transaction.commit_on_success
+def send_message(request):
     if request.method == 'POST':
         form = BroadcastForm(request.POST)
         if form.is_valid():
-            sender_num = form.cleaned_data['sender_number']
-            contacts_field = form.cleaned_data['contacts']
-            groups_field = form.cleaned_data['groups']
-            msg_txt = form.cleaned_data['message_text']
-
-            recipients = Contact.objects.filter(id__in=contacts_field)
-            groups_recipients = Contact.objects.filter(groups__id__in=groups_field)
-            recipients = (recipients | groups_recipients).distinct()
-
-            bm = make_broadcast_entry(sender_num,msg_txt,recipients)
-            send_broadcast(bm)
-
-            print contacts
-            return HttpResponseRedirect('sent/')
-
+            broadcast = form.save()
+            messages.info(request, 'Message successfully queued')
+            return HttpResponseRedirect(reverse('send-message'))
     else:
         form = BroadcastForm()
 
-    c = {'form':form, 'show_contacts':SHOW_CONTACTS_SELECTION}
-    c.update(csrf(request))
-    return render_to_response('broadcast/base.html',
-                              c,
+    context = {
+        'form': form,
+    }
+    return render_to_response('broadcast/send_message.html', context,
                               RequestContext(request))
 
 

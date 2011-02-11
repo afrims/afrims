@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}Send a Message{% endblock %}
+
+{% block javascripts %}
+<script src="{{ MEDIA_URL }}broadcast/js/jquery.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}broadcast/js/jquery.dataTables.min.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}broadcast/js/jquery-ui-1.8.6.custom.min.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}broadcast/js/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}broadcast/js/jquery.multiselect.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}broadcast/js/broadcast.groupscontacts.table.js" type="text/javascript"></script>
+<script src="{{ MEDIA_URL }}broadcast/js/broadcast.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}broadcast/css/jquery-ui-1.8.6.custom.css" />
+		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}broadcast/css/broadcast.css" />
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}broadcast/css/jquery.multiselect.css" />
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>Send a Message</h2>
+    <div id="form_holder">
+        <form method="POST" action="#" id="broadcast_form">
+            {% csrf_token %}
+            <table class="form_elements">
+                {{ form }}
+            </table>
+            <input type=submit value="Send Message">
+        </form>
+    </div>
+</div>
+{% endblock %}
+

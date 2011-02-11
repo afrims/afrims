@@ -63,7 +63,7 @@ RAPIDSMS_TABS = [
 #    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
     ("apps.reminder.views.dashboard", "Reminders"),
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
-    ("apps.broadcast.views.dashboard", "Broadcast"),
+    ("afrims.apps.broadcast.views.send_message", "Send a Message"),
 #    ("afrims.apps.reminder.views.dashboard", "Reminder"),
 ]
 

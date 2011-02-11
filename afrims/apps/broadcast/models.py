@@ -10,6 +10,49 @@ from rapidsms.contrib.messagelog.models import Message
 from afrims.apps.reminder.models import Group
 
 
+class DateAttribute(models.Model):
+    """ Simple model to store weekdays and months """
+
+    ATTRIBUTE_TYPES = (
+        ('weekday', 'Weekday'),
+        ('month', 'Month'),
+    )
+    WEEKDAY_CHOICES = (
+        (0, 'Sunday'),
+        (1, 'Monday'),
+        (2, 'Tuesday'),
+        (3, 'Wednesday'),
+        (4, 'Thursday'),
+        (5, 'Friday'),
+        (6, 'Saturday'),
+    )
+    MONTH_CHOICES = (
+        (0, 'January'),
+        (1, 'February'),
+        (2, 'March'),
+        (3, 'April'),
+        (4, 'May'),
+        (5, 'June'),
+        (6, 'July'),
+        (7, 'August'),
+        (8, 'September'),
+        (9, 'October'),
+        (10, 'November'),
+        (11, 'December'),
+    )
+
+    name = models.CharField(max_length=32, unique=True)
+    value = models.PositiveSmallIntegerField()
+    type = models.CharField(max_length=16, choices=ATTRIBUTE_TYPES)
+
+    class Meta(object):
+        unique_together = ('type', 'value')
+        ordering = ('value',)
+
+    def __unicode__(self):
+        return self.name
+
+
 class BroadcastReadyManager(models.Manager):
     def get_query_set(self):
         qs = super(BroadcastReadyManager, self).get_query_set()
@@ -36,8 +79,15 @@ class Broadcast(models.Model):
     date_next_notified = models.DateTimeField(null=True, blank=True,
                                               db_index=True)
     schedule_start_date = models.DateTimeField(null=True, blank=True)
+    schedule_end_date = models.DateTimeField(null=True, blank=True)
     schedule_frequency = models.CharField(max_length=16, blank=True,
                                           choices=REPEAT_CHOICES, default='')
+    weekdays = models.ManyToManyField(DateAttribute, blank=True,
+                                      limit_choices_to={'type': 'weekday'},
+                                      related_name='broadcast_weekdays')
+    months = models.ManyToManyField(DateAttribute, blank=True,
+                                    limit_choices_to={'type': 'month'},
+                                    related_name='broadcast_months')
     body = models.TextField()
     groups = models.ManyToManyField(Group, related_name='broadcasts')
 
