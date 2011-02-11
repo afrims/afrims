@@ -16,6 +16,7 @@ class BroadcastForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(BroadcastForm, self).__init__(*args, **kwargs)
         picker_class = 'datetimepicker'
+        self.fields['schedule_start_date'].required = True
         self.fields['schedule_start_date'].widget.attrs['class'] = picker_class
         self.fields['schedule_end_date'].widget.attrs['class'] = picker_class
         widget_class = 'multiselect'
@@ -25,6 +26,8 @@ class BroadcastForm(forms.ModelForm):
         self.fields['months'].widget.attrs['class'] = widget_class
         self.fields['groups'].help_text = ''
         self.fields['groups'].widget.attrs['class'] = widget_class
+        # hide disabled frequency in form
+        self.fields['schedule_frequency'].choices.pop(0)
         self.fields.keyOrder = ('schedule_start_date', 'schedule_end_date',
                                 'schedule_frequency', 'weekdays', 'months',
                                 'body', 'groups')
