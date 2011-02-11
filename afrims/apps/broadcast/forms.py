@@ -29,3 +29,10 @@ class BroadcastForm(forms.ModelForm):
                                 'schedule_frequency', 'weekdays', 'months',
                                 'body', 'groups')
 
+    def save(self, commit=True):
+        broadcast = super(BroadcastForm, self).save(commit=False)
+        broadcast.set_next_date()
+        if commit:
+            broadcast.save()
+        return broadcast
+
