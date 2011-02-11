@@ -31,3 +31,7 @@ DATABASES = {
 #        "HOST": "",
 #    }
 #}
+
+# south configuration
+SKIP_SOUTH_TESTS = True
+

@@ -47,6 +47,8 @@ class BroadcastApp(AppBase):
 
     def queue_outgoing_messages(self):
         """ generate queued messages for scheduled broadcasts """
+        broadcasts = Broadcast.ready.all()
+        self.info('found {0} ready broadcasts'.format(broadcasts.count()))
         for broadcast in Broadcast.ready.all():
             # TODO: make sure this process is atomic
             broadcast.queue_outgoing_messages()

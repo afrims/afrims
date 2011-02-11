@@ -1,3 +1,5 @@
+import datetime
+
 from django import forms
 from django.forms import CheckboxSelectMultiple
 from django.forms.widgets import RadioSelect, HiddenInput
@@ -9,6 +11,12 @@ from afrims.apps.broadcast.models import Broadcast
 class BroadcastForm(forms.ModelForm):
     """ Form to send a broadcast message """
 
+    SEND_CHOICES = (
+        ('now', 'Now'),
+        ('later', 'Later'),
+    )
+    when = forms.ChoiceField(label='Send', choices=SEND_CHOICES)
+
     class Meta(object):
         model = Broadcast
         exclude = ('date_created', 'date_last_notified', 'date_next_notified')
@@ -16,8 +24,9 @@ class BroadcastForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(BroadcastForm, self).__init__(*args, **kwargs)
         picker_class = 'datetimepicker'
-        self.fields['schedule_start_date'].required = True
-        self.fields['schedule_start_date'].widget.attrs['class'] = picker_class
+        self.fields['date'].label = 'Start date'
+        self.fields['date'].required = False
+        self.fields['date'].widget.attrs['class'] = picker_class
         self.fields['schedule_end_date'].widget.attrs['class'] = picker_class
         widget_class = 'multiselect'
         self.fields['weekdays'].help_text = ''
@@ -27,15 +36,25 @@ class BroadcastForm(forms.ModelForm):
         self.fields['groups'].help_text = ''
         self.fields['groups'].widget.attrs['class'] = widget_class
         # hide disabled frequency in form
-        self.fields['schedule_frequency'].choices.pop(0)
-        self.fields.keyOrder = ('schedule_start_date', 'schedule_end_date',
-                                'schedule_frequency', 'weekdays', 'months',
+        choices = list(Broadcast.REPEAT_CHOICES)
+        choices.pop(0)
+        self.fields['schedule_frequency'].choices = choices
+        self.fields.keyOrder = ('when', 'date', 'schedule_frequency', 
+                                'schedule_end_date','weekdays', 'months',
                                 'body', 'groups')
+
+    def clean_date(self):
+        when = self.cleaned_data['when']
+        if when == 'future':
+            raise forms.ValidationError('This field is required')
+        return self.cleaned_data['date']
 
     def save(self, commit=True):
         broadcast = super(BroadcastForm, self).save(commit=False)
-        broadcast.set_next_date()
+        if self.cleaned_data['when'] == 'now':
+            broadcast.date = datetime.datetime.now()
         if commit:
             broadcast.save()
+            self.save_m2m()
         return broadcast
 

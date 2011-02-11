@@ -135,3 +135,5 @@ LANGUAGE_CODE='en'
 
 ROOT_URLCONF = "afrims.urls"
 
+TIME_ZONE = 'America/New_York'
+

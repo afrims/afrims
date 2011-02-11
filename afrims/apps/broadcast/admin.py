@@ -4,8 +4,7 @@ from afrims.apps.broadcast import models as broadcast
 
 
 class BroadcastAdmin(admin.ModelAdmin):
-    list_display = ('id', 'date_created', 'date_last_notified',
-                    'date_next_notified')
+    list_display = ('id', 'date', 'date_last_notified', 'date_created')
     list_filter = ('date_created', 'date_last_notified')
     search_fields = ('body',)
     ordering = ('-date_last_notified',)

@@ -55,23 +55,21 @@ class CreateDataTest(TestCase):
         defaults.update(data)
         return Group.objects.create(**defaults)
 
-    def create_broadcast(self, when='', data={}):
+    def create_broadcast(self, when='', commit=True, data={}):
+        now = datetime.datetime.now()
         defaults = {
+            'date': now,
+            'schedule_frequency': 'daily',
             'body': self.random_string(160),
         }
         defaults.update(data)
         groups = defaults.pop('groups', [])
         # simple helper flag to create broadcasts in the past or future
-        now = datetime.datetime.now()
         delta = relativedelta(days=1)
-        if when == 'past':
-            defaults.update({'schedule_frequency': 'daily',
-                             'date_next_notified': now,
-                             'schedule_start_date': now - (delta * 2)})
+        if when == 'ready':
+            defaults.update({'date': now - delta})
         elif when == 'future':
-            defaults.update({'schedule_frequency': 'daily',
-                             'date_next_notified': now + delta,
-                             'schedule_start_date': now})
+            defaults.update({'date': now + delta})
         broadcast = Broadcast.objects.create(**defaults)
         if groups:
             broadcast.groups = groups
@@ -80,57 +78,36 @@ class CreateDataTest(TestCase):
 
 class BroadcastDateTest(CreateDataTest):
 
-    def setUp(self):
-        self.contact = self.create_contact()
-
-    def test_future_start_date(self):
-        """
-        date_next_notified should equal schedule_start_date if in future
-        """
-        now = datetime.datetime.now()
-        delta = relativedelta(days=1)
-        broadcast = self.create_broadcast()
-        broadcast.schedule_start_date = now + delta
-        broadcast.schedule_frequency = 'daily'
-        self.assertEqual(broadcast.get_next_date(), now + delta)
-
-    def test_near_past(self):
-        """
-        date_next_notified should equal schedule_start_date if in near past
-        """
-        now = datetime.datetime.now()
-        delta = relativedelta(days=1)
-        broadcast = self.create_broadcast()
-        broadcast.schedule_start_date = now - delta + relativedelta(hours=+1)
-        broadcast.schedule_frequency = 'daily'
-        self.assertEqual(broadcast.get_next_date(),
-                         broadcast.schedule_start_date + delta)
-
-    def test_one_time(self):
-        """
-        date_next_notified should equal schedule_start_date if one time
-        """
-        now = datetime.datetime.now()
-        broadcast = self.create_broadcast()
-        broadcast.schedule_start_date = now
-        broadcast.schedule_frequency = 'one-time'
-        self.assertEqual(broadcast.get_next_date(),
-                         broadcast.schedule_start_date)
-
-    def test_next_date_increment(self):
-        """ set_next_date will only increment ready broadcasts """
-        # ready broadcasts will increment
-        broadcast = self.create_broadcast(when='past')
-        old_notify_date = broadcast.date_next_notified
+    def test_get_next_date_future(self):
+        """ get_next_date shouln't increment if date is in the future """
+        date = datetime.datetime.now() + relativedelta(hours=1)
+        broadcast = self.create_broadcast(data={'date': date})
+        self.assertEqual(broadcast.get_next_date(), date)
         broadcast.set_next_date()
-        new_notify_date = broadcast.date_next_notified
-        self.assertTrue(new_notify_date > old_notify_date)
-        # non-ready broadcasts will remain the same
-        broadcast = self.create_broadcast(when='future')
-        old_notify_date = broadcast.date_next_notified
+        self.assertEqual(broadcast.date, date,
+                         "set_next_date should do nothing")
+
+    def test_get_next_date_past(self):
+        """ get_next_date should increment if date is in the past """
+        date = datetime.datetime.now() - relativedelta(hours=1)
+        broadcast = self.create_broadcast(data={'date': date})
+        self.assertTrue(broadcast.get_next_date() > date)
         broadcast.set_next_date()
-        new_notify_date = broadcast.date_next_notified
-        self.assertEqual(new_notify_date, old_notify_date)
+        self.assertTrue(broadcast.date > date,
+                        "set_next_date should increment date")
+
+    def test_one_time_broadcast(self):
+        """ one-time broadcasts should disable and not increment """
+        date = datetime.datetime.now()
+        data = {'date': date, 'schedule_frequency': 'one-time'}
+        broadcast = self.create_broadcast(data=data)
+        self.assertEqual(broadcast.get_next_date(), None,
+                         "one-time broadcasts have no next date")
+        broadcast.set_next_date()
+        self.assertEqual(broadcast.date, date,
+                         "set_next_date shoudn't change date of one-time")
+        self.assertEqual(broadcast.schedule_frequency, '',
+                         "set_next_date should disable one-time")
 
 
 class BroadcastAppTest(CreateDataTest):
@@ -155,6 +132,7 @@ class BroadcastAppTest(CreateDataTest):
         b1 = self.create_broadcast(when='past')
         b2 = self.create_broadcast(when='future')
         ready = Broadcast.ready.values_list('id', flat=True)
+        print b1
         self.assertTrue(b1.pk in ready)
         self.assertFalse(b2.pk in ready)
 
