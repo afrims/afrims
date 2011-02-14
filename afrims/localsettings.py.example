@@ -28,7 +28,7 @@ DATABASES = {
         "NAME": "afrims",
         "USER": "",
         "PASSWORD": "",
-        "HOST": "localhost",
+        "HOST": "",
     }
 }
 
