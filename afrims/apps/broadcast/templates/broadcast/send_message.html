@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "layout-split-2.html" %}
 
 {% block title %}Send a Message{% endblock %}
 
@@ -19,7 +19,31 @@
     <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}broadcast/css/jquery.multiselect.css" />
 {% endblock %}
 
-{% block content %}
+{% block left %}
+
+<div class="module">
+    <h2>Broadcasts</h2>
+    <table id='broadcasts' class="sortable">
+        <thead>
+            <tr>
+                <th>Scheduled Date</th>
+                <th>Frequency</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        {% for broadcast in broadcasts %}
+        <tr>
+            <td>{{ broadcast.date|date:"m/d/y fa" }}</td>
+            <td>{{ broadcast.get_schedule_frequency_display }}</td>
+            <td>{{ broadcast.body|truncatewords:3 }}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
+
+{% block right %}
 <div class="module">
     <h2>Send a Message</h2>
     <div id="form_holder">
@@ -28,7 +52,9 @@
             <table class="form_elements">
                 {{ form }}
             </table>
-            <input type=submit value="Send Message">
+            <div class='form-action'>
+                <input type='submit' name='submit' value="Send Message" />
+            </div>
         </form>
     </div>
 </div>

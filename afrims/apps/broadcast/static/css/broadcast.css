@@ -1,3 +1,15 @@
+#inner .col-1 { width: 40%; }
+#inner .col-2 { width: 60%; }
+
+table#broadcasts {
+    width: 100%
+}
+
+.form-action {
+    text-align: right;
+    padding-bottom: 1em;
+}
+
 #contacts_table_wrapper, #groups_table_wrapper{
    /* border: 2px outset black;*/
     clear: none;
