@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 # encoding=utf-8
+import os
 
 # -------------------------------------------------------------------- #
 #                          MAIN CONFIGURATION                          #
@@ -117,6 +118,11 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 #        these settings are pure hackery, and will go away soon        #
 # -------------------------------------------------------------------- #
 
+PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
+
+TEMPLATE_DIRS = [
+    os.path.join(PROJECT_PATH, 'templates'),
+]
 
 # these apps should not be started by rapidsms in your tests, however,
 # the models and bootstrap will still be available through django.

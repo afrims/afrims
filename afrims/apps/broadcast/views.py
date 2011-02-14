@@ -18,7 +18,7 @@ def send_message(request):
         form = BroadcastForm(request.POST)
         if form.is_valid():
             broadcast = form.save()
-            messages.info(request, 'Message successfully queued')
+            messages.info(request, 'Message queued for delivery')
             return HttpResponseRedirect(reverse('send-message'))
     else:
         form = BroadcastForm()
