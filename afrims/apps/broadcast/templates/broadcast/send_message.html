@@ -37,6 +37,10 @@
             <td>{{ broadcast.get_schedule_frequency_display }}</td>
             <td>{{ broadcast.body|truncatewords:3 }}
         </tr>
+        {% empty %}
+        <tr>
+            <td colspan='3'>No scheduled broadcasts</td>
+        </tr>
         {% endfor %}
     </table>
 </div>
