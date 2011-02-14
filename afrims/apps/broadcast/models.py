@@ -155,9 +155,9 @@ class Broadcast(models.Model):
     def queue_outgoing_messages(self):
         """ generate queued outgoing messages """
         contacts = Contact.objects.distinct().filter(groups__broadcasts=self)
-        print contacts
         for contact in contacts:
             self.messages.create(recipient=contact)
+        return contacts.count()
 
     def save(self, **kwargs):
         if not self.pk:
