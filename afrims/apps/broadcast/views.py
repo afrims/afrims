@@ -6,11 +6,12 @@ from django.template.context import RequestContext
 from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib import messages
-
+from django.contrib.auth.decorators import login_required
 
 from afrims.apps.broadcast.forms import BroadcastForm
 
 
+@login_required
 @transaction.commit_on_success
 def send_message(request):
     if request.method == 'POST':
