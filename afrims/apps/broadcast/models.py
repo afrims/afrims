@@ -186,18 +186,3 @@ class BroadcastMessage(models.Model):
             self.date_created = datetime.datetime.now()
         return super(BroadcastMessage, self).save(**kwargs)
 
-
-class BroadcastResponse(models.Model):
-    
-    broadcast = models.ForeignKey(BroadcastMessage)
-    contact   = models.ForeignKey(Contact)
-    text      = models.TextField()
-    date      = models.DateTimeField(default=datetime.datetime.utcnow)
-    
-    logger_message = models.ForeignKey(Message)
-    
-    def __unicode__(self):
-        return "%s from %s in response to %s" % \
-            (self.text, self.contact, self.broadcast)
-             
-    
