@@ -3,14 +3,14 @@ Created on Jan 10, 2011
 
 @author: adewinter
 '''
-from apps.broadcast.handlers.base import BroadcastHandler
 from rapidsms.models import Contact
 from rapidsms.messages.outgoing import OutgoingMessage
 from apps.offsite import tasks
 from datetime import datetime, timedelta
 from apps.offsite.models import HolidayPeriod
+from rapidsms.contrib.handlers.handlers.base import BaseHandler
 
-class DemoHandler(BroadcastHandler):
+class DemoHandler(BaseHandler):
     group_name = ""
     keyword = "Holiday"    #This is the keyword used to trigger a response from this handler.
     msg_help_txt = "Sent out holiday broadcast messages to volunteer group."
