@@ -1,5 +1,3 @@
-import logging
-
 from django.db import transaction
 from django.core.urlresolvers import reverse
 from django.template.context import RequestContext
@@ -10,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from afrims.apps.broadcast.forms import BroadcastForm
 from afrims.apps.broadcast.models import Broadcast
+
 
 @login_required
 @transaction.commit_on_success
