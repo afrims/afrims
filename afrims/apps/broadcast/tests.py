@@ -16,7 +16,7 @@ from rapidsms.tests.scripted import TestScript
 from afrims.apps.broadcast.models import Broadcast, DateAttribute
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 
-from afrims.apps.reminder.models import Group
+from afrims.apps.groups.models import Group
 
 
 class CreateDataTest(TestCase):

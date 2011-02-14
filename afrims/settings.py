@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     
     "south",
     # "gunicorn",
-    
+    "afrims.apps.groups",
     "afrims.apps.reminder",
     "afrims.apps.broadcast",
     "afrims.apps.offsite",
