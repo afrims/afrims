@@ -120,6 +120,8 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 
 PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
 
+MEDIA_ROOT = os.path.join(PROJECT_PATH, 'static')
+
 TEMPLATE_DIRS = [
     os.path.join(PROJECT_PATH, 'templates'),
 ]

@@ -14,6 +14,5 @@ $(document).ready(function() {
             $(siblings).show();
         }
     }).change();
-    
 });
 

@@ -36,4 +36,9 @@ if settings.DEBUG:
         # INSTALLED_APPS via the Django static media server (NOT for use in
         # production)
         (r'^', include('rapidsms.urls.static_media')),
+        (r'^%s(?P<path>.*)' % settings.MEDIA_URL.lstrip('/'),
+         'django.views.static.serve',
+         {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}
+        )
     )
+
