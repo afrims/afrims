@@ -22,7 +22,7 @@ def send_message(request):
             return HttpResponseRedirect(reverse('send-message'))
     else:
         form = BroadcastForm()
-    broadcasts = Broadcast.objects.exclude(schedule_frequency='')
+    broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True)
     context = {
         'form': form,
         'broadcasts': broadcasts.order_by('date'),

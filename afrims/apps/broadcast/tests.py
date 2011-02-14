@@ -137,7 +137,7 @@ class BroadcastDateTest(CreateDataTest):
         broadcast.set_next_date()
         self.assertEqual(broadcast.date, date,
                          "set_next_date shoudn't change date of one-time")
-        self.assertEqual(broadcast.schedule_frequency, '',
+        self.assertEqual(broadcast.schedule_frequency, None,
                          "set_next_date should disable one-time")
 
     def test_by_weekday_yesterday(self):

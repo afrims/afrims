@@ -62,7 +62,7 @@ class BroadcastReadyManager(models.Manager):
     def get_query_set(self):
         qs = super(BroadcastReadyManager, self).get_query_set()
         qs = qs.filter(date__lt=datetime.datetime.now())
-        qs = qs.exclude(schedule_frequency='')
+        qs = qs.exclude(schedule_frequency__isnull=True)
         return qs
 
 
@@ -70,7 +70,7 @@ class Broadcast(models.Model):
     """ General broadcast message """
 
     REPEAT_CHOICES = (
-        ('', 'Disabled'),
+        (None, 'Disabled'),
         ('one-time', 'One Time'),
         ('daily', 'Daily'),
         ('weekly', 'Weekly'),
@@ -83,8 +83,8 @@ class Broadcast(models.Model):
                                               db_index=True)
     date = models.DateTimeField(db_index=True)
     schedule_end_date = models.DateTimeField(null=True, blank=True)
-    schedule_frequency = models.CharField(max_length=16, blank=True,
-                                          choices=REPEAT_CHOICES, default='')
+    schedule_frequency = models.CharField(max_length=16, blank=True, null=True,
+                                          choices=REPEAT_CHOICES)
     weekdays = models.ManyToManyField(DateAttribute, blank=True,
                                       limit_choices_to={'type': 'weekday'},
                                       related_name='broadcast_weekdays')
@@ -146,7 +146,7 @@ class Broadcast(models.Model):
         # Disable this broadcast if it was a one-time notification (we just
         # sent it). This will make get_next_date() return None below.
         if self.schedule_frequency == 'one-time':
-            self.schedule_frequency = ''
+            self.schedule_frequency = None
         self.date_last_notified = now
         if next_date:
             self.date = next_date
