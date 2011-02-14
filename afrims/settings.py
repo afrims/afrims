@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     "afrims.apps.reminder",
     "afrims.apps.broadcast",
     "afrims.apps.offsite",
+    "afrims.apps.reminders",
+
     # the rapidsms contrib apps.
     "rapidsms.contrib.default",
     "rapidsms.contrib.export",
