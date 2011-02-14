@@ -79,12 +79,12 @@ class Broadcast(models.Model):
     )
 
     date_created = models.DateTimeField()
-    date_last_notified = models.DateTimeField(null=True, blank=True,
-                                              db_index=True)
+    date_last_notified = models.DateTimeField(null=True, blank=True)
     date = models.DateTimeField(db_index=True)
     schedule_end_date = models.DateTimeField(null=True, blank=True)
     schedule_frequency = models.CharField(max_length=16, blank=True, null=True,
-                                          choices=REPEAT_CHOICES)
+                                          choices=REPEAT_CHOICES,
+                                          db_index=True)
     weekdays = models.ManyToManyField(DateAttribute, blank=True,
                                       limit_choices_to={'type': 'weekday'},
                                       related_name='broadcast_weekdays')
@@ -179,7 +179,7 @@ class BroadcastMessage(models.Model):
     date_created = models.DateTimeField()
     date_sent = models.DateTimeField(null=True, blank=True, db_index=True)
     status = models.CharField(max_length=16, choices=STATUS_CHOICES,
-                              default='queued')
+                              default='queued', db_index=True)
 
     def save(self, **kwargs):
         if not self.pk:
