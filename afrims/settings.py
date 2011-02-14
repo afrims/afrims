@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     "south",
     # "gunicorn",
     "afrims.apps.groups",
-    "afrims.apps.reminder",
     "afrims.apps.broadcast",
     "afrims.apps.offsite",
     # the rapidsms contrib apps.
@@ -62,7 +61,6 @@ RAPIDSMS_TABS = [
     ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
 #    ("rapidsms.contrib.locations.views.locations",          "Map"),
 #    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
-    ("apps.reminder.views.dashboard", "Reminders"),
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
     ("afrims.apps.broadcast.views.send_message", "Send a Message"),
 #    ("afrims.apps.reminder.views.dashboard", "Reminder"),
