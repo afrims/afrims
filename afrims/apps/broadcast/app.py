@@ -1,14 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
-import time
-
-from django.conf import settings
-
-from rapidsms.conf import settings
 from rapidsms.apps.base import AppBase
-from rapidsms.models import Contact
-from rapidsms.backends.base import BackendBase
-from rapidsms.messages import IncomingMessage, OutgoingMessage
+from rapidsms.messages import OutgoingMessage
 from rapidsms.contrib.scheduler.models import EventSchedule
 
 from afrims.apps.broadcast.models import Broadcast, BroadcastMessage
