@@ -88,6 +88,7 @@ class CreateDataTest(TestCase):
                                          type__exact='weekday')
 
     def assertDateEqual(self, date1, date2):
+        """ date comparison that ignores microseconds """
         date1 = date1.replace(microsecond=0)
         date2 = date2.replace(microsecond=0)
         self.assertEqual(date1, date2)
