@@ -6,7 +6,7 @@ table#broadcasts {
 }
 
 form#broadcast-form {
-    padding: 1em;
+    padding: 0 1em;
 }
 
 .form-action {
