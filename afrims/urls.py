@@ -26,7 +26,6 @@ urlpatterns = patterns('',
     (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
     (r'^registration/', include('rapidsms.contrib.registration.urls')),
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
-    (r'^reminder/', include('apps.reminder.urls')),
     (r'^broadcast/', include('afrims.apps.broadcast.urls')),
 )
 
