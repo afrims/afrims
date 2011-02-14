@@ -43,11 +43,12 @@ class BroadcastForm(forms.ModelForm):
                                 'schedule_end_date','weekdays', 'months',
                                 'body', 'groups')
 
-    def clean_date(self):
+    def clean(self):
         when = self.cleaned_data['when']
-        if when == 'future':
-            raise forms.ValidationError('This field is required')
-        return self.cleaned_data['date']
+        date = self.cleaned_data['date']
+        if when == 'later' and not date:
+            raise forms.ValidationError('Start date is required for future broadcasts')
+        return self.cleaned_data
 
     def save(self, commit=True):
         broadcast = super(BroadcastForm, self).save(commit=False)
