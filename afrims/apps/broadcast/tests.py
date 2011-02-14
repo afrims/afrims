@@ -3,6 +3,7 @@ import string
 import random
 import datetime
 from dateutil.relativedelta import relativedelta
+from dateutil import rrule
 
 from django.test import TransactionTestCase, TestCase
 
@@ -12,7 +13,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.tests.scripted import TestScript
 
-from afrims.apps.broadcast.models import Broadcast
+from afrims.apps.broadcast.models import Broadcast, DateAttribute
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 
 from afrims.apps.reminder.models import Group
@@ -64,6 +65,7 @@ class CreateDataTest(TestCase):
         }
         defaults.update(data)
         groups = defaults.pop('groups', [])
+        weekdays = defaults.pop('weekdays', [])
         # simple helper flag to create broadcasts in the past or future
         delta = relativedelta(days=1)
         if when == 'ready':
@@ -73,7 +75,36 @@ class CreateDataTest(TestCase):
         broadcast = Broadcast.objects.create(**defaults)
         if groups:
             broadcast.groups = groups
+        if weekdays:
+            broadcast.weekdays = weekdays
         return broadcast
+
+    def get_weekday(self, day):
+        return DateAttribute.objects.get(name__iexact=day,
+                                         type__exact='weekday')
+
+    def get_weekday_for_date(self, date):
+        return DateAttribute.objects.get(value=date.weekday(),
+                                         type__exact='weekday')
+
+    def assertDateEqual(self, date1, date2):
+        date1 = date1.replace(microsecond=0)
+        date2 = date2.replace(microsecond=0)
+        self.assertEqual(date1, date2)
+
+
+class DateAttributeTest(CreateDataTest):
+    """ Test pre-defined data in initial_data.json against rrule constants """
+
+    def test_weekdays(self):
+        """ Test weekdays match """
+        self.assertEqual(self.get_weekday('monday').value, rrule.MO.weekday)
+        self.assertEqual(self.get_weekday('tuesday').value, rrule.TU.weekday)
+        self.assertEqual(self.get_weekday('wednesday').value, rrule.WE.weekday)
+        self.assertEqual(self.get_weekday('thursday').value, rrule.TH.weekday)
+        self.assertEqual(self.get_weekday('friday').value, rrule.FR.weekday)
+        self.assertEqual(self.get_weekday('saturday').value, rrule.SA.weekday)
+        self.assertEqual(self.get_weekday('sunday').value, rrule.SU.weekday)
 
 
 class BroadcastDateTest(CreateDataTest):
@@ -109,6 +140,23 @@ class BroadcastDateTest(CreateDataTest):
         self.assertEqual(broadcast.schedule_frequency, '',
                          "set_next_date should disable one-time")
 
+    def test_by_weekday_yesterday(self):
+        """ Test weekday recurrences for past day """
+        yesterday = datetime.datetime.now() - relativedelta(days=1)
+        data = {'date': yesterday, 'schedule_frequency': 'weekly',
+                'weekdays': [self.get_weekday_for_date(yesterday)]}
+        broadcast = self.create_broadcast(data=data)
+        next = yesterday + relativedelta(weeks=1)
+        self.assertDateEqual(broadcast.get_next_date(), next)
+
+    def test_by_weekday_tomorrow(self):
+        """ Test weekday recurrences for future day (shouldn't change) """
+        tomorrow = datetime.datetime.now() + relativedelta(days=1)
+        data = {'date': tomorrow, 'schedule_frequency': 'weekly',
+                'weekdays': [self.get_weekday_for_date(tomorrow)]}
+        broadcast = self.create_broadcast(data=data)
+        self.assertDateEqual(broadcast.get_next_date(), tomorrow)
+
 
 class BroadcastAppTest(CreateDataTest):
 
@@ -132,7 +180,6 @@ class BroadcastAppTest(CreateDataTest):
         b1 = self.create_broadcast(when='past')
         b2 = self.create_broadcast(when='future')
         ready = Broadcast.ready.values_list('id', flat=True)
-        print b1
         self.assertTrue(b1.pk in ready)
         self.assertFalse(b2.pk in ready)
 

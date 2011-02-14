@@ -115,8 +115,9 @@ class Broadcast(models.Model):
         # return current date if it's in the future
         if self.date > now:
             return self.date
-        # no next date if disabled or one-time
-        if not self.schedule_frequency or self.schedule_frequency == 'one-time':
+        # no next date if broadcast is disabled or one-time
+        one_time = self.schedule_frequency == 'one-time'
+        if not self.schedule_frequency or one_time:
             return None
         freq_map = {
             'daily': rrule.DAILY,
@@ -126,27 +127,16 @@ class Broadcast(models.Model):
         }
         freq = freq_map.get(self.schedule_frequency)
         kwargs = {'dtstart': self.date}
+        if freq == rrule.WEEKLY:
+            weekdays = self.weekdays.values_list('value', flat=True)
+            if weekdays:
+                kwargs['byweekday'] = weekdays
         dates = rrule.rrule(freq, **kwargs)
         for date in dates:
             logger.debug('looking for next date {0}'.format(date))
             if date > now:
                 logger.debug('next date {0}'.format(date))
                 return date
-      #              
-      #          
-      #      
-      #      next_date = self.schedule_start_date
-      #      frequency_map = {
-      #          'daily': relativedelta(days=+1),
-      #          'weekly': relativedelta(weeks=+1),
-      #          'monthly': relativedelta(months=+1),
-      #      }
-      #      if self.schedule_frequency in frequency_map:
-      #          now = datetime.datetime.now()
-      #          delta = frequency_map[self.schedule_frequency]
-      #          while next_date < now:
-      #              next_date += delta
-      #      return next_date
 
     def set_next_date(self):
         """ update broadcast to be ready for next date """
