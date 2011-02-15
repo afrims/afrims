@@ -32,7 +32,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     
-    
+    "pagination",
     "south",
     # "gunicorn",
     
@@ -67,6 +67,7 @@ RAPIDSMS_TABS = [
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
     ("apps.broadcast.views.dashboard", "Broadcast"),
 #    ("afrims.apps.reminder.views.dashboard", "Reminder"),
+    ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
 ]
 
 
@@ -114,6 +115,15 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 ]
 
 
+MIDDLEWARE_CLASSES = [
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'pagination.middleware.PaginationMiddleware',
+]
+    
 # -------------------------------------------------------------------- #
 #                           HERE BE DRAGONS!                           #
 #        these settings are pure hackery, and will go away soon        #

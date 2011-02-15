@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% load pagination_tags %}
+
+{% block title %}Appointment Reminders{% endblock %}
+
+{% block javascripts %}{{ block.super }}
+{% endblock %}
+
+{% block stylesheets %}{{ block.super }}
+{% endblock %}
+
+{% block content %}
+<h1>Sent Notifications</h1>
+
+{% autopaginate sent_notifications 20 %}
+
+{% paginate %}
+
+<table class='sent_notifications'>
+    <tr>
+        <th>Date</th>
+        <th>Recipient</th>
+        <th>Message</th>
+    </tr>
+    {% for notification in sent_notifications %}
+    <tr>
+        <td>{{ notification.date_logged }}</td>
+        <td>{{ notification.recipient }}</td>
+        <td>{{ notification.message }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="3">No sent notifications yet!</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% paginate %}
+
+{% endblock %}
