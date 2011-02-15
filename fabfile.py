@@ -106,17 +106,15 @@ def update_requirements():
 def touch():
     """ touch wsgi file to trigger reload """
     require('code_root', provided_by=('staging', 'production'))
-    apache_dir = os.path.join(env.code_root, 'apache')
-    with cd(apache_dir):
+    with cd(env.project_root):
         run('touch %s.wsgi' % env.environment)
 
 
-def update_apache_conf():
-    """ upload apache configuration to remote host """
-    require('root', provided_by=('staging', 'production'))
-    source = os.path.join('apache', '%(environment)s.conf' % env)
-    put(source, env.apache_conf_d, mode=0755)
+def update_services():
+    """ upload changes to services such as nginx """
+    rsync_project(remote_dir=env.home, local_dir="services")
     apache_reload()
+    netstat_plnt()
 
 
 def configtest():    
@@ -135,6 +133,12 @@ def apache_restart():
     """ restart Apache on remote host """
     require('root', provided_by=('staging', 'production'))
     run('sudo /etc/init.d/apache2 restart')
+
+
+def netstat_plnt():
+    """ run netstat -plnt on a remote host """
+    require('hosts', provided_by=('production', 'staging'))
+    run('sudo netstat -plnt')
 
 
 def migrate():
