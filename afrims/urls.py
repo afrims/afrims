@@ -26,9 +26,8 @@ urlpatterns = patterns('',
     (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
     (r'^registration/', include('rapidsms.contrib.registration.urls')),
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
-    (r'^reminder/', include('apps.reminder.urls')),
-    (r'^broadcast/', include('apps.broadcast.urls')),
-    (r'^reminders/', include('apps.reminders.urls')),
+    (r'^broadcast/', include('afrims.apps.broadcast.urls')),
+    (r'^reminders/', include('afrims.apps.reminders.urls')),
 )
 
 if settings.DEBUG:
@@ -37,4 +36,9 @@ if settings.DEBUG:
         # INSTALLED_APPS via the Django static media server (NOT for use in
         # production)
         (r'^', include('rapidsms.urls.static_media')),
+        (r'^%s(?P<path>.*)' % settings.MEDIA_URL.lstrip('/'),
+         'django.views.static.serve',
+         {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}
+        )
     )
+

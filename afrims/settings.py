@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 # encoding=utf-8
+import os
 
 # -------------------------------------------------------------------- #
 #                          MAIN CONFIGURATION                          #
@@ -35,8 +36,7 @@ INSTALLED_APPS = [
     "pagination",
     "south",
     # "gunicorn",
-    
-    "afrims.apps.reminder",
+    "afrims.apps.groups",
     "afrims.apps.broadcast",
     "afrims.apps.offsite",
     "afrims.apps.reminders",
@@ -63,9 +63,8 @@ RAPIDSMS_TABS = [
     ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
 #    ("rapidsms.contrib.locations.views.locations",          "Map"),
 #    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
-    ("apps.reminder.views.dashboard", "Reminders"),
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
-    ("apps.broadcast.views.dashboard", "Broadcast"),
+    ("afrims.apps.broadcast.views.send_message", "Send a Message"),
 #    ("afrims.apps.reminder.views.dashboard", "Reminder"),
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
 ]
@@ -129,6 +128,13 @@ MIDDLEWARE_CLASSES = [
 #        these settings are pure hackery, and will go away soon        #
 # -------------------------------------------------------------------- #
 
+PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
+
+MEDIA_ROOT = os.path.join(PROJECT_PATH, 'static')
+
+TEMPLATE_DIRS = [
+    os.path.join(PROJECT_PATH, 'templates'),
+]
 
 # these apps should not be started by rapidsms in your tests, however,
 # the models and bootstrap will still be available through django.
@@ -146,4 +152,8 @@ TEST_EXCLUDED_APPS = [
 LANGUAGE_CODE='en'
 
 ROOT_URLCONF = "afrims.urls"
+
+TIME_ZONE = 'America/New_York'
+
+LOGIN_URL = '/account/login/'
 
