@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
+import datetime
+
 from rapidsms.apps.base import AppBase
 from rapidsms.messages import OutgoingMessage
 from rapidsms.contrib.scheduler.models import EventSchedule
@@ -66,6 +68,7 @@ class BroadcastApp(AppBase):
             if success:
                 self.debug('message sent successfully')
                 message.status = 'sent'
+                message.date_sent = datetime.datetime.now()
             else:
                 self.debug('message failed to send')
                 message.status = 'failed'

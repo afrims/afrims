@@ -208,5 +208,7 @@ class BroadcastScriptedTest(TestScript, CreateDataTest):
         self.assertEqual(queued, 0)
         # only one message should be sent
         self.assertEqual(sent, 1)
+        message = contact.broadcast_messages.filter(status='sent')[0]
+        self.assertTrue(message.date_sent is not None)
         self.stopRouter()
 
