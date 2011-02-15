@@ -86,10 +86,12 @@ def deploy():
         if not console.confirm('Are you sure you want to deploy production?',
                                default=False):
             utils.abort('Production deployment aborted.')
+    router_stop()
     with cd(env.code_root):
         run('git checkout %(code_branch)s' % env)
         run('git pull')
     touch()
+    router_start()
 
 
 def update_requirements():
@@ -114,6 +116,8 @@ def update_services():
     """ upload changes to services such as nginx """
     rsync_project(remote_dir=env.home, local_dir="services")
     apache_reload()
+    router_stop()
+    router_start()
     netstat_plnt()
 
 
@@ -129,7 +133,7 @@ def apache_reload():
     run('sudo /etc/init.d/apache2 reload')
 
 
-def apache_restart():    
+def apache_restart():
     """ restart Apache on remote host """
     require('root', provided_by=('staging', 'production'))
     run('sudo /etc/init.d/apache2 restart')
@@ -139,6 +143,18 @@ def netstat_plnt():
     """ run netstat -plnt on a remote host """
     require('hosts', provided_by=('production', 'staging'))
     run('sudo netstat -plnt')
+
+
+def router_start():  
+    """ start router on remote host """
+    require('root', provided_by=('staging', 'production'))
+    run('sudo start afrims-router')
+
+
+def router_stop():  
+    """ stop router on remote host """
+    require('root', provided_by=('staging', 'production'))
+    run('sudo stop afrims-router')
 
 
 def migrate():

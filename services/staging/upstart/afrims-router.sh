@@ -15,8 +15,9 @@ env DJANGO_VIRTUALENV=/home/afrims/www/staging/python_env
 # upstart manages PID creation for you.
 expect fork
 
-start on started afrims
-stop on stopped afrims
+start on started [2345]
+stop on stopped [!2345]
+
 pre-start script
         chdir $DJANGO_HOME
 end script
