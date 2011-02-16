@@ -2,5 +2,5 @@ django==1.2.4
 South==0.7.3
 gunicorn==0.12.0
 python-dateutil==1.5
--e git+http://github.com/rapidsms/rapidsms.git#egg=rapidsms
+-e git+http://github.com/dimagi/rapidsms.git#egg=rapidsms
 django-pagination==1.0.7
