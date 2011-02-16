@@ -30,3 +30,29 @@ class SentNotification(models.Model):
                                         notification=self.notification,
                                         recipient=self.recipient,
                                         date=self.date_logged)
+
+
+class PatientDataPayload(models.Model):
+    '''
+        Dumping area for incoming patient data xml snippets
+    '''
+    raw_data = models.TextField()
+    submit_date = models.DateTimeField()
+
+    def __unicode__(self):
+        return u'Raw Data Payload, submitted on: {date}'.format(date=self.submit_date)
+
+
+class Patient(models.Model):
+    raw_data = models.ForeignKey(PatientDataPayload, null=True, blank=True) #we might create Patients manually
+    subject_number = models.CharField(max_length=20)
+    date_enrolled = models.DateField()
+    mobile_number = models.CharField(max_length=30)
+    pin = models.CharField(max_length=4, blank=True,help_text="A 4-digit pin code for sms authentication workflows.")
+    next_visit = models.DateField(blank=True,null=True)
+    contact = models.ForeignKey(rapidsms.Contact, null=True, blank=True)
+
+
+    def __unicode__(self):
+        return u'Patient, Subject ID:{id}, Enrollment Date:{date_enrolled}'.format(id=self.subject_number,
+                                                  date_enrolled=self.date_enrolled)
