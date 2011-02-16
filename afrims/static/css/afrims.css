@@ -1,0 +1,22 @@
+/* afrims.css
+ * base style sheet included on all pages
+ */
+
+/* django messages */
+
+ul.messages {
+    margin: 0;
+    padding: 0;
+}
+
+ul.messages li {
+    list-style-type: none;
+    padding: 1em;
+    margin: 0.5em;
+}
+
+ul.messages li.info {
+    background-color: #FFFF99;
+    border: 1px solid #FFFF66;
+}
+

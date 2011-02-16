@@ -3,9 +3,7 @@ import logging
 from django.conf import settings
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, HttpResponseBadRequest
-from django.core import serializers
-from django.db.models import Q
+from django.http import HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from django.db import transaction
 from afrims.apps.reminders.models import PatientDataPayload, Patient
 from afrims.decorators import has_perm_or_basicauth
@@ -17,13 +15,25 @@ from lxml.etree import XMLSyntaxError
 from rapidsms.models import Contact, Connection, Backend
 from django.core.exceptions import ObjectDoesNotExist
 from afrims.apps.reminder.models import Group
-
+from django.contrib.auth.decorators import login_required
+from afrims.apps.reminders import models as reminders
 
 logger = logging.getLogger('afrims.apps.reminder')
+
+
+
+@login_required
 def dashboard(request):
-    sent_notifications = reminders.SentNotification.objects.order_by('-date_logged')
+    queued = reminders.SentNotification.objects.filter(status='queued')
+    delivered = reminders.SentNotification.objects.filter(status='delivered')
+    confirmed = reminders.SentNotification.objects.filter(status='confirmed')
+    reminder_report = {
+        'queued': queued.count(),
+        'delivered': delivered.count(),
+        'confirmed': confirmed.count(),
+    }
     context = {
-        'sent_notifications': sent_notifications,
+        'reminder_report': reminder_report,
     }
     return render_to_response('reminders/dashboard.html', context,
                               RequestContext(request))

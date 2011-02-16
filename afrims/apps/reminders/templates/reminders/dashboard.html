@@ -1,5 +1,4 @@
-{% extends "layout.html" %}
-{% load pagination_tags %}
+{% extends "layout-split-2.html" %}
 
 {% block title %}Appointment Reminders{% endblock %}
 
@@ -7,34 +6,23 @@
 {% endblock %}
 
 {% block stylesheets %}{{ block.super }}
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reminders/css/reminders.css" />
 {% endblock %}
 
-{% block content %}
-<h1>Sent Notifications</h1>
+{% block left %}
+<div class="module">
+<h2>Appointment Reminders</h2>
 
-{% autopaginate sent_notifications 20 %}
-
-{% paginate %}
-
-<table class='sent_notifications'>
+<table id='reminder_report' class='sortable'>
     <tr>
-        <th>Date</th>
-        <th>Recipient</th>
-        <th>Message</th>
+        <th>Queued, Unsent Reminders:</th><td>{{ reminder_report.queued }}</td>
     </tr>
-    {% for notification in sent_notifications %}
     <tr>
-        <td>{{ notification.date_logged }}</td>
-        <td>{{ notification.recipient }}</td>
-        <td>{{ notification.message }}</td>
+        <th>Delivered, Unconfirmed Reminders:</th><td>{{ reminder_report.delivered }}</td>
     </tr>
-    {% empty %}
     <tr>
-        <td colspan="3">No sent notifications yet!</td>
+        <th>Delivered, Confirmed Reminders:</th><td>{{ reminder_report.confirmed }}</td>
     </tr>
-    {% endfor %}
 </table>
-
-{% paginate %}
-
+</div>
 {% endblock %}
