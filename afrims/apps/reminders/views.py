@@ -14,7 +14,7 @@ from datetime import datetime
 from lxml.etree import XMLSyntaxError
 from rapidsms.models import Contact, Connection, Backend
 from django.core.exceptions import ObjectDoesNotExist
-from afrims.apps.reminder.models import Group
+from afrims.apps.groups.models import Group
 from django.contrib.auth.decorators import login_required
 from afrims.apps.reminders import models as reminders
 
