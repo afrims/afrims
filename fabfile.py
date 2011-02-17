@@ -19,16 +19,23 @@ env.project = 'afrims'
 env.code_repo = 'git://github.com/afrims/afrims.git'
 
 
+def _join(*args):
+    """
+    We're deploying on Linux, so hard-code that path separator here.
+    """
+    return '/'.join(args)
+
+
 def _setup_path():
-    env.root = os.path.join(env.home, 'www', env.environment)
-    env.log_dir = os.path.join(env.home, 'www', env.environment, 'log')
-    env.code_root = os.path.join(env.root, 'code_root')
-    env.project_root = os.path.join(env.code_root, env.project)
-    env.project_media = os.path.join(env.code_root, 'media')
-    env.project_static = os.path.join(env.project_root, 'static')
-    env.virtualenv_root = os.path.join(env.root, 'python_env')
-    env.services = os.path.join(env.home, 'services')
-    env.settings = '%(project)s.local_settings' % env
+    env.root = _join(env.home, 'www', env.environment)
+    env.log_dir = _join(env.home, 'www', env.environment, 'log')
+    env.code_root = _join(env.root, 'code_root')
+    env.project_root = _join(env.code_root, env.project)
+    env.project_media = _join(env.code_root, 'media')
+    env.project_static = _join(env.project_root, 'static')
+    env.virtualenv_root = _join(env.root, 'python_env')
+    env.services = _join(env.home, 'services')
+    env.settings = '%(project)s.localsettings' % env
 
 
 def setup_dirs():
@@ -97,11 +104,11 @@ def deploy():
 def update_requirements():
     """ update external dependencies on remote host """
     require('code_root', provided_by=('staging', 'production'))
-    requirements = os.path.join(env.code_root, 'requirements')
+    requirements = _join(env.code_root, 'requirements')
     with cd(requirements):
         cmd = ['pip install']
         cmd += ['-q -E %(virtualenv_root)s' % env]
-        cmd += ['--requirement %s' % os.path.join(requirements, 'apps.txt')]
+        cmd += ['--requirement %s' % _join(requirements, 'apps.txt')]
         run(' '.join(cmd))
 
 
