@@ -122,9 +122,18 @@ def touch():
 
 def update_services():
     """ upload changes to services such as nginx """
-    rsync_project(remote_dir=env.home, local_dir="services")
+    with settings(warn_only=True):
+        router_stop()
+    # use a two stage rsync process because we are not connecting as the
+    # afrims user
+    remote_dir = 'tmp-services/'
+    rsync_project(remote_dir=remote_dir, local_dir="services/", delete=True)
+    sudo("rsync -av --delete %s %s" %
+         (remote_dir, _join(env.home, 'services')), user=env.sudo_user)
+    # copy the upstart script to /etc/init
+    run("sudo cp %s /etc/init" % _join(env.home, 'services', 'staging',
+                                       'upstart', 'afrims-router.conf'))
     apache_reload()
-    router_stop()
     router_start()
     netstat_plnt()
 
