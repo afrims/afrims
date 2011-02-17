@@ -121,15 +121,11 @@ def create_or_update_patient_model(patient, raw_data_entry):
         backend = None
         try:
             backend = Backend.objects.get(name=settings.DEFAULT_BACKEND_NAME)
-            print backend
             (conn, new_conn) = Connection.objects.get_or_create(identity=mobile_number,backend=backend)
             conn.contact=contact
-            print conn, contact,backend
             conn.save()
-            print 'saved!'
         except ObjectDoesNotExist:
             logging.error("Can't find Backend specified by DEFAULT_BACKEND_NAME in settings!")
-            print ("Can't find Backend specified by DEFAULT_BACKEND_NAME in settings!")
             return False
 
     patient_model.contact = contact
