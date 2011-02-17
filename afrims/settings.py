@@ -123,6 +123,10 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'pagination.middleware.PaginationMiddleware',
 ]
+
+#The default group subjects are added to when their information
+#is POSTed to us
+DEFAULT_SUBJECT_GROUP_NAME = 'subjects'
     
 # -------------------------------------------------------------------- #
 #                           HERE BE DRAGONS!                           #
