@@ -14,7 +14,7 @@ RSYNC_EXCLUDE = (
     '*.example',
     '*.db',
 )
-env.home = '/home/afrims/'
+env.home = '/home/afrims'
 env.project = 'afrims'
 env.code_repo = 'git://github.com/afrims/afrims.git'
 
@@ -40,18 +40,18 @@ def _setup_path():
 
 def setup_dirs():
     """ create (if necessary) and make writable uploaded media, log, etc. directories """
-    run('mkdir -p %(log_dir)s' % env)
-    run('chmod a+w %(log_dir)s' % env)
-    # run('mkdir -p %(project_media)s' % env)
-    # run('chmod a+w %(project_media)s' % env)
-    # run('mkdir -p %(project_static)s' % env)
-    run('mkdir -p %(services)s' % env)
+    sudo('mkdir -p %(log_dir)s' % env, user=env.sudo_user)
+    sudo('chmod a+w %(log_dir)s' % env, user=env.sudo_user)
+    # sudo('mkdir -p %(project_media)s' % env, user=env.sudo_user)
+    # sudo('chmod a+w %(project_media)s' % env, user=env.sudo_user)
+    # sudo('mkdir -p %(project_static)s' % env, user=env.sudo_user)
+    sudo('mkdir -p %(services)s' % env, user=env.sudo_user)
 
 
 def staging():
     """ use staging environment on remote host"""
     env.code_branch = 'develop'
-    env.user = 'afrims'
+    env.sudo_user = 'afrims'
     env.environment = 'staging'
     env.hosts = ['173.203.221.48']
     _setup_path()
@@ -65,7 +65,7 @@ def production():
 def bootstrap():
     """ initialize remote host environment (virtualenv, deploy, update) """
     require('root', provided_by=('staging', 'production'))
-    run('mkdir -p %(root)s' % env)
+    sudo('mkdir -p %(root)s' % env, user=env.sudo_user)
     clone_repo()
     setup_dirs()
     create_virtualenv()
@@ -77,13 +77,13 @@ def create_virtualenv():
     """ setup virtualenv on remote host """
     require('virtualenv_root', provided_by=('staging', 'production'))
     args = '--clear --distribute'
-    run('virtualenv %s %s' % (args, env.virtualenv_root))
+    sudo('virtualenv %s %s' % (args, env.virtualenv_root), user=env.sudo_user)
 
 
 def clone_repo():
     """ clone a new copy of the git repository """
     with cd(env.root):
-        run('git clone %(code_repo)s %(code_root)s' % env)
+        sudo('git clone %(code_repo)s %(code_root)s' % env, user=env.sudo_user)
 
 
 def deploy():
@@ -93,10 +93,11 @@ def deploy():
         if not console.confirm('Are you sure you want to deploy production?',
                                default=False):
             utils.abort('Production deployment aborted.')
-    router_stop()
+    with settings(warn_only=True):
+        router_stop()
     with cd(env.code_root):
-        run('git checkout %(code_branch)s' % env)
-        run('git pull')
+        sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
+        sudo('git pull', user=env.sudo_user)
     touch()
     router_start()
 
@@ -109,14 +110,14 @@ def update_requirements():
         cmd = ['pip install']
         cmd += ['-q -E %(virtualenv_root)s' % env]
         cmd += ['--requirement %s' % _join(requirements, 'apps.txt')]
-        run(' '.join(cmd))
+        sudo(' '.join(cmd), user=env.sudo_user)
 
 
 def touch():
     """ touch wsgi file to trigger reload """
     require('code_root', provided_by=('staging', 'production'))
     with cd(env.project_root):
-        run('touch %s.wsgi' % env.environment)
+        sudo('touch %s.wsgi' % env.environment, user=env.sudo_user)
 
 
 def update_services():
