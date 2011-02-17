@@ -131,7 +131,7 @@ def update_services():
     sudo("rsync -av --delete %s %s" %
          (remote_dir, _join(env.home, 'services')), user=env.sudo_user)
     # copy the upstart script to /etc/init
-    run("sudo cp %s /etc/init" % _join(env.home, 'services', 'staging',
+    run("sudo cp %s /etc/init" % _join(env.home, 'services', env.environment,
                                        'upstart', 'afrims-router.conf'))
     apache_reload()
     router_start()
