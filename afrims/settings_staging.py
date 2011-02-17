@@ -29,6 +29,10 @@ DATABASES = {
     },
 }
 
+#The default backend to be used when creating new patient contacts
+#on POST submission of patient data from their server
+DEFAULT_BACKEND_NAME = "txtnation"
+
 DEBUG = True
 
 LOG_LEVEL = "DEBUG"
