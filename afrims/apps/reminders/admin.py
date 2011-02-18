@@ -16,3 +16,7 @@ class SentNotificationAdmin(admin.ModelAdmin):
     list_filter = ('status', 'notification', 'date_queued', 'date_delivered',
                    'date_confirmed')
 admin.site.register(reminders.SentNotification, SentNotificationAdmin)
+
+
+admin.site.register(reminders.PatientDataPayload)
+admin.site.register(reminders.Patient)
