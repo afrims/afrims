@@ -67,6 +67,7 @@ class CreateDataTest(TestCase):
         defaults.update(data)
         groups = defaults.pop('groups', [])
         weekdays = defaults.pop('weekdays', [])
+        months = defaults.pop('months', [])
         # simple helper flag to create broadcasts in the past or future
         delta = relativedelta(days=1)
         if when == 'ready':
@@ -78,6 +79,8 @@ class CreateDataTest(TestCase):
             broadcast.groups = groups
         if weekdays:
             broadcast.weekdays = weekdays
+        if months:
+            broadcast.months = months
         return broadcast
 
     def get_weekday(self, day):
@@ -87,6 +90,12 @@ class CreateDataTest(TestCase):
     def get_weekday_for_date(self, date):
         return DateAttribute.objects.get(value=date.weekday(),
                                          type__exact='weekday')
+
+    def get_month(self, day):
+        return DateAttribute.objects.get(name__iexact=day, type__exact='month')
+
+    def get_month_for_date(self, date):
+        return DateAttribute.objects.get(value=date.month, type__exact='month')
 
     def assertDateEqual(self, date1, date2):
         """ date comparison that ignores microseconds """
@@ -164,6 +173,26 @@ class BroadcastDateTest(CreateDataTest):
         broadcast = self.create_broadcast(when='ready')
         broadcast.schedule_end_date = datetime.datetime.now()
         self.assertEqual(broadcast.get_next_date(), None)
+
+    def test_month_recurrence(self):
+        """ Test monthly recurrence for past month """
+        day = datetime.datetime.now() + relativedelta(days=1)
+        one_month_ago = day - relativedelta(months=1)
+        data = {'date': one_month_ago, 'schedule_frequency': 'monthly'}
+        broadcast = self.create_broadcast(data=data)
+        self.assertDateEqual(broadcast.get_next_date(), day)
+
+    def test_bymonth_recurrence(self):
+        """ Test bymonth recurrence for past month """
+        day = datetime.datetime.now() + relativedelta(days=1)
+        one_month_ago = day - relativedelta(months=1)
+        next_month = day + relativedelta(months=1)
+        months = (self.get_month_for_date(one_month_ago),
+                  self.get_month_for_date(next_month))
+        data = {'date': one_month_ago, 'schedule_frequency': 'monthly',
+                'months': months}
+        broadcast = self.create_broadcast(data=data)
+        self.assertDateEqual(broadcast.get_next_date(), next_month)
 
 
 class BroadcastAppTest(CreateDataTest):

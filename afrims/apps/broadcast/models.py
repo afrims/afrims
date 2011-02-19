@@ -135,6 +135,10 @@ class Broadcast(models.Model):
             weekdays = self.weekdays.values_list('value', flat=True)
             if weekdays:
                 kwargs['byweekday'] = weekdays
+        elif freq == rrule.MONTHLY:
+            months = self.months.values_list('value', flat=True)
+            if months:
+                kwargs['bymonth'] = months
         dates = rrule.rrule(freq, **kwargs)
         for date in dates:
             logger.debug('looking for next date {0}'.format(date))
