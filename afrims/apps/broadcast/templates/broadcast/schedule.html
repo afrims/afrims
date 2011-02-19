@@ -21,6 +21,7 @@
     <table id='broadcasts' class="sortable">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Scheduled Date</th>
                 <th>Frequency</th>
                 <th>Message</th>
@@ -31,6 +32,7 @@
         </thead>
         {% for broadcast in broadcasts %}
         <tr>
+            <td>{{ broadcast.pk }}</td>
             <td>{{ broadcast.date|date:"m/d/y fa" }}</td>
             <td>{{ broadcast.get_schedule_frequency_display }}</td>
             <td>{{ broadcast.body|truncatewords:2 }}</td>
