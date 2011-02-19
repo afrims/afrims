@@ -1,0 +1,58 @@
+{% extends "broadcast/base.html" %}
+
+{% block title %}Broadcast Schedule{% endblock %}
+
+{% block javascripts %}
+    {{ block.super }}
+    <script src="{{ MEDIA_URL }}js/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}js/jquery.multiselect.min.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}broadcast/js/broadcast.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/jquery.multiselect.css" />
+{% endblock %}
+
+{% block right %}
+
+<div class="module">
+    <h2>Broadcast Schedule</h2>
+    <table id='broadcasts' class="sortable">
+        <thead>
+            <tr>
+                <th>Scheduled Date</th>
+                <th>Frequency</th>
+                <th>Message</th>
+                <th>Groups</th>
+                <th>End Date</th>
+                <th>Rule</th>
+            </tr>
+        </thead>
+        {% for broadcast in broadcasts %}
+        <tr>
+            <td>{{ broadcast.date|date:"m/d/y fa" }}</td>
+            <td>{{ broadcast.get_schedule_frequency_display }}</td>
+            <td>{{ broadcast.body|truncatewords:2 }}</td>
+            <td>{{ broadcast.groups.all|join:", "|truncatewords:3 }} ({{ broadcast.recipients }})</td>
+            <td>{{ broadcast.schedule_end_date|date:"m/d/y fa" }}</td>
+            <td>
+                {% if broadcast.schedule_frequency == 'weekly' %}
+                    {{ broadcast.weekdays.all|join:", " }}
+                {% else %}
+                    {% if broadcast.schedule_frequency == 'monthly' %}
+                        {{ broadcast.months.all|join:", " }}
+                    {% endif %}
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan='3'>No scheduled broadcasts</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
+

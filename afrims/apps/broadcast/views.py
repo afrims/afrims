@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 
 from afrims.apps.broadcast.forms import BroadcastForm
 from afrims.apps.broadcast.models import Broadcast
@@ -18,7 +19,7 @@ def send_message(request):
         if form.is_valid():
             broadcast = form.save()
             messages.info(request, 'Message queued for delivery')
-            return HttpResponseRedirect(reverse('send-message'))
+            return HttpResponseRedirect(reverse('broadcast-schedule'))
     else:
         form = BroadcastForm()
     broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True)
@@ -27,5 +28,16 @@ def send_message(request):
         'broadcasts': broadcasts.order_by('date'),
     }
     return render_to_response('broadcast/send_message.html', context,
+                              RequestContext(request))
+
+@login_required
+@transaction.commit_on_success
+def schedule(request):
+    broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True)
+    broadcasts = broadcasts.annotate(recipients=Count('groups__contacts'))
+    context = {
+        'broadcasts': broadcasts.order_by('date'),
+    }
+    return render_to_response('broadcast/schedule.html', context,
                               RequestContext(request))
 

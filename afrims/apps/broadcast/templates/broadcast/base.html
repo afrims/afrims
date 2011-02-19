@@ -1,0 +1,27 @@
+{% extends "layout-split-2.html" %}
+
+{% block javascripts %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ block.super }}
+    <link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/ui-lightness/jquery-ui.css" />
+		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/afrims.css" />
+		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}broadcast/css/broadcast.css" />
+{% endblock %}
+
+{% block left %}
+
+<div class="module">
+    <h3>Broadcasts</h3>
+    <ul id='broadcast-nav'>
+        <li><a title="Send a Message" href="{% url send-message %}">Send a Message</a></li>
+        <li><a title="Broadcast Schedule" href="{% url broadcast-schedule %}">Broadcast Schedule</a></li>
+        <li><a title="History" href="{% url send-message %}">History</a></li>
+    </ul>
+</div>
+
+{% endblock %}
+
