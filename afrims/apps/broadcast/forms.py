@@ -47,7 +47,7 @@ class BroadcastForm(forms.ModelForm):
         if when == 'later' and not date:
             raise forms.ValidationError('Start date is required for future broadcasts')
         end_date = self.cleaned_data['schedule_end_date']
-        if end_date < date:
+        if end_date and end_date < date:
             raise forms.ValidationError('End date must be later than start date')
         return self.cleaned_data
 

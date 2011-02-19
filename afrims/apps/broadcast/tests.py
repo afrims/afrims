@@ -192,6 +192,32 @@ class BroadcastFormTest(CreateDataTest):
         self.group = self.create_group()
         self.contact.groups.add(self.group)
 
+    def test_future_start_date_required(self):
+        """ Start date is required for future broadcasts """
+        data =  {
+            'when': 'later',
+            'body': self.random_string(160),
+            'schedule_frequency': 'one-time',
+            'groups': [self.group.pk],
+        }
+        form = BroadcastForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.non_field_errors()), 1)
+        msg = 'Start date is required for future broadcasts'
+        self.assertTrue(msg in form.non_field_errors().as_text())
+
+    def test_now_date_set_on_save(self):
+        """ 'now' messages automatically get date assignment """
+        data =  {
+            'when': 'now',
+            'body': self.random_string(160),
+            'groups': [self.group.pk],
+        }
+        form = BroadcastForm(data)
+        self.assertTrue(form.is_valid())
+        broadcast = form.save()
+        self.assertTrue(broadcast.date is not None)
+
     def test_end_date_before_start_date(self):
         """ Form should prevent end date being before start date """
         now = datetime.datetime.now()
@@ -202,7 +228,7 @@ class BroadcastFormTest(CreateDataTest):
             'date': now,
             'schedule_end_date': yesterday,
             'schedule_frequency': 'daily',
-            'groups': [self.group.pk]
+            'groups': [self.group.pk],
         }
         form = BroadcastForm(data)
         self.assertFalse(form.is_valid())
