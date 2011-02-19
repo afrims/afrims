@@ -117,7 +117,11 @@ class Broadcast(models.Model):
             return self.date
         # no next date if broadcast is disabled or one-time
         one_time = self.schedule_frequency == 'one-time'
-        if not self.schedule_frequency or one_time:
+        # no next date if end date has passed
+        end_date_reached = False
+        if self.schedule_end_date:
+            end_date_reached = self.schedule_end_date < now
+        if not self.schedule_frequency or one_time or end_date_reached:
             return None
         freq_map = {
             'daily': rrule.DAILY,

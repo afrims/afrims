@@ -159,6 +159,12 @@ class BroadcastDateTest(CreateDataTest):
         broadcast = self.create_broadcast(data=data)
         self.assertDateEqual(broadcast.get_next_date(), tomorrow)
 
+    def test_end_date_disable(self):
+        """ Broadcast should disable once end date is reached """
+        broadcast = self.create_broadcast(when='ready')
+        broadcast.schedule_end_date = datetime.datetime.now()
+        self.assertEqual(broadcast.get_next_date(), None)
+
 
 class BroadcastAppTest(CreateDataTest):
 
