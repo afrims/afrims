@@ -15,6 +15,7 @@ from rapidsms.tests.scripted import TestScript
 
 from afrims.apps.broadcast.models import Broadcast, DateAttribute
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
+from afrims.apps.broadcast.forms import BroadcastForm
 
 from afrims.apps.groups.models import Group
 
@@ -183,6 +184,31 @@ class BroadcastAppTest(CreateDataTest):
         ready = Broadcast.ready.values_list('id', flat=True)
         self.assertTrue(b1.pk in ready)
         self.assertFalse(b2.pk in ready)
+
+
+class BroadcastFormTest(CreateDataTest):
+    def setUp(self):
+        self.contact = self.create_contact()
+        self.group = self.create_group()
+        self.contact.groups.add(self.group)
+
+    def test_end_date_before_start_date(self):
+        """ Form should prevent end date being before start date """
+        now = datetime.datetime.now()
+        yesterday = now - relativedelta(days=1)
+        data =  {
+            'when': 'later',
+            'body': self.random_string(160),
+            'date': now,
+            'schedule_end_date': yesterday,
+            'schedule_frequency': 'daily',
+            'groups': [self.group.pk]
+        }
+        form = BroadcastForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.non_field_errors()), 1)
+        msg = 'End date must be later than start date'
+        self.assertTrue(msg in form.non_field_errors().as_text())
 
 
 class BroadcastScriptedTest(TestScript, CreateDataTest):
