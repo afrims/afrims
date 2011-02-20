@@ -63,5 +63,10 @@ class BroadcastForm(forms.ModelForm):
         if commit:
             broadcast.save()
             self.save_m2m()
+            frequency = self.cleaned_data['schedule_frequency']
+            if frequency != 'weekly':
+                broadcast.weekdays = []
+            if frequency != 'monthly':
+                broadcast.months = []
         return broadcast
 

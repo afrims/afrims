@@ -293,6 +293,24 @@ class BroadcastFormTest(CreateDataTest):
         # new message
         self.assertNotEqual(before.body, after.body)
 
+    def test_field_clearing(self):
+        """ Non related frequency fields should be cleared on form clean """
+        weekday = self.get_weekday_for_date(datetime.datetime.now())
+        before = self.create_broadcast(when='future',
+                                       data={'groups': [self.group.pk],
+                                             'weekdays': [weekday]})
+        data =  {
+            'when': 'later',
+            'date': before.date,
+            'body': before.body,
+            'schedule_frequency': 'monthly',
+            'groups': [self.group.pk],
+            'weekdays': [weekday.pk],
+        }
+        form = BroadcastForm(data, instance=before)
+        after = form.save()
+        self.assertEqual(after.weekdays.count(), 0)
+
 
 class BroadcastViewTest(CreateDataTest):
     def setUp(self):
@@ -301,6 +319,7 @@ class BroadcastViewTest(CreateDataTest):
         self.client.login(username='test', password='abc')
 
     def test_delete(self):
+        """ Make sure broadcasts are disabled on 'delete' """
         contact = self.create_contact()
         group = self.create_group()
         contact.groups.add(group)
