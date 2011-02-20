@@ -19,7 +19,12 @@ class BroadcastForm(forms.ModelForm):
         exclude = ('date_created', 'date_last_notified', 'date_next_notified')
 
     def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance')
+        if instance and instance.pk:
+            kwargs['initial'] = {'when': 'later'}
         super(BroadcastForm, self).__init__(*args, **kwargs)
+        if instance and instance.pk:
+            self.fields['when'].widget = forms.HiddenInput()
         picker_class = 'datetimepicker'
         self.fields['date'].label = 'Start date'
         self.fields['date'].required = False

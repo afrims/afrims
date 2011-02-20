@@ -9,11 +9,6 @@ form#broadcast-form {
     padding: 0 1em;
 }
 
-.form-action {
-    text-align: right;
-    padding-bottom: 1em;
-}
-
 form#broadcast-form table td, form#broadcast-form table th {
     border: none;
 }

@@ -46,10 +46,13 @@
             <td>{{ broadcast.body|truncatewords:2 }}</td>
             <td>{{ broadcast.groups.all|join:", "|truncatewords:3 }} ({{ broadcast.recipients }})</td>
             <td>{{ broadcast.schedule_end_date|date:"m/d/y fa" }}</td>
+            <td>
+                <a title='Edit broadcast #{{ broadcast.pk }}' href='{% url edit-broadcast broadcast.pk %}'>Edit</a> | <a title='Delete broadcast #{{ broadcast.pk }}' href='{% url delete-broadcast broadcast.pk %}' class='delete-link'>Delete</a>
+            </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan='3'>No scheduled broadcasts</td>
+            <td colspan='6'>No scheduled broadcasts</td>
         </tr>
         {% endfor %}
     </table>

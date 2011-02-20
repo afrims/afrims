@@ -20,3 +20,19 @@ ul.messages li.info {
     border: 1px solid #FFFF66;
 }
 
+/* forms */
+
+.form-action {
+    text-align: right;
+    padding-bottom: 1em;
+}
+
+form.buttons .form-action {
+    margin-right: 1em;
+}
+
+form p.message {
+    margin-top: 0;
+    padding-left: 1em;
+    padding-top: 1em;
+}

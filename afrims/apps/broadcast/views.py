@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.shortcuts import get_object_or_404
 
 from afrims.apps.broadcast.forms import BroadcastForm
 from afrims.apps.broadcast.models import Broadcast, BroadcastMessage
@@ -13,15 +14,23 @@ from afrims.apps.broadcast.models import Broadcast, BroadcastMessage
 
 @login_required
 @transaction.commit_on_success
-def send_message(request):
+def send_message(request, broadcast_id=None):
+    if broadcast_id:
+        broadcast = get_object_or_404(Broadcast, pk=broadcast_id)
+    else:
+        broadcast = None
     if request.method == 'POST':
-        form = BroadcastForm(request.POST)
+        form = BroadcastForm(request.POST, instance=broadcast)
         if form.is_valid():
             broadcast = form.save()
-            messages.info(request, 'Message queued for delivery')
+            if broadcast_id:
+                info = 'Broadcast successfully saved'
+            else:
+                info = 'Message queued for delivery'
+            messages.info(request, info)
             return HttpResponseRedirect(reverse('broadcast-schedule'))
     else:
-        form = BroadcastForm()
+        form = BroadcastForm(instance=broadcast)
     broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True)
     context = {
         'form': form,
@@ -29,6 +38,22 @@ def send_message(request):
     }
     return render_to_response('broadcast/send_message.html', context,
                               RequestContext(request))
+
+
+@login_required
+@transaction.commit_on_success
+def delete_broadcast(request, broadcast_id):
+    broadcast = get_object_or_404(Broadcast, pk=broadcast_id)
+    if request.method == 'POST':
+        # disable broadcast to preserve any foreign keys
+        broadcast.schedule_frequency = None
+        broadcast.save()
+        messages.info(request, 'Broadcast successfully deleted')
+        return HttpResponseRedirect(reverse('broadcast-schedule'))
+    context = {'broadcast': broadcast}
+    return render_to_response('broadcast/delete.html', context,
+                              RequestContext(request))
+
 
 @login_required
 def schedule(request):
@@ -42,7 +67,7 @@ def schedule(request):
 
 
 @login_required
-def messages(request):
+def list_messages(request):
     messages = BroadcastMessage.objects.all()
     context = {
         'broadcast_messages': messages,

@@ -6,6 +6,8 @@ from dateutil.relativedelta import relativedelta
 from dateutil import rrule
 
 from django.test import TransactionTestCase, TestCase
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.models import Connection, Contact, Backend
@@ -270,6 +272,46 @@ class BroadcastFormTest(CreateDataTest):
         self.assertEqual(len(form.non_field_errors()), 1)
         msg = 'End date must be later than start date'
         self.assertTrue(msg in form.non_field_errors().as_text())
+
+    def test_update(self):
+        """ Test broadcast edit functionality """
+        before = self.create_broadcast(when='future',
+                                       data={'groups': [self.group.pk]})
+        data =  {
+            'when': 'later',
+            'date': before.date,
+            'body': self.random_string(30),
+            'schedule_frequency': before.schedule_frequency,
+            'groups': [self.group.pk],
+        }
+        form = BroadcastForm(data, instance=before)
+        self.assertTrue(form.is_valid(), form._errors.as_text())
+        before = Broadcast.objects.get(pk=before.pk)
+        after = form.save()
+        # same broadcast
+        self.assertEqual(before.pk, after.pk)
+        # new message
+        self.assertNotEqual(before.body, after.body)
+
+
+class BroadcastViewTest(CreateDataTest):
+    def setUp(self):
+        self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.save()
+        self.client.login(username='test', password='abc')
+
+    def test_delete(self):
+        contact = self.create_contact()
+        group = self.create_group()
+        contact.groups.add(group)
+        before = self.create_broadcast(when='future',
+                                       data={'groups': [group.pk]})
+        url = reverse('delete-broadcast', args=[before.pk])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302,
+                         'should redirect on success')
+        after = Broadcast.objects.get(pk=before.pk)
+        self.assertTrue(after.schedule_frequency is None)
 
 
 class BroadcastScriptedTest(TestScript, CreateDataTest):
