@@ -35,10 +35,10 @@
             <td>{{ broadcast.date|date:"m/d/y fa" }}</td>
             <td>
                 {{ broadcast.get_schedule_frequency_display }}
-                {% if broadcast.schedule_frequency == 'weekly' %}
+                {% if broadcast.schedule_frequency == 'weekly' and broadcast.weekdays.exists %}
                     ({{ broadcast.weekdays.all|join:", " }})
                 {% else %}
-                    {% if broadcast.schedule_frequency == 'monthly' %}
+                    {% if broadcast.schedule_frequency == 'monthly' and broadcast.months.exists %}
                         ({{ broadcast.months.all|join:", " }})
                     {% endif %}
                 {% endif %}
