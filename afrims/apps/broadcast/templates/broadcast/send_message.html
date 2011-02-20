@@ -24,7 +24,12 @@
             {{ form }}
         </table>
         <div class='form-action'>
-            <input type='submit' name='submit' value="Send Message" />
+            {% if form.instance.pk %}
+                <button type='button' name='cancel' />Cancel</button>
+                 <input type='submit' name='submit' value="Save" />
+            {% else %}
+                <input type='submit' name='submit' value="Send Message" />
+            {% endif %}
         </div>
     </form>
 </div>
