@@ -36,3 +36,17 @@ form p.message {
     padding-left: 1em;
     padding-top: 1em;
 }
+
+ul.errorlist {
+    margin: 0;
+    padding: 0;
+}
+
+ul.errorlist li {
+    list-style-type: none;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+    background-color: #FF7D7D;
+    border: 1px solid #A33B3B;
+}
+
