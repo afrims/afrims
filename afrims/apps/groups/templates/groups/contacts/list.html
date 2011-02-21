@@ -9,6 +9,7 @@
 
 <div class='module'>
     <h2>Contacts ({{ contacts.count }} total)</h2>
+    <p><a title='Add contact' href="{% url create-contact %}" >Add contact...</a></p>
     {% autopaginate contacts 15 %}
     <table class='sortable pagination'>
         <thead>
@@ -36,6 +37,5 @@
             </tr>
         </tfoot>
     </table>
-    <p><a title='Add contact' href="{% url create-contact %}" >Add contact...</a></p>
 </div>
 {% endblock %}

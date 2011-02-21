@@ -6,6 +6,7 @@
 
 <div class='module'>
     <h2>Groups</h2>
+    <p><a title='Add group' href="{% url create-group %}" >Add group...</a></p>
     <table class='sortable'>
         <thead>
             <tr>
@@ -27,6 +28,5 @@
             {% endfor %}
         </tbody>
     </table>
-    <p><a title='Add group' href="{% url create-group %}" >Add group...</a></p>
 </div>
 {% endblock %}
