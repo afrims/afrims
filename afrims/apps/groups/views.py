@@ -55,9 +55,13 @@ def create_edit_group(request, group_id=None):
 @transaction.commit_on_success
 def delete_group(request, group_id):
     group = get_object_or_404(Group, pk=group_id)
-    group.delete()
-    messages.info(request, 'Group successfully deleted')
-    return HttpResponseRedirect(reverse('groups'))
+    if request.method == 'POST':
+        group.delete()
+        messages.info(request, 'Group successfully deleted')
+        return HttpResponseRedirect(reverse('list-groups'))
+    context = {'group': group}
+    return render_to_response('groups/groups/delete.html', context,
+                              RequestContext(request))
 
 
 @login_required
@@ -94,9 +98,13 @@ def create_edit_contact(request, contact_id=None):
 
 @login_required
 @transaction.commit_on_success
-def delete_contact(request, group_id):
-    group = get_object_or_404(Group, pk=group_id)
-    group.delete()
-    messages.info(request, 'Group successfully deleted')
-    return HttpResponseRedirect(reverse('groups'))
+def delete_contact(request, contact_id):
+    contact = get_object_or_404(Contact, pk=contact_id)
+    if request.method == 'POST':
+        contact.delete()
+        messages.info(request, 'Contact successfully deleted')
+        return HttpResponseRedirect(reverse('list-contacts'))
+    context = {'contact': contact}
+    return render_to_response('groups/contacts/delete.html', context,
+                              RequestContext(request))
 
