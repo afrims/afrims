@@ -1,61 +1,36 @@
-{% extends "layout-split-2.html" %}
+{% extends "broadcast/base.html" %}
 
-{% block title %}Send a Message{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit Broadcast{% else %}Send a Message{% endif %}{% endblock %}
 
 {% block javascripts %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js" type="text/javascript"></script>
+    {{ block.super }}
     <script src="{{ MEDIA_URL }}js/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
     <script src="{{ MEDIA_URL }}js/jquery.multiselect.min.js" type="text/javascript"></script>
     <script src="{{ MEDIA_URL }}broadcast/js/broadcast.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}js/forms.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}test_messager/js/test_messager.js" type="text/javascript"></script>
 {% endblock %}
 
 {% block stylesheets %}
     {{ block.super }}
-    <link type="text/css" rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/ui-lightness/jquery-ui.css" />
-		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/afrims.css" />
     <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/jquery.multiselect.css" />
-		<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}broadcast/css/broadcast.css" />
-{% endblock %}
-
-{% block left %}
-
-<div class="module">
-    <h2>Broadcasts</h2>
-    <table id='broadcasts' class="sortable">
-        <thead>
-            <tr>
-                <th>Scheduled Date</th>
-                <th>Frequency</th>
-                <th>Message</th>
-            </tr>
-        </thead>
-        {% for broadcast in broadcasts %}
-        <tr>
-            <td>{{ broadcast.date|date:"m/d/y fa" }}</td>
-            <td>{{ broadcast.get_schedule_frequency_display }}</td>
-            <td>{{ broadcast.body|truncatewords:3 }}
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan='3'>No scheduled broadcasts</td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
-
 {% endblock %}
 
 {% block right %}
 <div class="module">
-    <h2>Send a Message</h2>
-    <form method="POST" action="#" id="broadcast-form">
+    <h2>{% if form.instance.pk %}Edit Broadcast{% else %}Send a Message{% endif %}</h2>
+    <form method="POST" action="#" id="broadcast-form" class='buttons'>
         {% csrf_token %}
         <table>
             {{ form }}
         </table>
         <div class='form-action'>
-            <input type='submit' name='submit' value="Send Message" />
+            {% if form.instance.pk %}
+                <button type='button' name='cancel' />Cancel</button>
+                 <input type='submit' name='submit' value="Save" />
+            {% else %}
+                <input type='submit' name='submit' value="Send Message" />
+            {% endif %}
         </div>
     </form>
 </div>

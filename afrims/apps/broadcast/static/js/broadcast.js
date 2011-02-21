@@ -34,11 +34,14 @@ $(document).ready(function() {
                 $(months_row).hide();
             } else if (frequency == 'weekly') {
                 $(weekdays_row).show();
+                $(end_date_row).show();
                 $(months_row).hide();
             } else if (frequency == 'monthly') {
                 $(months_row).show();
+                $(end_date_row).show();
                 $(weekdays_row).hide();
             } else if (frequency == 'yearly') {
+                $(end_date_row).show();
                 $(months_row).hide();
                 $(weekdays_row).hide();
             }

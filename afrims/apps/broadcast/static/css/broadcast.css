@@ -1,5 +1,5 @@
-#inner .col-1 { width: 40%; }
-#inner .col-2 { width: 60%; }
+#inner .col-1 { width: 15%; }
+#inner .col-2 { width: 85%; }
 
 table#broadcasts {
     width: 100%
@@ -9,12 +9,16 @@ form#broadcast-form {
     padding: 0 1em;
 }
 
-.form-action {
-    text-align: right;
-    padding-bottom: 1em;
-}
-
 form#broadcast-form table td, form#broadcast-form table th {
     border: none;
+}
+
+ul#broadcast-nav {
+    padding: 0;
+}
+
+ul#broadcast-nav li {
+    list-style: none;
+    margin-bottom: 5px;
 }
 

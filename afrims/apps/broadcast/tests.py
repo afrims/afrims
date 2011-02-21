@@ -6,6 +6,8 @@ from dateutil.relativedelta import relativedelta
 from dateutil import rrule
 
 from django.test import TransactionTestCase, TestCase
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 
 from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.models import Connection, Contact, Backend
@@ -15,6 +17,7 @@ from rapidsms.tests.scripted import TestScript
 
 from afrims.apps.broadcast.models import Broadcast, DateAttribute
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
+from afrims.apps.broadcast.forms import BroadcastForm
 
 from afrims.apps.groups.models import Group
 
@@ -66,6 +69,7 @@ class CreateDataTest(TestCase):
         defaults.update(data)
         groups = defaults.pop('groups', [])
         weekdays = defaults.pop('weekdays', [])
+        months = defaults.pop('months', [])
         # simple helper flag to create broadcasts in the past or future
         delta = relativedelta(days=1)
         if when == 'ready':
@@ -77,6 +81,8 @@ class CreateDataTest(TestCase):
             broadcast.groups = groups
         if weekdays:
             broadcast.weekdays = weekdays
+        if months:
+            broadcast.months = months
         return broadcast
 
     def get_weekday(self, day):
@@ -86,6 +92,12 @@ class CreateDataTest(TestCase):
     def get_weekday_for_date(self, date):
         return DateAttribute.objects.get(value=date.weekday(),
                                          type__exact='weekday')
+
+    def get_month(self, day):
+        return DateAttribute.objects.get(name__iexact=day, type__exact='month')
+
+    def get_month_for_date(self, date):
+        return DateAttribute.objects.get(value=date.month, type__exact='month')
 
     def assertDateEqual(self, date1, date2):
         """ date comparison that ignores microseconds """
@@ -158,6 +170,32 @@ class BroadcastDateTest(CreateDataTest):
         broadcast = self.create_broadcast(data=data)
         self.assertDateEqual(broadcast.get_next_date(), tomorrow)
 
+    def test_end_date_disable(self):
+        """ Broadcast should disable once end date is reached """
+        broadcast = self.create_broadcast(when='ready')
+        broadcast.schedule_end_date = datetime.datetime.now()
+        self.assertEqual(broadcast.get_next_date(), None)
+
+    def test_month_recurrence(self):
+        """ Test monthly recurrence for past month """
+        day = datetime.datetime.now() + relativedelta(days=1)
+        one_month_ago = day - relativedelta(months=1)
+        data = {'date': one_month_ago, 'schedule_frequency': 'monthly'}
+        broadcast = self.create_broadcast(data=data)
+        self.assertDateEqual(broadcast.get_next_date(), day)
+
+    def test_bymonth_recurrence(self):
+        """ Test bymonth recurrence for past month """
+        day = datetime.datetime.now() + relativedelta(days=1)
+        one_month_ago = day - relativedelta(months=1)
+        next_month = day + relativedelta(months=1)
+        months = (self.get_month_for_date(one_month_ago),
+                  self.get_month_for_date(next_month))
+        data = {'date': one_month_ago, 'schedule_frequency': 'monthly',
+                'months': months}
+        broadcast = self.create_broadcast(data=data)
+        self.assertDateEqual(broadcast.get_next_date(), next_month)
+
 
 class BroadcastAppTest(CreateDataTest):
 
@@ -183,6 +221,116 @@ class BroadcastAppTest(CreateDataTest):
         ready = Broadcast.ready.values_list('id', flat=True)
         self.assertTrue(b1.pk in ready)
         self.assertFalse(b2.pk in ready)
+
+
+class BroadcastFormTest(CreateDataTest):
+    def setUp(self):
+        self.contact = self.create_contact()
+        self.group = self.create_group()
+        self.contact.groups.add(self.group)
+
+    def test_future_start_date_required(self):
+        """ Start date is required for future broadcasts """
+        data =  {
+            'when': 'later',
+            'body': self.random_string(160),
+            'schedule_frequency': 'one-time',
+            'groups': [self.group.pk],
+        }
+        form = BroadcastForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.non_field_errors()), 1)
+        msg = 'Start date is required for future broadcasts'
+        self.assertTrue(msg in form.non_field_errors().as_text())
+
+    def test_now_date_set_on_save(self):
+        """ 'now' messages automatically get date assignment """
+        data =  {
+            'when': 'now',
+            'body': self.random_string(160),
+            'groups': [self.group.pk],
+        }
+        form = BroadcastForm(data)
+        self.assertTrue(form.is_valid())
+        broadcast = form.save()
+        self.assertTrue(broadcast.date is not None)
+
+    def test_end_date_before_start_date(self):
+        """ Form should prevent end date being before start date """
+        now = datetime.datetime.now()
+        yesterday = now - relativedelta(days=1)
+        data =  {
+            'when': 'later',
+            'body': self.random_string(160),
+            'date': now,
+            'schedule_end_date': yesterday,
+            'schedule_frequency': 'daily',
+            'groups': [self.group.pk],
+        }
+        form = BroadcastForm(data)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(len(form.non_field_errors()), 1)
+        msg = 'End date must be later than start date'
+        self.assertTrue(msg in form.non_field_errors().as_text())
+
+    def test_update(self):
+        """ Test broadcast edit functionality """
+        before = self.create_broadcast(when='future',
+                                       data={'groups': [self.group.pk]})
+        data =  {
+            'when': 'later',
+            'date': before.date,
+            'body': self.random_string(30),
+            'schedule_frequency': before.schedule_frequency,
+            'groups': [self.group.pk],
+        }
+        form = BroadcastForm(data, instance=before)
+        self.assertTrue(form.is_valid(), form._errors.as_text())
+        before = Broadcast.objects.get(pk=before.pk)
+        after = form.save()
+        # same broadcast
+        self.assertEqual(before.pk, after.pk)
+        # new message
+        self.assertNotEqual(before.body, after.body)
+
+    def test_field_clearing(self):
+        """ Non related frequency fields should be cleared on form clean """
+        weekday = self.get_weekday_for_date(datetime.datetime.now())
+        before = self.create_broadcast(when='future',
+                                       data={'groups': [self.group.pk],
+                                             'weekdays': [weekday]})
+        data =  {
+            'when': 'later',
+            'date': before.date,
+            'body': before.body,
+            'schedule_frequency': 'monthly',
+            'groups': [self.group.pk],
+            'weekdays': [weekday.pk],
+        }
+        form = BroadcastForm(data, instance=before)
+        after = form.save()
+        self.assertEqual(after.weekdays.count(), 0)
+
+
+class BroadcastViewTest(CreateDataTest):
+    def setUp(self):
+        self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.save()
+        self.client.login(username='test', password='abc')
+
+    def test_delete(self):
+        """ Make sure broadcasts are disabled on 'delete' """
+        contact = self.create_contact()
+        group = self.create_group()
+        contact.groups.add(group)
+        before = self.create_broadcast(when='future',
+                                       data={'groups': [group.pk]})
+        url = reverse('delete-broadcast', args=[before.pk])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302,
+                         'should redirect on success')
+        after = Broadcast.objects.get(pk=before.pk)
+        self.assertTrue(after.schedule_frequency is None)
 
 
 class BroadcastScriptedTest(TestScript, CreateDataTest):

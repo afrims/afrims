@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "afrims.apps.broadcast",
     "afrims.apps.offsite",
     "afrims.apps.reminders",
+    "afrims.apps.test_messager",
 
     # the rapidsms contrib apps.
     "rapidsms.contrib.default",
@@ -69,6 +70,13 @@ RAPIDSMS_TABS = [
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
     ("afrims.apps.groups.views.list_groups", "Groups"),
 ]
+
+
+
+# Specify a logo URL for the dashboard layout.html. This logo will show up
+# at top left for every tab
+LOGO_LEFT_URL = '/static/images/trialconnect.png'
+LOGO_RIGHT_URL = '/static/images/tatrc.png'
 
 
 # -------------------------------------------------------------------- #
@@ -113,6 +121,9 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.request",
+
+    #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
+    "rapidsms.context_processors.logo",
 ]
 
 
@@ -138,6 +149,9 @@ DEFAULT_BACKEND_NAME = "txtnation"
 #                           HERE BE DRAGONS!                           #
 #        these settings are pure hackery, and will go away soon        #
 # -------------------------------------------------------------------- #
+
+AJAX_PROXY_HOST = '127.0.0.1'
+AJAX_PROXY_PORT = 9988
 
 PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
 
