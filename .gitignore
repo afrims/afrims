@@ -6,6 +6,5 @@
 *.log.*
 *.log
 *.idea
-initial_data.json
 localsettings.py
-initial_data.*
+test_localsettings.py

@@ -1,0 +1,52 @@
+/* afrims.css
+ * base style sheet included on all pages
+ */
+
+/* django messages */
+
+ul.messages {
+    margin: 0;
+    padding: 0;
+}
+
+ul.messages li {
+    list-style-type: none;
+    padding: 1em;
+    margin: 0.5em;
+}
+
+ul.messages li.info {
+    background-color: #FFFF99;
+    border: 1px solid #FFFF66;
+}
+
+/* forms */
+
+.form-action {
+    text-align: right;
+    padding-bottom: 1em;
+}
+
+form.buttons .form-action {
+    margin-right: 1em;
+}
+
+form p.message {
+    margin-top: 0;
+    padding-left: 1em;
+    padding-top: 1em;
+}
+
+ul.errorlist {
+    margin: 0;
+    padding: 0;
+}
+
+ul.errorlist li {
+    list-style-type: none;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+    background-color: #FF7D7D;
+    border: 1px solid #A33B3B;
+}
+

@@ -1,0 +1,28 @@
+{% extends "layout-split-2.html" %}
+
+{% block title %}Appointment Reminders{% endblock %}
+
+{% block javascripts %}{{ block.super }}
+{% endblock %}
+
+{% block stylesheets %}{{ block.super }}
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reminders/css/reminders.css" />
+{% endblock %}
+
+{% block left %}
+<div class="module">
+<h2>Appointment Reminders</h2>
+
+<table id='reminder_report' class='sortable'>
+    <tr>
+        <th>Queued, Unsent Reminders:</th><td>{{ reminder_report.queued }}</td>
+    </tr>
+    <tr>
+        <th>Delivered, Unconfirmed Reminders:</th><td>{{ reminder_report.delivered }}</td>
+    </tr>
+    <tr>
+        <th>Delivered, Confirmed Reminders:</th><td>{{ reminder_report.confirmed }}</td>
+    </tr>
+</table>
+</div>
+{% endblock %}

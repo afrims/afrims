@@ -1,53 +1,77 @@
 import os
 
 from fabric.api import *
-from fabric.contrib.project import rsync_project
 from fabric.contrib import files, console
+from fabric.contrib.project import rsync_project
 from fabric import utils
 from fabric.decorators import hosts
 
 
 RSYNC_EXCLUDE = (
     '.DS_Store',
-    '.hg',
+    '.git',
     '*.pyc',
     '*.example',
     '*.db',
-    'media/admin',
-    'media/attachments',
-    'local_settings.py',
-    'fabfile.py',
-    'bootstrap.py',
 )
-env.home = '/home/afrims/'
-env.project = 'afrims_website'
+env.home = '/home/afrims'
+env.project = 'afrims'
+env.code_repo = 'git://github.com/afrims/afrims.git'
+
+
+def _join(*args):
+    """
+    We're deploying on Linux, so hard-code that path separator here.
+    """
+    return '/'.join(args)
 
 
 def _setup_path():
-    env.root = os.path.join(env.home, 'www', env.environment)
-    env.code_root = os.path.join(env.root, env.project)
-    env.virtualenv_root = os.path.join(env.root, 'env')
-    env.settings = '%(project)s.settings_%(environment)s' % env
+    env.root = _join(env.home, 'www', env.environment)
+    env.log_dir = _join(env.home, 'www', env.environment, 'log')
+    env.code_root = _join(env.root, 'code_root')
+    env.project_root = _join(env.code_root, env.project)
+    env.project_media = _join(env.code_root, 'media')
+    env.project_static = _join(env.project_root, 'static')
+    env.virtualenv_root = _join(env.root, 'python_env')
+    env.services = _join(env.home, 'services')
+    env.settings = '%(project)s.localsettings' % env
+
+
+def setup_dirs():
+    """ create (if necessary) and make writable uploaded media, log, etc. directories """
+    sudo('mkdir -p %(log_dir)s' % env, user=env.sudo_user)
+    sudo('chmod a+w %(log_dir)s' % env, user=env.sudo_user)
+    # sudo('mkdir -p %(project_media)s' % env, user=env.sudo_user)
+    # sudo('chmod a+w %(project_media)s' % env, user=env.sudo_user)
+    # sudo('mkdir -p %(project_static)s' % env, user=env.sudo_user)
+    sudo('mkdir -p %(services)s' % env, user=env.sudo_user)
 
 
 def staging():
     """ use staging environment on remote host"""
-    env.user = 'afrims'
+    env.code_branch = 'develop'
+    env.sudo_user = 'afrims'
     env.environment = 'staging'
-    env.hosts = ['r.dimagi.vmracks.com']
+    env.hosts = ['173.203.221.48']
     _setup_path()
 
 
 def production():
     """ use production environment on remote host"""
-    utils.abort('Production deployment not yet implemented.')
+    env.code_branch = 'master'
+    env.sudo_user = 'afrims'
+    env.environment = 'production'
+    env.hosts = ['10.84.168.245']
+    _setup_path()
 
 
 def bootstrap():
     """ initialize remote host environment (virtualenv, deploy, update) """
     require('root', provided_by=('staging', 'production'))
-    run('mkdir -p %(root)s' % env)
-    run('mkdir -p %s' % os.path.join(env.home, 'www', 'log'))
+    sudo('mkdir -p %(root)s' % env, user=env.sudo_user)
+    clone_repo()
+    setup_dirs()
     create_virtualenv()
     deploy()
     update_requirements()
@@ -57,60 +81,65 @@ def create_virtualenv():
     """ setup virtualenv on remote host """
     require('virtualenv_root', provided_by=('staging', 'production'))
     args = '--clear --distribute'
-    run('virtualenv %s %s' % (args, env.virtualenv_root))
+    sudo('virtualenv %s %s' % (args, env.virtualenv_root), user=env.sudo_user)
+
+
+def clone_repo():
+    """ clone a new copy of the git repository """
+    with cd(env.root):
+        sudo('git clone %(code_repo)s %(code_root)s' % env, user=env.sudo_user)
 
 
 def deploy():
-    """ rsync code to remote host """
+    """ deploy code to remote host by checking out the latest via git """
     require('root', provided_by=('staging', 'production'))
     if env.environment == 'production':
         if not console.confirm('Are you sure you want to deploy production?',
                                default=False):
             utils.abort('Production deployment aborted.')
-    # defaults rsync options:
-    # -pthrvz
-    # -p preserve permissions
-    # -t preserve times
-    # -h output numbers in a human-readable format
-    # -r recurse into directories
-    # -v increase verbosity
-    # -z compress file data during the transfer
-    extra_opts = '--omit-dir-times'
-    rsync_project(
-        env.root,
-        exclude=RSYNC_EXCLUDE,
-        delete=True,
-        extra_opts=extra_opts,
-    )
+    with settings(warn_only=True):
+        router_stop()
+    with cd(env.code_root):
+        sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
+        sudo('git pull', user=env.sudo_user)
     touch()
+    router_start()
 
 
 def update_requirements():
     """ update external dependencies on remote host """
     require('code_root', provided_by=('staging', 'production'))
-    requirements = os.path.join(env.code_root, 'requirements')
+    requirements = _join(env.code_root, 'requirements')
     with cd(requirements):
         cmd = ['pip install']
-        cmd += ['-E %(virtualenv_root)s' % env]
-        cmd += ['--requirement %s' % os.path.join(requirements, 'apps.txt')]
-        run(' '.join(cmd))
+        cmd += ['-q -E %(virtualenv_root)s' % env]
+        cmd += ['--requirement %s' % _join(requirements, 'apps.txt')]
+        sudo(' '.join(cmd), user=env.sudo_user)
 
 
 def touch():
     """ touch wsgi file to trigger reload """
     require('code_root', provided_by=('staging', 'production'))
-    apache_dir = os.path.join(env.code_root, 'apache')
-    with cd(apache_dir):
-        run('touch %s.wsgi' % env.environment)
+    with cd(env.project_root):
+        sudo('touch %s.wsgi' % env.environment, user=env.sudo_user)
 
 
-def update_apache_conf():
-    """ upload apache configuration to remote host """
-    require('root', provided_by=('staging', 'production'))
-    source = os.path.join('apache', '%(environment)s.conf' % env)
-    dest = os.path.join(env.home, 'apache.conf.d')
-    put(source, dest, mode=0755)
+def update_services():
+    """ upload changes to services such as nginx """
+    with settings(warn_only=True):
+        router_stop()
+    # use a two stage rsync process because we are not connecting as the
+    # afrims user
+    remote_dir = 'tmp-services/'
+    rsync_project(remote_dir=remote_dir, local_dir="services/", delete=True)
+    sudo("rsync -av --delete %s %s" %
+         (remote_dir, _join(env.home, 'services')), user=env.sudo_user)
+    # copy the upstart script to /etc/init
+    run("sudo cp %s /etc/init" % _join(env.home, 'services', env.environment,
+                                       'upstart', 'afrims-router.conf'))
     apache_reload()
+    router_start()
+    netstat_plnt()
 
 
 def configtest():    
@@ -125,24 +154,41 @@ def apache_reload():
     run('sudo /etc/init.d/apache2 reload')
 
 
-def apache_restart():    
+def apache_restart():
     """ restart Apache on remote host """
     require('root', provided_by=('staging', 'production'))
     run('sudo /etc/init.d/apache2 restart')
 
 
-def symlink_django():    
-    """ create symbolic link so Apache can serve django admin media """
-    require('root', provided_by=('staging', 'production'))
-    admin_media = os.path.join(env.virtualenv_root,
-                               'src/django/django/contrib/admin/media/')
-    media = os.path.join(env.code_root, 'media/admin')
-    if not files.exists(media):
-        run('ln -s %s %s' % (admin_media, media))
+def netstat_plnt():
+    """ run netstat -plnt on a remote host """
+    require('hosts', provided_by=('production', 'staging'))
+    run('sudo netstat -plnt')
 
 
-def reset_local_media():
-    """ Reset local media from remote host """
+def router_start():  
+    """ start router on remote host """
     require('root', provided_by=('staging', 'production'))
-    media = os.path.join(env.code_root, 'media', 'upload')
-    local('rsync -rvaz %s@%s:%s media/' % (env.user, env.hosts[0], media))
+    run('sudo start afrims-router')
+
+
+def router_stop():  
+    """ stop router on remote host """
+    require('root', provided_by=('staging', 'production'))
+    run('sudo stop afrims-router')
+
+
+def migrate():
+    """ run south migration on remote environment """
+    require('project_root', provided_by=('production', 'staging'))
+    with cd(env.project_root):      
+        run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % env)        
+        run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
+
+
+def collectstatic():
+    """ run collectstatic on remote environment """
+    require('project_root', provided_by=('production', 'staging'))
+    with cd(env.project_root):      
+        run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env)
+
