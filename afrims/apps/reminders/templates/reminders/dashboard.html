@@ -26,3 +26,27 @@
 </table>
 </div>
 {% endblock %}
+
+{% block right %}
+<div class="module">
+<h2>Notification Schedule</h2>
+
+<form method="POST" action="">
+{% csrf_token %}
+<table id='notification_schedule' class='sortable'>
+{{ notification_formset.management_form }}
+	{% for form in notification_formset.forms %}
+	<tr class="{% cycle 'one' 'two' %}">
+	    <td>{{ form.as_ul }}</td>
+	</tr>
+	{% endfor %}
+	<tr>
+		<td colspan="2" class="submit">
+		   <input type="submit" name="submit" value="Update Schedule" />
+		</td>
+	</tr>
+</table>
+</form>
+
+</div>
+{% endblock %}

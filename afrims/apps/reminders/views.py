@@ -1,22 +1,27 @@
 import logging
+from datetime import datetime
+
+from lxml import etree
+from lxml.etree import XMLSyntaxError
 
 from django.conf import settings
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.http import HttpResponse, HttpResponseServerError, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseServerError,\
+                        HttpResponseBadRequest, HttpResponseRedirect
 from django.db import transaction
-from afrims.apps.reminders.models import PatientDataPayload, Patient
-from afrims.decorators import has_perm_or_basicauth
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
-from lxml import etree
-from datetime import datetime
-from lxml.etree import XMLSyntaxError
-from rapidsms.models import Contact, Connection, Backend
 from django.core.exceptions import ObjectDoesNotExist
-from afrims.apps.groups.models import Group
+from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
+
+from rapidsms.models import Contact, Connection, Backend
+
+from afrims.decorators import has_perm_or_basicauth
+from afrims.apps.groups.models import Group
 from afrims.apps.reminders import models as reminders
+from afrims.apps.reminders.forms import NotificationFormset
 
 logger = logging.getLogger('afrims.apps.reminder')
 
@@ -32,8 +37,16 @@ def dashboard(request):
         'delivered': delivered.count(),
         'confirmed': confirmed.count(),
     }
+    if request.method == 'POST':
+        notification_formset = NotificationFormset(request.POST)
+        if notification_formset.is_valid():
+            notifications = notification_formset.save()
+            return HttpResponseRedirect(reverse('reminders_dashboard'))
+    else:
+        notification_formset = NotificationFormset()
     context = {
         'reminder_report': reminder_report,
+        'notification_formset': notification_formset,
     }
     return render_to_response('reminders/dashboard.html', context,
                               RequestContext(request))
@@ -57,7 +70,8 @@ def receive_patient_record(request):
         return HttpResponseServerError("No XML data appears to be attached.")
 
     #save the raw data just in case
-    raw_data = PatientDataPayload(raw_data=content,submit_date=datetime.now())
+    raw_data = reminders.PatientDataPayload(raw_data=content,
+                                            submit_date=datetime.now())
     raw_data.save()
     
     try:
@@ -98,7 +112,7 @@ def create_or_update_patient_model(patient, raw_data_entry):
     if not (subject_number and enroll_date and mobile_number and pin):
         return False #something is wrong with our parsing.
 
-    (patient_model, new_patient) = Patient.objects.get_or_create(
+    (patient_model, new_patient) = reminders.Patient.objects.get_or_create(
                             subject_number=subject_number,
                             date_enrolled=enroll_date,
                             )

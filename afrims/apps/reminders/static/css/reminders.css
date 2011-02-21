@@ -8,3 +8,18 @@ table#reminder_report {
 table#reminder_report th {
     font-weight: bold;
 }
+
+table#notification_schedule {
+    width: 100%;
+}
+table#notification_schedule tr.one {
+    background-color: #fff;
+}
+
+table#notification_schedule tr.two {
+    background-color: #eee;
+}
+
+table#notification_schedule td.submit {
+    text-align: right;
+}
