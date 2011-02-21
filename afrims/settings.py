@@ -63,7 +63,7 @@ RAPIDSMS_TABS = [
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
     ("afrims.apps.groups.views.list_groups", "Cold Chain"),
     ("afrims.apps.groups.views.list_groups", "Groups"),
-    ("rapidsms.contrib.registration.views.registration","People"),
+    ("afrims.apps.groups.views.list_contacts","People"),
     ("afrims.apps.groups.views.list_groups", "Settings"),
 #    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
 
