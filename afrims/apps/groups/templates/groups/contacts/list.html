@@ -1,0 +1,31 @@
+{% extends "groups/base.html" %}
+
+{% block title %}Contacts{% endblock %}
+
+{% block content %}
+
+<div class='module'>
+    <h2>Contacts</h2>
+    <table class='sortable'>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th># Recipients</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contact in contacts %}
+                <tr>
+                    <td>{{ contact.pk }}</td>
+                    <td>{{ contact.name }}</td>
+                    <td>
+                        <a title='Edit {{ contact.name }}' href='{% url edit-contact contact.pk %}'>Edit</a> | <a title='Delete {{ contact.name }}' href='{% url delete-contact contact.pk %}'>Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p><a title='Add contact' href="{% url create-contact %}" >Add contact...</a></p>
+</div>
+{% endblock %}

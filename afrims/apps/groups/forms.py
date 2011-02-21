@@ -16,3 +16,10 @@ class GroupForm(forms.ModelForm):
         contacts = Contact.objects.order_by('name')
         self.fields['contacts'].queryset = contacts
 
+
+class ContactForm(forms.ModelForm):
+
+    class Meta:
+        model = Contact
+        exclude = ('language',)
+

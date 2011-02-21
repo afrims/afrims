@@ -69,6 +69,7 @@ RAPIDSMS_TABS = [
 #    ("afrims.apps.reminder.views.dashboard", "Reminder"),
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
     ("afrims.apps.groups.views.list_groups", "Groups"),
+    ("afrims.apps.groups.views.list_contacts", "Contacts"),
 ]
 
 

@@ -16,7 +16,7 @@ from django.contrib import messages
 from rapidsms.models import Contact
 
 from afrims.apps.groups.models import Group
-from afrims.apps.groups.forms import GroupForm
+from afrims.apps.groups.forms import GroupForm, ContactForm
 
 
 @login_required
@@ -54,6 +54,47 @@ def create_edit_group(request, group_id=None):
 @login_required
 @transaction.commit_on_success
 def delete_group(request, group_id):
+    group = get_object_or_404(Group, pk=group_id)
+    group.delete()
+    messages.info(request, 'Group successfully deleted')
+    return HttpResponseRedirect(reverse('groups'))
+
+
+@login_required
+def list_contacts(request):
+    contacts = Contact.objects.all()
+    context = {
+        'contacts': contacts.order_by('name'),
+    }
+    return render_to_response('groups/contacts/list.html', context,
+                              context_instance=RequestContext(request))
+
+
+@login_required
+@transaction.commit_on_success
+def create_edit_contact(request, contact_id=None):
+    contact = None
+    if contact_id:
+        contact = get_object_or_404(Contact, pk=contact_id)
+    if request.method == 'POST':
+        form = ContactForm(request.POST, instance=contact)
+        if form.is_valid():
+            form.save()
+            messages.info(request, "Contact saved successfully")
+            return HttpResponseRedirect(reverse('list-contacts'))
+    else:
+        form = ContactForm(instance=contact)
+    context = {
+        'form': form,
+        'contact': contact,
+    }
+    return render_to_response('groups/contacts/create_edit.html', context,
+                              context_instance=RequestContext(request))
+
+
+@login_required
+@transaction.commit_on_success
+def delete_contact(request, group_id):
     group = get_object_or_404(Group, pk=group_id)
     group.delete()
     messages.info(request, 'Group successfully deleted')
