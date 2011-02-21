@@ -25,7 +25,8 @@ class SentNotification(models.Model):
     '''
     STATUS_CHOICES = (
         ('queued', 'Queued'),
-        ('delivered', 'Delivered'),
+        ('sent', 'Sent'),
+        ('error', 'Error'),
         ('confirmed', 'Confirmed'),
     )
     notification = models.ForeignKey(Notification,
@@ -40,15 +41,15 @@ class SentNotification(models.Model):
                               default='queued')
     date_queued = models.DateTimeField(help_text='The date and time this '
                                        'notification was initially created.')
-    date_delivered = models.DateTimeField(null=True, blank=True,
-                                          help_text='The date and time this '
-                                          'notification was delivered.')
+    date_sent = models.DateTimeField(null=True, blank=True,
+                                     help_text='The date and time this '
+                                     'notification was sent.')
     date_confirmed = models.DateTimeField(null=True, blank=True,
                                           help_text='The date and time we '
                                           'received a receipt confirmation '
                                           'from the recipient.')
     message = models.CharField(max_length=160, help_text='The actual message '
-                               'that was delivered to the user.')
+                               'that was sent to the user.')
 
     def __unicode__(self):
         return u'{notification} for {recipient} created on {date}'.format(

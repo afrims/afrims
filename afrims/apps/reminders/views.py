@@ -30,11 +30,11 @@ logger = logging.getLogger('afrims.apps.reminder')
 @login_required
 def dashboard(request):
     queued = reminders.SentNotification.objects.filter(status='queued')
-    delivered = reminders.SentNotification.objects.filter(status='delivered')
+    sent = reminders.SentNotification.objects.filter(status='sent')
     confirmed = reminders.SentNotification.objects.filter(status='confirmed')
     reminder_report = {
         'queued': queued.count(),
-        'delivered': delivered.count(),
+        'sent': sent.count(),
         'confirmed': confirmed.count(),
     }
     if request.method == 'POST':
