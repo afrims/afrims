@@ -25,7 +25,7 @@ def list_groups(request):
     context = {
         'groups': groups.order_by('name'),
     }
-    return render_to_response('groups/list.html', context,
+    return render_to_response('groups/groups/list.html', context,
                               context_instance=RequestContext(request))
 
 
@@ -47,7 +47,7 @@ def create_edit_group(request, group_id=None):
         'form': form,
         'group': group,
     }
-    return render_to_response('groups/create_edit.html', context,
+    return render_to_response('groups/groups/create_edit.html', context,
                               context_instance=RequestContext(request))
 
 
