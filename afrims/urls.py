@@ -29,6 +29,7 @@ urlpatterns = patterns('',
     (r'^broadcast/', include('afrims.apps.broadcast.urls')),
     (r'^reminders/', include('afrims.apps.reminders.urls')),
     (r'^test-messager/', include('afrims.apps.test_messager.urls')),
+    (r'^groups/', include('afrims.apps.groups.urls')),
 )
 
 if settings.DEBUG:

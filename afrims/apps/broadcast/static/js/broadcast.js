@@ -41,6 +41,7 @@ $(document).ready(function() {
                 $(end_date_row).show();
                 $(weekdays_row).hide();
             } else if (frequency == 'yearly') {
+                $(end_date_row).show();
                 $(months_row).hide();
                 $(weekdays_row).hide();
             }
