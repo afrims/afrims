@@ -38,6 +38,7 @@ class BroadcastForm(forms.ModelForm):
         self.fields['groups'].help_text = ''
         self.fields['groups'].widget.attrs['class'] = widget_class
         self.fields['body'].label = 'Message'
+        self.fields['body'].widget.attrs['class'] = 'test-messager-field'
         # hide disabled frequency in form
         choices = list(Broadcast.REPEAT_CHOICES)
         choices.pop(0)

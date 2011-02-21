@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "afrims.apps.broadcast",
     "afrims.apps.offsite",
     "afrims.apps.reminders",
+    "afrims.apps.test_messager",
 
     # the rapidsms contrib apps.
     "rapidsms.contrib.default",
@@ -137,6 +138,9 @@ DEFAULT_BACKEND_NAME = "txtnation"
 #                           HERE BE DRAGONS!                           #
 #        these settings are pure hackery, and will go away soon        #
 # -------------------------------------------------------------------- #
+
+AJAX_PROXY_HOST = '127.0.0.1'
+AJAX_PROXY_PORT = 9988
 
 PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
 
