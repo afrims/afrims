@@ -1,16 +1,25 @@
-{% extends "layout.html" %}
+{% extends "groups/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Groups" %}{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit Group{% else %}Create Group{% endif %}{% endblock %}
+
+{% block javascripts %}
+    {{ block.super }}
+    <script src="{{ MEDIA_URL }}js/forms.js" type="text/javascript"></script>
+{% endblock %}
 
 {% block content %}
-<form action="#" method="POST" class="pretty">
-    {% csrf_token %}
-    <table>
-        {{ form }}
-    </table>
-    <div class='form-action'>
-        <input type='submit' name='submit' value="Save" />
-    </div>
-</form>
+<div class="module">
+    <h2>{% if form.instance.pk %}Edit Group{% else %}Create Group{% endif %}</h2>
+    <form action="#" method="POST" class="buttons">
+        {% csrf_token %}
+        <table>
+            {{ form }}
+        </table>
+        <div class='form-action'>
+            <button type='button' name='cancel' />Cancel</button>
+            <input type='submit' name='submit' value="Save" />
+        </div>
+    </form>
+</div>
 {% endblock %}

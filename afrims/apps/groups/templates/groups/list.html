@@ -1,42 +1,32 @@
-{% extends "layout.html" %}
-{% load i18n %}
+{% extends "groups/base.html" %}
 
-{% block title %}{% trans "Groups" %}{% endblock %}
+{% block title %}Groups{% endblock %}
 
 {% block content %}
-<h2>{% trans "Groups" %}</h2>
-<ul class='horizontal'>
-    <li><a href="{% url create-group %}" >Add group</a></li>
-</ul>
 
-<table class='list auto'>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th># Recipients</th>
-            <th>Edit</th>
-            <th>Delete</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for group in groups %}
+<div class='module'>
+    <h2>Groups</h2>
+    <table class='sortable'>
+        <thead>
             <tr>
-                <td>{{ group.pk }}</td>
-                <td>{{ group.name }}</td>
-                <td>{{ group.count }}</td>
-                <td>
-                    <a href="{% url edit-group group.pk " title="Edit" class="edit-link">
-                        <img class='action' alt='Edit' src="{{ MEDIA_URL }}group_messaging/edit-icon.jpeg" />
-                    </a>
-                </td>
-                <td>
-                    <a href="" title="Edit" class="delete-link">
-                        <img class='action' alt='Delete' src="{{ MEDIA_URL }}group_messaging/delete-icon.png" />
-                    </a>
-                </td>
+                <th>ID</th>
+                <th>Name</th>
+                <th># Recipients</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for group in groups %}
+                <tr>
+                    <td>{{ group.pk }}</td>
+                    <td>{{ group.name }}</td>
+                    <td>{{ group.count }}</td>
+                    <td>
+                        <a title='Edit {{ group.name }}' href='{% url edit-group group.pk %}'>Edit</a> | <a title='Delete {{ group.name }}' href='{% url delete-group group.pk %}'>Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p><a title='Add group' href="{% url create-group %}" >Add group...</a></p>
+</div>
 {% endblock %}
