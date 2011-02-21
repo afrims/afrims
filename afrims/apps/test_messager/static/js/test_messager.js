@@ -48,6 +48,7 @@ $.widget("ui.messager", {
                 button.button('enable');
             }
         });
+        self.element.keyup();
     },
     _handle_response: function (data) {
         if (data.success === true) {
