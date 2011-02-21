@@ -70,6 +70,13 @@ RAPIDSMS_TABS = [
 ]
 
 
+
+# Specify a logo URL for the dashboard layout.html. This logo will show up
+# at top left for every tab
+LOGO_LEFT_URL = '/static/images/trialconnect.png'
+LOGO_RIGHT_URL = '/static/images/tatrc.png'
+
+
 # -------------------------------------------------------------------- #
 #                         BORING CONFIGURATION                         #
 # -------------------------------------------------------------------- #
@@ -112,6 +119,9 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.request",
+
+    #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
+    "rapidsms.context_processors.logo",
 ]
 
 
