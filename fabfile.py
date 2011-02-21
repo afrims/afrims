@@ -59,7 +59,11 @@ def staging():
 
 def production():
     """ use production environment on remote host"""
-    utils.abort('Production deployment not yet implemented.')
+    env.code_branch = 'master'
+    env.sudo_user = 'afrims'
+    env.environment = 'production'
+    env.hosts = ['10.84.168.245']
+    _setup_path()
 
 
 def bootstrap():
