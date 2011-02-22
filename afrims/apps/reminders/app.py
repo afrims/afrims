@@ -24,27 +24,58 @@ def scheduler_callback(router):
 class RemindersApp(AppBase):
     """ RapidSMS app to send appointment reminders """
 
+    # for production, we'll probably want something like:
+#    cron_schedule = {'minutes': ['0'], 'hours': ['10']}
+    # for testing and debugging, run every minute:
     cron_schedule = {'minutes': '*'}
     cron_name = 'reminders-cron-job'
     cron_callback = 'afrims.apps.reminders.app.scheduler_callback'
 
     appt_message = _('Hello, {name}. You have an upcoming appointment in '
                      '{days} days, on {date}. Please reply with 1 to confirm.')
+    not_registered = _('Sorry, your mobile number is not registered.')
+    no_reminders = _('Sorry, I could not find any reminders awaiting '
+                     'confirmation.')
+    thank_you = _('Thank you for confirming your upcoming appointment.')  
 
     def start(self):
-        """ setup event schedule to run cron job every hour """
+        """ setup event schedule to run cron job """
         try:
             schedule = EventSchedule.objects.get(description=self.name)
         except EventSchedule.DoesNotExist:
             schedule = EventSchedule.objects.create(description=self.name,
                                                     callback=self.cron_callback,
-                                                    minutes=['0'], hours=['10'])
+                                                    **self.cron_schedule)
         schedule.callback = self.cron_callback
         for key, val in self.cron_schedule.iteritems():
             if hasattr(schedule, key):
                 setattr(schedule, key, val)
         schedule.save()
         self.info('started')
+
+    def handle(self, msg):
+        """
+        Handles messages that start with a '1' (to ease responding in
+        alternate character sets).
+        
+        Updates the SentNotification status to 'confirmed' for the given user
+        and replies with a thank you message.
+        """
+        if not msg.text.startswith('1'):
+            return False
+        contact = msg.connection.contact
+        if not contact:
+            msg.respond(self.not_registered)
+            return
+        notifs = reminders.SentNotification.objects.filter(recipient=contact)
+        if not notifs.exists():
+            msg.respond(self.no_reminders)
+            return
+        sent_notification = notifs.order_by('-date_sent')[0]
+        sent_notification.status = 'confirmed'
+        sent_notification.date_confirmed = datetime.datetime.now()
+        sent_notification.save()
+        msg.respond(self.thank_you)
 
     def queue_outgoing_notifications(self):
         """ generate queued appointment reminders """

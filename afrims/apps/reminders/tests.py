@@ -15,8 +15,8 @@ from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from afrims.apps.reminders import models as reminders
-from afrims.apps.reminders.handlers.confirm import ConfirmHandler
 from afrims.tests.testcases import CreateDataTest
+from afrims.apps.reminders.app import RemindersApp
 
 
 class RemindersCreateDataTest(CreateDataTest):
@@ -59,25 +59,25 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.reg_conn = self.create_connection({'contact': self.contact,
                                                 'backend': self.backend})
         self.router = MockRouter()
+        self.app = RemindersApp(router=self.router)
 
     def _send(self, conn, text):
         msg = IncomingMessage(conn, text)
-        handler = ConfirmHandler(self.router, msg)
-        handler.handle(msg.text)
-        return handler
-    
+        self.app.handle(msg)
+        return msg
+
     def test_confirm(self):
         # test the response from an unregistered user
-        handler = self._send(self.unreg_conn, '1')
-        self.assertEqual(len(handler.msg.responses), 1)
-        self.assertEqual(handler.msg.responses[0].text,
-                         ConfirmHandler.NOT_REGISTERED)
+        msg = self._send(self.unreg_conn, '1')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.not_registered)
 
         # test the response from a registered user without any notifications
-        handler = self._send(self.reg_conn, '1')
-        self.assertEqual(len(handler.msg.responses), 1)
-        self.assertEqual(handler.msg.responses[0].text,
-                         ConfirmHandler.NO_REMINDERS)
+        msg = self._send(self.reg_conn, '1')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.no_reminders)
 
         # test the response from a user with a pending notification
         notification = reminders.Notification.objects.create(num_days=1)
@@ -85,10 +85,10 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
                                                   recipient=self.contact,
                                                   status='sent',
                                                   message='abc')
-        handler = self._send(self.reg_conn, '1')
-        self.assertEqual(len(handler.msg.responses), 1)
-        self.assertEqual(handler.msg.responses[0].text,
-                         ConfirmHandler.THANK_YOU)
+        msg = self._send(self.reg_conn, '1')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)
         sent_notif = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notif.count(), 1)
         self.assertEqual(sent_notif[0].status, 'confirmed')
