@@ -1,0 +1,32 @@
+{% extends "groups/base.html" %}
+
+{% block title %}Groups{% endblock %}
+
+{% block content %}
+
+<div class='module'>
+    <h2>Groups</h2>
+    <p><a title='Add group' href="{% url create-group %}" >Add group...</a></p>
+    <table class='sortable'>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th># Recipients</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in groups %}
+                <tr>
+                    <td>{{ group.pk }}</td>
+                    <td>{{ group.name }}</td>
+                    <td>{{ group.count }}</td>
+                    <td>
+                        <a title='Edit {{ group.name }}' href='{% url edit-group group.pk %}'>Edit</a> | <a title='Delete {{ group.name }}' href='{% url delete-group group.pk %}'>Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
