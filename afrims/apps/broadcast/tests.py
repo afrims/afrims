@@ -15,49 +15,14 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.tests.scripted import TestScript
 
+from afrims.tests.testcases import CreateDataTest
 from afrims.apps.broadcast.models import Broadcast, DateAttribute
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 from afrims.apps.broadcast.forms import BroadcastForm
 
-from afrims.apps.groups.models import Group
 
-
-class CreateDataTest(TestCase):
+class BroadcastCreateDataTest(CreateDataTest):
     """ Base test case that provides helper functions to create data """
-
-    def random_string(self, length=255, extra_chars=''):
-        chars = string.letters + extra_chars
-        return ''.join([random.choice(chars) for i in range(length)])
-
-    def create_backend(self, data={}):
-        defaults = {
-            'name': self.random_string(12),
-        }
-        defaults.update(data)
-        return Backend.objects.create(**defaults)
-
-    def create_contact(self, data={}):
-        defaults = {
-            'name': self.random_string(12),
-        }
-        defaults.update(data)
-        return Contact.objects.create(**defaults)
-
-    def create_connection(self, data={}):
-        defaults = {
-            'identity': self.random_string(10),
-        }
-        defaults.update(data)
-        if 'backend' not in defaults:
-            defaults['backend'] = self.create_backend()
-        return Connection.objects.create(**defaults)
-
-    def create_group(self, data={}):
-        defaults = {
-            'name': self.random_string(12),
-        }
-        defaults.update(data)
-        return Group.objects.create(**defaults)
 
     def create_broadcast(self, when='', commit=True, data={}):
         now = datetime.datetime.now()
@@ -106,7 +71,7 @@ class CreateDataTest(TestCase):
         self.assertEqual(date1, date2)
 
 
-class DateAttributeTest(CreateDataTest):
+class DateAttributeTest(BroadcastCreateDataTest):
     """ Test pre-defined data in initial_data.json against rrule constants """
 
     def test_weekdays(self):
@@ -120,7 +85,7 @@ class DateAttributeTest(CreateDataTest):
         self.assertEqual(self.get_weekday('sunday').value, rrule.SU.weekday)
 
 
-class BroadcastDateTest(CreateDataTest):
+class BroadcastDateTest(BroadcastCreateDataTest):
 
     def test_get_next_date_future(self):
         """ get_next_date shouln't increment if date is in the future """
@@ -197,7 +162,7 @@ class BroadcastDateTest(CreateDataTest):
         self.assertDateEqual(broadcast.get_next_date(), next_month)
 
 
-class BroadcastAppTest(CreateDataTest):
+class BroadcastAppTest(BroadcastCreateDataTest):
 
     def test_queue_creation(self):
         """ Test broadcast messages are queued properly """
@@ -223,7 +188,7 @@ class BroadcastAppTest(CreateDataTest):
         self.assertFalse(b2.pk in ready)
 
 
-class BroadcastFormTest(CreateDataTest):
+class BroadcastFormTest(BroadcastCreateDataTest):
     def setUp(self):
         self.contact = self.create_contact()
         self.group = self.create_group()
@@ -312,7 +277,7 @@ class BroadcastFormTest(CreateDataTest):
         self.assertEqual(after.weekdays.count(), 0)
 
 
-class BroadcastViewTest(CreateDataTest):
+class BroadcastViewTest(BroadcastCreateDataTest):
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
         self.user.save()
@@ -333,7 +298,7 @@ class BroadcastViewTest(CreateDataTest):
         self.assertTrue(after.schedule_frequency is None)
 
 
-class BroadcastScriptedTest(TestScript, CreateDataTest):
+class BroadcastScriptedTest(TestScript, BroadcastCreateDataTest):
     def test_entire_stack(self):
         self.startRouter()
         contact = self.create_contact()

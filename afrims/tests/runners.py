@@ -3,7 +3,7 @@ import logging
 
 from test_extensions.testrunners.xmloutput import XMLTestSuiteRunner
 
-logger = logging.getLogger('mwana.tests.runners')
+logger = logging.getLogger('afrims.tests.runners')
 
 class NoTeardownXMLTestRunner(XMLTestSuiteRunner):
     """
