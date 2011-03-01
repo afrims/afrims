@@ -16,6 +16,11 @@ INSTALLED_BACKENDS = {
             "params_outgoing": "reply=%(reply)s&id=%(id)s&network=%(network)s&number=%(phone_number)s&message=%(message)s&ekey=<SECRET_EKEY>&cc=dimagi&currency=THB&value=0&title=trialcnct",
             "params_incoming": "action=action&id=%(id)s&number=%(phone_number)s&network=%(network)s&message=%(message)s&shortcode=%(sc)s&country=%(country_code)&billing=%(bill_code)s"
     },
+    "twilio": {
+        "ENGINE": "rtwilio.backend",
+        'host': 'localhost', 'port': '8081',
+        'config': {},
+    },
 }
 
 DATABASES = {
