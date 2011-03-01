@@ -31,6 +31,10 @@ Developer Setup
 
     sudo apt-get install postgresql python-psycopg2
 
+* The following additional build dependencies::
+
+    sudo apt-get install libxslt1-dev libxml2-dev
+
 * Install pip and virtualenv, and make sure virtualenv is up to date, e.g.::
 
     easy_install pip
