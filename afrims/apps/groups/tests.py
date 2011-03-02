@@ -26,7 +26,7 @@ class GroupFormTest(CreateDataTest):
         self.assertFalse(contact.groups.filter(pk=group2.pk).exists())
 
     def test_edit_contact(self):
-        """ Test contact creation functionality with form """
+        """ Test contact edit functionality with form """
         group1 = self.create_group()
         group2 = self.create_group()
         contact = self.create_contact()
