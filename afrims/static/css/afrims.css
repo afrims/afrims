@@ -50,6 +50,15 @@ ul.errorlist li {
     border: 1px solid #A33B3B;
 }
 
+form.buttons ul {
+    margin: 0;
+    padding: 0;
+}
+
+form.buttons ul li {
+    list-style-type: none;
+}
+
 /* tables */
 
 table.pagination tfoot tr td div.pagination {
