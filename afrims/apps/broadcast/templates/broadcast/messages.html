@@ -33,7 +33,7 @@
             <td>{{ message.broadcast.pk }}</td>
             <td>{{ message.date_created|date:"m/d/y fa" }}</td>
             <td>{{ message.get_status_display }}</td>
-            <td>{{ message.contact }}</td>
+            <td>{{ message.recipient }}</td>
             <td>{{ message.date_sent|date:"m/d/y fa" }}</td>
         </tr>
         {% empty %}

@@ -68,7 +68,7 @@ def schedule(request):
 
 @login_required
 def list_messages(request):
-    messages = BroadcastMessage.objects.all()
+    messages = BroadcastMessage.objects.select_related()
     context = {
         'broadcast_messages': messages,
     }
