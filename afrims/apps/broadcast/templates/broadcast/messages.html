@@ -30,7 +30,7 @@
         </thead>
         {% for message in broadcast_messages %}
         <tr>
-            <td>{{ message.broadcast.pk }}</td>
+            <td>{{ message.broadcast.pk }} ({{ message.broadcast.body|truncatewords:2 }})</td>
             <td>{{ message.date_created|date:"m/d/y fa" }}</td>
             <td>{{ message.get_status_display }}</td>
             <td>{{ message.recipient }}</td>
