@@ -59,6 +59,23 @@ form.buttons ul li {
     list-style-type: none;
 }
 
+form.buttons td ul.selectable-deck {
+    margin-top: 1em;
+}
+
+form.buttons td ul.selectable-deck li {
+    padding-left: 0;
+}
+
+form.buttons th {
+    padding-top: 0.9em;
+    vertical-align: top;
+}
+
+form.buttons .ui-widget-content {
+    padding: 0.2em;
+}
+
 /* tables */
 
 table.pagination tfoot tr td div.pagination {
