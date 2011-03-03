@@ -6,7 +6,5 @@ $(document).ready(function() {
     $("form.buttons input[name=cancel]").click(function(e) {
         history.go(-1);
     });
-    
-    $('.horitzonal-multiselect').multiselect();
 });
 
