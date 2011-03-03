@@ -78,6 +78,7 @@ form.buttons .ui-widget-content {
 
 select.horitzonal-multiselect {
     width: 500px;
+    height: 200px;
 }
 
 /* tables */
