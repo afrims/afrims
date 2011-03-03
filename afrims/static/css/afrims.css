@@ -76,6 +76,10 @@ form.buttons .ui-widget-content {
     padding: 0.2em;
 }
 
+select.horitzonal-multiselect {
+    width: 500px;
+}
+
 /* tables */
 
 table.pagination tfoot tr td div.pagination {

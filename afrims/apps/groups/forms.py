@@ -1,11 +1,8 @@
 from django import forms
 
 from afrims.apps.groups.models import Group
-from afrims.apps.groups.lookups import ContactLookup
 
 from rapidsms.models import Contact
-
-from selectable import forms as selectable
 
 
 __all__ = ('GroupForm', 'ContactForm')
@@ -13,18 +10,15 @@ __all__ = ('GroupForm', 'ContactForm')
 
 class GroupForm(forms.ModelForm):
 
-    contacts = selectable.AutoCompleteSelectMultipleField(ContactLookup)
-
     class Meta:
         model = Group
 
     def __init__(self, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            pks = list(self.instance.contacts.values_list('pk', flat=True))
-            self.initial['contacts'] = [[], pks]
-        # help_text = 'Begin typing to search contact names'
-        # self.fields['contacts'].help_text = help_text
+        self.fields['contacts'].help_text = ''
+        qs = Contact.objects.filter(patient__isnull=True).order_by('name')
+        self.fields['contacts'].queryset = qs
+        self.fields['contacts'].widget.attrs['class'] = 'horitzonal-multiselect'
 
 
 class ContactForm(forms.ModelForm):

@@ -15,7 +15,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         phone_number = 1111111111
         Contact.objects.filter(name__startswith=self.prefix).delete()
-        for i in xrange(3000):
+        for i in xrange(100):
             name = '%s Contact %d' % (self.prefix, i)
             contact = Contact.objects.create(name=name)
             if (i % 2) == 0:
