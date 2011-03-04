@@ -52,8 +52,6 @@ INSTALLED_APPS = [
     "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "rapidsms.contrib.echo",
-
-    "selectable",
 ]
 
 

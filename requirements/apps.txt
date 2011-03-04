@@ -7,4 +7,3 @@ django-pagination==1.0.7
 lxml==2.3
 twilio==2.0.6
 -e git+http://github.com/caktus/rapidsms-twilio.git#egg=rtwilio
--e hg+http://bitbucket.org/mlavin/django-selectable@f0f3391b63a4#egg=django-selectable
