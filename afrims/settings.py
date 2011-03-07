@@ -61,10 +61,10 @@ INSTALLED_APPS = [
 RAPIDSMS_TABS = [
     ("afrims.apps.broadcast.views.send_message", "Send a Message"),
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
-    ("afrims.apps.groups.views.list_groups", "Cold Chain"),
+    ("cold_chain", "Cold Chain"),
     ("afrims.apps.groups.views.list_groups", "Groups"),
     ("afrims.apps.groups.views.list_contacts","People"),
-    ("afrims.apps.groups.views.list_groups", "Settings"),
+    ("settings", "Settings"),
 #    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
 
 #    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
