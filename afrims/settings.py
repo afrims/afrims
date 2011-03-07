@@ -187,3 +187,7 @@ TIME_ZONE = 'America/New_York'
 
 LOGIN_URL = '/account/login/'
 
+SOUTH_MIGRATION_MODULES = {
+    'rapidsms': 'afrims.migrations.rapidsms',
+}
+
