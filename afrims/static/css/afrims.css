@@ -76,9 +76,18 @@ form.buttons .ui-widget-content {
     padding: 0.2em;
 }
 
+form.buttons table td, form.buttons table th {
+    border: none;
+}
+
 select.horitzonal-multiselect {
     width: 500px;
     height: 200px;
+}
+
+body:last-child h2 + form.buttons {
+    padding-top: 1em;
+    padding-left: 1em;
 }
 
 /* tables */
