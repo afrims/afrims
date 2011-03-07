@@ -1,3 +1,5 @@
+import logging
+
 from django import forms
 
 from afrims.apps.groups.models import Group
@@ -6,6 +8,9 @@ from rapidsms.models import Contact
 
 
 __all__ = ('GroupForm', 'ContactForm')
+
+
+logger = logging.getLogger('afrims.apps.groups.forms')
 
 
 class GroupForm(forms.ModelForm):
@@ -41,6 +46,7 @@ class ContactForm(forms.ModelForm):
         self.fields['groups'].required = False
         for name in ('first_name', 'last_name', 'email', 'phone'):
             self.fields[name].required = True
+        logger.debug(str(self.initial))
 
     def save(self, commit=True):
         instance = super(ContactForm, self).save()
