@@ -33,7 +33,8 @@ class ContactForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance')
         if instance and instance.pk:
-            kwargs['initial'] = {'groups': instance.groups.all()}
+            pks = instance.groups.values_list('pk', flat=True)
+            kwargs['initial'] = {'groups': list(pks)}
         super(ContactForm, self).__init__(*args, **kwargs)
         self.fields['groups'].widget = forms.CheckboxSelectMultiple()
         self.fields['groups'].queryset = Group.objects.order_by('name')
