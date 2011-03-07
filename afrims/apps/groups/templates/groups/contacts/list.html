@@ -3,9 +3,13 @@
 
 {% block title %}Contacts{% endblock %}
 
+{% block javascripts %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="{{ MEDIA_URL }}js/afrims.js" type="text/javascript"></script>
+{% endblock %}
+
 {% block content %}
-
-
 
 <div class='module'>
     <h2>Contacts ({{ contacts.count }} total)</h2>
@@ -22,13 +26,14 @@
         </thead>
         <tbody>
             {% for contact in contacts %}
-                <tr>
+                <tr class="{% cycle 'odd' 'even' %}">
                     <td>{{ contact.pk }}</td>
                     <td>{{ contact.name }}</td>
                     <td>{{ contact.email }}</td>
                     <td>{{ contact.phone }}</td>
-                    <td>
-                        <a title='Edit {{ contact.name }}' href='{% url edit-contact contact.pk %}'>Edit</a> | <a title='Delete {{ contact.name }}' href='{% url delete-contact contact.pk %}'>Delete</a>
+                    <td class='actions'>
+                        <a class='button' title='Edit {{ contact.name }}' href='{% url edit-contact contact.pk %}'><span class='ui-icon ui-icon-pencil' /></a>
+                        <a class='button' title='Delete {{ contact.name }}' href='{% url delete-contact contact.pk %}'><span class='ui-icon ui-icon-closethick' /></a>    
                     </td>
                 </tr>
             {% endfor %}

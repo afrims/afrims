@@ -17,12 +17,13 @@
         </thead>
         <tbody>
             {% for group in groups %}
-                <tr>
+                <tr class="{% cycle 'odd' 'even' %}">
                     <td>{{ group.pk }}</td>
                     <td>{{ group.name }}</td>
                     <td>{{ group.count }}</td>
-                    <td>
-                        <a title='Edit {{ group.name }}' href='{% url edit-group group.pk %}'>Edit</a> | <a title='Delete {{ group.name }}' href='{% url delete-group group.pk %}'>Delete</a>
+                    <td class='actions'>
+                        <a class='button' title='Edit {{ group.name }}' href='{% url edit-group group.pk %}'><span class='ui-icon ui-icon-pencil' /></a>
+                        <a class='button' title='Delete {{ group.name }}' href='{% url delete-group group.pk %}'><span class='ui-icon ui-icon-closethick' /></a>    
                     </td>
                 </tr>
             {% endfor %}

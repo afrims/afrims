@@ -91,3 +91,12 @@ table.pagination tfoot tr td div.pagination a, table.pagination tfoot tr td div.
     display: inline;
     float: none;
 }
+
+table.sortable tbody tr.odd {
+    background: #F3F8FD;
+}
+
+table.sortable td.actions .ui-button-text-only .ui-button-text {
+    padding: 2px;
+}
+
