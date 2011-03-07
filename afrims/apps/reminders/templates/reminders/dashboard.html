@@ -7,6 +7,7 @@
 
 {% block stylesheets %}{{ block.super }}
         <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reminders/css/reminders.css" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/afrims.css" />
 {% endblock %}
 
 {% block left %}
@@ -15,13 +16,13 @@
 
 <table id='reminder_report' class='sortable'>
     <tr>
-        <th>Queued, Unsent Reminders:</th><td>{{ reminder_report.queued }}</td>
+        <th>Unsent Reminders:</th><td>{{ reminder_report.queued }}</td>
     </tr>
     <tr>
-        <th>Sent, Unconfirmed Reminders:</th><td>{{ reminder_report.sent }}</td>
+        <th>Sent and Unconfirmed:</th><td>{{ reminder_report.sent }}</td>
     </tr>
     <tr>
-        <th>Sent, Confirmed Reminders:</th><td>{{ reminder_report.confirmed }}</td>
+        <th>Sent and Confirmed:</th><td>{{ reminder_report.confirmed }}</td>
     </tr>
 </table>
 </div>
@@ -40,12 +41,10 @@
 	    <td>{{ form.as_ul }}</td>
 	</tr>
 	{% endfor %}
-	<tr>
-		<td colspan="2" class="submit">
-		   <input type="submit" name="submit" value="Update Schedule" />
-		</td>
-	</tr>
 </table>
+<div class='form-action'>
+   <input type="submit" name="submit" value="Update Schedule" />
+</div>
 </form>
 
 </div>

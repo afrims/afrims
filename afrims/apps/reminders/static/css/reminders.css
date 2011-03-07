@@ -19,7 +19,3 @@ table#notification_schedule tr.one {
 table#notification_schedule tr.two {
     background-color: #eee;
 }
-
-table#notification_schedule td.submit {
-    text-align: right;
-}
