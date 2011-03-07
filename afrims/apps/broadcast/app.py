@@ -71,7 +71,7 @@ class BroadcastApp(AppBase):
                 message.date_sent = datetime.datetime.now()
             else:
                 self.debug('message failed to send')
-                message.status = 'failed'
+                message.status = 'error'
             message.save()
 
     def cronjob(self):
