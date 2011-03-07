@@ -46,7 +46,6 @@ class ContactForm(forms.ModelForm):
         self.fields['groups'].required = False
         for name in ('first_name', 'last_name', 'email', 'phone'):
             self.fields[name].required = True
-        logger.debug(str(self.initial))
 
     def save(self, commit=True):
         instance = super(ContactForm, self).save()
