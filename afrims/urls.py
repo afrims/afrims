@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from django.contrib import admin
+from django.views.generic.simple import direct_to_template
 
 admin.autodiscover()
 
@@ -16,6 +17,11 @@ urlpatterns = patterns('',
     # RapidSMS core URLs
     (r'^account/', include('rapidsms.urls.login_logout')),
     url(r'^$', 'rapidsms.views.dashboard', name='rapidsms-dashboard'),
+
+    url(r'^settings/$', direct_to_template,
+        {'template': 'not_implemented.html'}, name='settings'),
+    url(r'^cold-chain/$', direct_to_template,
+        {'template': 'not_implemented.html'}, name='cold_chain'),
 
     # RapidSMS contrib app URLs
     (r'^ajax/', include('rapidsms.contrib.ajax.urls')),

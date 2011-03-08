@@ -8,9 +8,9 @@ class Notification(models.Model):
     An appointment notifications to be sent to trial participants.
     '''
     NUM_DAY_CHOICES = [(x, x) for x in xrange(1, 15)]
-    num_days = models.IntegerField(help_text='Number of days before the '
-                                   'scheduled appointment to send a reminder.',
-                                   choices=NUM_DAY_CHOICES)
+    num_days = models.IntegerField('An appointment reminder will go out',
+                                   help_text='days before the scheduled '
+                                   'appointment.', choices=NUM_DAY_CHOICES)
 
     class Meta:
         ordering = ('num_days',)

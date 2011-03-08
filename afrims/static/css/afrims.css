@@ -23,7 +23,7 @@ ul.messages li.info {
 /* forms */
 
 .form-action {
-    text-align: right;
+    text-align: left;
     padding-bottom: 1em;
 }
 
