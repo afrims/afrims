@@ -108,6 +108,8 @@ class RemindersApp(AppBase):
         self.info('found {0} notification(s) to send'.format(count))
         for notification in notifications:
             connection = notification.recipient.default_connection
+            if not connection:
+                continue
             msg = PinVerifiedOutgoingMessage(connection=connection,
                                              template=notification.message)
             success = True
