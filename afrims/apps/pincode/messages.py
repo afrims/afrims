@@ -22,7 +22,8 @@ class PinVerifiedOutgoingMessage(OutgoingMessage):
     def send(self):
         # we can only verify the PIN if the connection has an associated
         # contact with a PIN set
-        if self.connection.contact and self.connection.contact.pin:
+        if self.connection and self.connection.contact and \
+          self.connection.contact.pin:
             # queue up the original message for delivery upon PIN entry
             now = datetime.datetime.now()
             pincode.OutgoingMessage.objects.create(connection=self.connection,
