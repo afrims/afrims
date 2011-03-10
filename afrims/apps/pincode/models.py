@@ -17,3 +17,6 @@ class OutgoingMessage(models.Model):
     date_queued = models.DateTimeField()
     date_sent = models.DateTimeField(blank=True, null=True)
     error_message = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.text
