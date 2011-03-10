@@ -86,7 +86,9 @@ class RemindersApp(AppBase):
             days_delta = datetime.timedelta(days=notification.num_days)
             appt_date = datetime.date.today() + days_delta
             patients = reminders.Patient.objects.filter(next_visit=appt_date,
-                                                        contact__isnull=False)
+                                                        contact__isnull=False,)
+            patients = patients.exclude(contact__sent_notifications__appt_date=appt_date,
+                                        contact__sent_notifications__notification=notification)
             self.info('Queuing reminders for %s patients.' % patients.count())
             for patient in patients:
                 self.debug('Creating notification for %s' % patient)
@@ -98,6 +100,7 @@ class RemindersApp(AppBase):
                 message = self.appt_message.format(**msg_data)
                 notification.sent_notifications.create(
                                         recipient=patient.contact,
+                                        appt_date=appt_date,
                                         date_queued=datetime.datetime.now(),
                                         message=message)
 
@@ -109,6 +112,8 @@ class RemindersApp(AppBase):
         for notification in notifications:
             connection = notification.recipient.default_connection
             if not connection:
+                self.debug('no connection found for recipient {0}, unable '
+                           'to send'.format(notification.recipient))
                 continue
             msg = PinVerifiedOutgoingMessage(connection=connection,
                                              template=notification.message)

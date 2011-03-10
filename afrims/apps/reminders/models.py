@@ -39,6 +39,7 @@ class SentNotification(models.Model):
                                   'notification.')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES,
                               default='queued')
+    appt_date = models.DateField(help_text='The date of the appointment.')
     date_queued = models.DateTimeField(help_text='The date and time this '
                                        'notification was initially created.')
     date_sent = models.DateTimeField(null=True, blank=True,
