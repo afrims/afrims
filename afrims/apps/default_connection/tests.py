@@ -1,34 +1,29 @@
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.forms.models import model_to_dict
-
-from rapidsms.models import Contact, Backend, Connection
-
 from afrims.tests.testcases import CreateDataTest
-
-from afrims.apps.groups.models import Group
 
 
 class DefaultConnectionTest(CreateDataTest):
 
-    def test_backend_with_create(self):
-        """ New contacts should be associated with a connection """
+    def test_without_primary_backend(self):
+        """ Random backend is chosen if contact's default is not set """
         backend = self.create_backend()
         contact = self.create_contact()
         connection = contact.get_or_create_connection()
+        self.assertEqual(connection.backend_id, backend.pk)
+        self.assertEqual(connection.identity, contact.phone)
 
-#         form = group_forms.ContactForm(data)
-#         self.assertTrue(form.is_valid())
-#         contact = form.save()
-#         self.assertEqual(contact.default_connection.backend.pk, backend.pk)
-# 
-#     def test_backend_with_existing_connection(self):
-#         """ New contacts should auto associate with existing connections """
-#         backend = self.create_backend()
-#         connection = self.create_connection({'backend': backend})
-#         data = self._data({'default_backend': backend.pk,
-#                            'phone': connection.identity})
-#         form = group_forms.ContactForm(data)
-#         self.assertTrue(form.is_valid())
-#         contact = form.save()
-#         self.assertEqual(contact.default_connection.pk, connection.pk)
+    def test_with_primary_backend(self):
+        """ New connection should have contact's default backend """
+        backend1 = self.create_backend()
+        backend2 = self.create_backend()
+        contact = self.create_contact({'primary_backend': backend2})
+        connection = contact.get_or_create_connection()
+        self.assertEqual(connection.backend_id, backend2.pk)
+
+    def test_conn(self):
+        """ New connection should have contact's default backend """
+        backend = self.create_backend()
+        contact = self.create_contact({'primary_backend': backend})
+        contact.set_primary_connection()
+        contact.save()
+        self.assertEqual(contact.primary_backend_id,
+                         contact.primary_connection.backend_id)

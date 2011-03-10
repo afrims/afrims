@@ -11,11 +11,23 @@ class Migration(SchemaMigration):
         # Adding field 'Contact.default_backend'
         db.add_column('rapidsms_contact', 'default_backend', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['rapidsms.Backend'], null=True, blank=True), keep_default=False)
 
+        # Adding field 'Contact.primary_backend'
+        db.add_column('rapidsms_contact', 'primary_backend', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='contact_primary', null=True, to=orm['rapidsms.Backend']), keep_default=False)
+
+        # Adding field 'Contact.primary_connection'
+        db.add_column('rapidsms_contact', 'primary_connection', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='contact_primary', null=True, to=orm['rapidsms.Connection']), keep_default=False)
+
 
     def backwards(self, orm):
         
         # Deleting field 'Contact.default_backend'
         db.delete_column('rapidsms_contact', 'default_backend_id')
+
+        # Deleting field 'Contact.primary_backend'
+        db.delete_column('rapidsms_contact', 'primary_backend_id')
+
+        # Deleting field 'Contact.primary_connection'
+        db.delete_column('rapidsms_contact', 'primary_connection_id')
 
 
     models = {
@@ -47,6 +59,9 @@ class Migration(SchemaMigration):
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
             'phone': ('django.db.models.fields.CharField', [], {'max_length': '32', 'blank': 'True'}),
+            'pin': ('django.db.models.fields.CharField', [], {'max_length': '20', 'blank': 'True'}),
+            'primary_backend': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'contact_primary'", 'null': 'True', 'to': "orm['rapidsms.Backend']"}),
+            'primary_connection': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'contact_primary'", 'null': 'True', 'to': "orm['rapidsms.Connection']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'})
         },
         'rapidsms.deliveryreport': {
