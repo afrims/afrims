@@ -99,7 +99,7 @@ class RemindersScriptedTest(TestScript, RemindersCreateDataTest):
     def test_scheduler(self):
         self.startRouter()
         self.router.logger.setLevel(logging.DEBUG)
-        contact = self.create_contact()
+        contact = self.create_contact({'pin': '1234'})
         backend = self.create_backend(data={'name': 'mockbackend'})
         connection = self.create_connection({'contact': contact,
                                              'backend': backend})

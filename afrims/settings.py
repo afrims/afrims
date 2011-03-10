@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "pagination",
     "south",
     # "gunicorn",
+    "afrims.apps.pincode",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
     "afrims.apps.offsite",
