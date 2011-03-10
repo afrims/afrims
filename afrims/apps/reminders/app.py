@@ -1,10 +1,10 @@
 import datetime
 
 from rapidsms.apps.base import AppBase
-from rapidsms.messages import OutgoingMessage
 from rapidsms.contrib.scheduler.models import EventSchedule
 
 from afrims.apps.reminders import models as reminders
+from afrims.apps.pincode.messages import PinVerifiedOutgoingMessage
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that ./manage.py makemessages
@@ -61,16 +61,17 @@ class RemindersApp(AppBase):
         Updates the SentNotification status to 'confirmed' for the given user
         and replies with a thank you message.
         """
-        if not msg.text.startswith('1'):
+        msg_parts = msg.text.split()
+        if not msg_parts or msg_parts[0] != '1':
             return False
         contact = msg.connection.contact
         if not contact:
             msg.respond(self.not_registered)
-            return
+            return True
         notifs = reminders.SentNotification.objects.filter(recipient=contact)
         if not notifs.exists():
             msg.respond(self.no_reminders)
-            return
+            return True
         sent_notification = notifs.order_by('-date_sent')[0]
         sent_notification.status = 'confirmed'
         sent_notification.date_confirmed = datetime.datetime.now()
@@ -107,8 +108,8 @@ class RemindersApp(AppBase):
         self.info('found {0} notification(s) to send'.format(count))
         for notification in notifications:
             connection = notification.recipient.default_connection
-            msg = OutgoingMessage(connection=connection,
-                                  template=notification.message)
+            msg = PinVerifiedOutgoingMessage(connection=connection,
+                                             template=notification.message)
             success = True
             try:
                 msg.send()
