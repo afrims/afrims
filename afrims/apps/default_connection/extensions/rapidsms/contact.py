@@ -38,7 +38,8 @@ class ContactExtra(models.Model):
             logger.debug('using random backend: {0}'.format(backend))
         connection = self.get_or_create_connection(backend=backend)
         if not connection.contact:
-            logging.debug('associating connection to contact')
+            msg = 'associating connection ({0}) to contact ({1})'
+            logger.debug(msg.format(connection, self))
             connection.contact = self
             connection.save()
         return connection
