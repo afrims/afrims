@@ -22,7 +22,8 @@ class DefaultConnectionTest(CreateDataTest):
         self.assertEqual(connection.contact_id, contact.pk)
 
     def test_backend_setting(self):
-        """ Random backend is fallback """
+        """ Test specified backend """
+        self.create_backend()
         backend = self.create_backend()
         contact = self.create_contact()
         connection = contact.get_primary_connection(backend_name=backend.name)
