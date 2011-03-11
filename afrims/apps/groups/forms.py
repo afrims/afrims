@@ -34,7 +34,7 @@ class ContactForm(forms.ModelForm):
 
     class Meta:
         model = Contact
-        exclude = ('language', 'name')
+        exclude = ('language', 'name', 'primary_backend')
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance')
@@ -48,26 +48,9 @@ class ContactForm(forms.ModelForm):
         for name in ('first_name', 'last_name', 'email', 'phone'):
             self.fields[name].required = True
 
-    def _get_connection(self, instance):
-        """ Look for a connection related to specified phone and backend """
-        from rapidsms.models import Connection
-        if Backend.objects.count() > 0:
-            if not instance.default_backend:
-                # TODO: possibly make this a setting
-                instance.default_backend = Backend.objects.all()[0]
-            data = {'backend': instance.default_backend,
-                    'identity': instance.phone}
-            connection, _ = Connection.objects.get_or_create(**data)
-            return connection
-
     def save(self, commit=True):
         instance = super(ContactForm, self).save()
         instance.groups = self.cleaned_data['groups']
-        # if we find a connection, associate it with this contact
-        connection = self._get_connection(instance)
-        if connection:
-            connection.contact = instance
-            connection.save()
         return instance
 
 
