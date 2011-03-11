@@ -22,20 +22,20 @@ class ContactExtra(models.Model):
         return connection
 
     def get_primary_connection(self, backend_name=None):
-        """ Override Contact's default_connection """
+        """ Determine needed backend and return associated connection """
         from rapidsms.models import Backend
         if not backend_name and hasattr(settings, 'PRIMARY_BACKEND'):
             backend_name = settings.PRIMARY_BACKEND
-            logging.debug('found {0} in settings'.format(backend_name))
+            logger.debug('found {0} in settings'.format(backend_name))
         if self.primary_backend_id:
             backend = self.primary_backend
-            logging.debug('using contact backend: {0}'.format(backend))
+            logger.debug('using contact backend: {0}'.format(backend))
         elif backend_name:
             backend = Backend.objects.get(name=backend_name)
-            logging.debug('using backend: {0}'.format(backend))
+            logger.debug('using backend: {0}'.format(backend))
         else:
             backend = Backend.objects.all()[0]
-            logging.debug('using random backend: {0}'.format(backend))
+            logger.debug('using random backend: {0}'.format(backend))
         connection = self.get_or_create_connection(backend=backend)
         if not connection.contact:
             logging.debug('associating connection to contact')
@@ -45,6 +45,7 @@ class ContactExtra(models.Model):
 
     @property
     def default_connection(self):
+        """ Override default_connection to return primary connection """
         return self.get_primary_connection()
 
     class Meta:
