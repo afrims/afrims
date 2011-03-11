@@ -1,0 +1,41 @@
+{% extends "layout-split-2.html" %}
+
+{% block title %}Forwarding Rules{% endblock %}
+
+{% block javascripts %}{{ block.super }}
+{% endblock %}
+
+{% block stylesheets %}{{ block.super }}
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}groups/css/groups.css" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/afrims.css" />
+{% endblock %}
+
+{% block left %}
+
+{% endblock %}
+
+{% block right %}
+<div class="module">
+<h2>Forwarding Rules</h2>
+
+<form method="POST" action="">
+{% csrf_token %}
+<table id='forwarding_rules' class='sortable'>
+{{ formset.management_form }}
+    <tr><th>Keyword</th><th>Source Group</th><th>Destination Group</th><th>Delete?</th></tr>
+	{% for form in formset.forms %}
+	<tr class="{% cycle 'one' 'two' %}">
+	    {% for field in form.visible_fields %}
+	    <td>{{ field.errors }}{{ field }}</td>
+	    {% endfor %}
+	</tr>
+	{% endfor %}
+	
+</table>
+<div class='form-action'>
+   <input type="submit" name="submit" value="Update Rules" />
+</div>
+</form>
+
+</div>
+{% endblock %}
