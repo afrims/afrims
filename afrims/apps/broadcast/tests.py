@@ -301,6 +301,7 @@ class BroadcastViewTest(BroadcastCreateDataTest):
 class BroadcastScriptedTest(TestScript, BroadcastCreateDataTest):
     def test_entire_stack(self):
         self.startRouter()
+        self.router.logger.setLevel(logging.DEBUG)
         contact = self.create_contact()
         backend = self.create_backend(data={'name': 'mockbackend'})
         connection = self.create_connection({'contact': contact,
