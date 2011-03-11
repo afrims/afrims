@@ -18,7 +18,7 @@ INSTALLED_BACKENDS = {
     },
     "twilio": {
         "ENGINE": "rtwilio.backend",
-        'host': 'localhost', 'port': '8081',
+        'host': '173.203.221.48', 'port': '8081',
         'config': {},
     },
 }

@@ -31,6 +31,8 @@ class PinCodeApp(AppBase):
         if not msg_parts:
             return False
         pin = msg_parts[0]
+        if not self.pin_regex.match(pin):
+            return False
         contact = msg.connection.contact
         if not contact or not contact.pin:
             msg.respond(self.no_pin)

@@ -1,13 +1,14 @@
 import logging
 
 from django import forms
+from django.forms.models import modelformset_factory
 
-from afrims.apps.groups.models import Group
+from afrims.apps.groups.models import Group, ForwardingRule
 
 from rapidsms.models import Contact, Backend
 
 
-__all__ = ('GroupForm', 'ContactForm')
+__all__ = ('GroupForm', 'ContactForm', 'ForwardingRuleFormset',)
 
 
 logger = logging.getLogger('afrims.apps.groups.forms')
@@ -68,3 +69,6 @@ class ContactForm(forms.ModelForm):
             connection.contact = instance
             connection.save()
         return instance
+
+
+ForwardingRuleFormset = modelformset_factory(ForwardingRule, can_delete=True)

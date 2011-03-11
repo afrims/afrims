@@ -20,5 +20,7 @@ urlpatterns = patterns('',
         name='edit-contact'),
     url(r'^contact/(\d+)/delete/$', views.delete_contact,
         name='delete-contact'),
+    url(r'^forwarding/$', views.forwarding,
+        name='groups-forwarding'),
 )
 

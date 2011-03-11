@@ -1,0 +1,13 @@
+#inner .col-1 { width: 25%; }
+#inner .col-2 { width: 75%; }
+
+table#forwarding_rules {
+    width: 100%;
+}
+table#forwarding_rules tr.one {
+    background-color: #fff;
+}
+
+table#forwarding_rules tr.two {
+    background-color: #eee;
+}

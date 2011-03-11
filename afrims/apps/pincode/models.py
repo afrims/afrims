@@ -15,5 +15,8 @@ class OutgoingMessage(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES,
                               default='queued')
     date_queued = models.DateTimeField()
-    date_sent = models.DateTimeField(null=True)
-    error_message = models.TextField()
+    date_sent = models.DateTimeField(blank=True, null=True)
+    error_message = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.text

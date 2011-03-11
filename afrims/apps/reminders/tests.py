@@ -78,13 +78,14 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
                          self.app.no_reminders)
-
+        appt_date = datetime.date.today()
         # test the response from a user with a pending notification
         notification = reminders.Notification.objects.create(num_days=1)
         reminders.SentNotification.objects.create(notification=notification,
                                                   recipient=self.contact,
                                                   status='sent',
-                                                  message='abc')
+                                                  message='abc',
+                                                  appt_date=appt_date)
         msg = self._send(self.reg_conn, '1')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
