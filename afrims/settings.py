@@ -193,3 +193,5 @@ SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'afrims.migrations.rapidsms',
 }
 
+PRIMARY_BACKEND = 'twilio'
+
