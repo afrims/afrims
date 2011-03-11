@@ -110,7 +110,7 @@ class RemindersApp(AppBase):
         count = notifications.count()
         self.info('found {0} notification(s) to send'.format(count))
         for notification in notifications:
-            connection = notification.recipient.get_primary_connection()
+            connection = notification.recipient.default_connection
             if not connection:
                 self.debug('no connection found for recipient {0}, unable '
                            'to send'.format(notification.recipient))

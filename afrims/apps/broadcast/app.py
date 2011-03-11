@@ -56,7 +56,7 @@ class BroadcastApp(AppBase):
         messages = BroadcastMessage.objects.filter(status='queued')[:50]
         self.info('found {0} message(s) to send'.format(messages.count()))
         for message in messages:
-            connection = message.recipient.get_primary_connection()
+            connection = message.recipient.default_connection
             msg = OutgoingMessage(connection=connection,
                                   template=message.broadcast.body)
             success = True

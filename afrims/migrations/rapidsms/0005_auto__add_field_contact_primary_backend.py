@@ -8,18 +8,12 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Adding field 'Contact.default_backend'
-        db.add_column('rapidsms_contact', 'default_backend', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['rapidsms.Backend'], null=True, blank=True), keep_default=False)
-
         # Adding field 'Contact.primary_backend'
         db.add_column('rapidsms_contact', 'primary_backend', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='contact_primary', null=True, to=orm['rapidsms.Backend']), keep_default=False)
 
 
     def backwards(self, orm):
         
-        # Deleting field 'Contact.default_backend'
-        db.delete_column('rapidsms_contact', 'default_backend_id')
-
         # Deleting field 'Contact.primary_backend'
         db.delete_column('rapidsms_contact', 'primary_backend_id')
 
@@ -45,7 +39,6 @@ class Migration(SchemaMigration):
         },
         'rapidsms.contact': {
             'Meta': {'object_name': 'Contact'},
-            'default_backend': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Backend']", 'null': 'True', 'blank': 'True'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),

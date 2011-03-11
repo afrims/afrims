@@ -33,5 +33,9 @@ class ContactExtra(models.Model):
             connection.save()
         return connection
 
+    @property
+    def default_connection(self):
+        return self.get_primary_connection()
+
     class Meta:
         abstract = True

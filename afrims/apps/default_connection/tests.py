@@ -8,7 +8,7 @@ class DefaultConnectionTest(CreateDataTest):
     def test_defined_primary_backend(self):
         """ Random backend is chosen if contact's default is not set """
         backend = self.create_backend()
-        contact = self.create_contact({'default_backend': backend})
+        contact = self.create_contact({'primary_backend': backend})
         connection = contact.get_primary_connection()
         self.assertEqual(connection.backend_id, backend.pk)
         self.assertEqual(connection.contact_id, contact.pk)
@@ -28,4 +28,3 @@ class DefaultConnectionTest(CreateDataTest):
         connection = contact.get_primary_connection(backend_name=backend.name)
         self.assertEqual(connection.backend_id, backend.pk)
         self.assertEqual(connection.contact_id, contact.pk)
-
