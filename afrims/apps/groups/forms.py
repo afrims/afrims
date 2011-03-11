@@ -5,7 +5,7 @@ from django.forms.models import modelformset_factory
 
 from afrims.apps.groups.models import Group, ForwardingRule
 
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Backend
 
 
 __all__ = ('GroupForm', 'ContactForm', 'ForwardingRuleFormset',)
@@ -34,7 +34,7 @@ class ContactForm(forms.ModelForm):
 
     class Meta:
         model = Contact
-        exclude = ('language', 'name')
+        exclude = ('language', 'name', 'primary_backend')
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance')

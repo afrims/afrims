@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "afrims.apps.offsite",
     "afrims.apps.reminders",
     "afrims.apps.test_messager",
+    "afrims.apps.default_connection",
 
     # the rapidsms contrib apps.
     "rapidsms.contrib.default",
@@ -191,4 +192,6 @@ LOGIN_URL = '/account/login/'
 SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'afrims.migrations.rapidsms',
 }
+
+PRIMARY_BACKEND = 'twilio'
 
