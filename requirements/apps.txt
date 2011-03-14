@@ -7,3 +7,4 @@ django-pagination==1.0.7
 lxml==2.3
 twilio==2.0.6
 -e git+http://github.com/caktus/rapidsms-twilio.git#egg=rtwilio
+django-sorting==0.1

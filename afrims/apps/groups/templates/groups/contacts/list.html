@@ -1,5 +1,5 @@
 {% extends "groups/base.html" %}
-{% load pagination_tags %}
+{% load pagination_tags sorting_tags %}
 
 {% block title %}Contacts{% endblock %}
 
@@ -14,14 +14,15 @@
 <div class='module'>
     <h2>Contacts ({{ contacts.count }} total)</h2>
     <p><a class='button add' title='Add contact' href="{% url create-contact %}">Add contact...</a></p>
+    {% autosort contacts %}
     {% autopaginate contacts 15 %}
     <table class='sortable pagination'>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
+                <th>{% anchor id ID %}</th>
+                <th>{% anchor name Name %}</th>
+                <th>{% anchor email Email %}</th>
+                <th>{% anchor phone Phone %}</th>
             </tr>
         </thead>
         <tbody>

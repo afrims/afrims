@@ -1,4 +1,5 @@
 {% extends "groups/base.html" %}
+{% load pagination_tags sorting_tags %}
 
 {% block title %}Groups{% endblock %}
 
@@ -7,12 +8,14 @@
 <div class='module'>
     <h2>Groups</h2>
     <p><a class='button add' title='Add group' href="{% url create-group %}" >Add group...</a></p>
-    <table class='sortable'>
+    {% autosort groups %}
+    {% autopaginate groups 15 %}
+    <table class='sortable pagination'>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th># Recipients</th>
+                <th>{% anchor id ID %}</th>
+                <th>{% anchor name Name %}</th>
+                <th>{% anchor count "# Recipients" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -30,6 +33,13 @@
                 </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan='4'>
+                    {% paginate %}
+                </td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 {% endblock %}

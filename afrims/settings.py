@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     
     "pagination",
+    "django_sorting",
     "south",
     # "gunicorn",
     "afrims.apps.pincode",
@@ -141,6 +142,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'pagination.middleware.PaginationMiddleware',
+    'django_sorting.middleware.SortingMiddleware',
 ]
 
 #The default group subjects are added to when their information

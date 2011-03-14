@@ -1,4 +1,5 @@
 {% extends "broadcast/base.html" %}
+{% load sorting_tags pagination_tags %}
 
 {% block title %}Broadcast Schedule{% endblock %}
 
@@ -16,16 +17,19 @@
 
 {% block right %}
 
+{% autosort broadcast_messages %}
+{% autopaginate broadcast_messages 20 %}
+
 <div class="module">
     <h2>Message History</h2>
-    <table id='broadcast-history' class="sortable">
+    <table id='broadcast-history' class="sortable pagination">
         <thead>
             <tr>
-                <th>Broadcast</th>
-                <th>Queued</th>
-                <th>Status</th>
-                <th>Recipient</th>
-                <th>Sent</th>
+                <th>{% anchor id Broadcast %}</th>
+                <th>{% anchor date_created Queued %}</th>
+                <th>{% anchor status Status %}</th>
+                <th>{% anchor recipient Recipient %}</th>
+                <th>{% anchor date_sent Sent %}</th>
             </tr>
         </thead>
         {% for message in broadcast_messages %}
@@ -41,6 +45,14 @@
             <td colspan='3'>No message history</td>
         </tr>
         {% endfor %}
+        
+        <tfoot>
+            <tr>
+                <td colspan='5'>
+                    {% paginate %}
+                </td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 
