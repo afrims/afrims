@@ -59,3 +59,20 @@ class GroupFormTest(CreateDataTest):
         self.assertFalse(contact.groups.filter(pk=group1.pk).exists())
         self.assertTrue(contact.groups.filter(pk=group2.pk).exists())
 
+
+class GroupViewTest(CreateDataTest):
+
+    def setUp(self):
+        self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.client.login(username='test', password='abc')
+
+    def test_editable_views(self):
+        group = self.create_group({'is_editable': False})
+        edit_url = reverse('edit-group', args=[group.pk])
+        response = self.client.get(edit_url)
+        self.assertEqual(response.status_code, 403)
+        delete_url = reverse('delete-group', args=[group.pk])
+        response = self.client.get(delete_url)
+        self.assertEqual(response.status_code, 403)
+        
+        

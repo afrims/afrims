@@ -18,6 +18,7 @@ class GroupForm(forms.ModelForm):
 
     class Meta:
         model = Group
+        exclude = ('is_editable',)
 
     def __init__(self, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)

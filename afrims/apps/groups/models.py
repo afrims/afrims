@@ -8,6 +8,7 @@ class Group(models.Model):
 
     name = models.CharField(max_length=64, unique=True)
     description = models.TextField(blank=True)
+    is_editable = models.BooleanField(default=True)
 
     contacts = models.ManyToManyField(Contact, related_name='groups',
                                       blank=True)
