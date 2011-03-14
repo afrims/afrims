@@ -31,10 +31,18 @@ class ContactExtra(models.Model):
             backend = self.primary_backend
             logger.debug('using contact backend: {0}'.format(backend))
         elif backend_name:
-            backend = Backend.objects.get(name=backend_name)
+            try:
+                backend = Backend.objects.get(name=backend_name)
+            except Backend.DoesNotExist:
+                logger.warning('failed to find backend: {0}'.format(backend_name))
+                return None
             logger.debug('using backend: {0}'.format(backend))
         else:
-            backend = Backend.objects.all()[0]
+            try:
+                backend = Backend.objects.all()[0]
+            except IndexError:
+                logger.warning('failed to find backend: {0}'.format(backend_name))
+                return None
             logger.debug('using random backend: {0}'.format(backend))
         connection = self.get_or_create_connection(backend=backend)
         if not connection.contact:

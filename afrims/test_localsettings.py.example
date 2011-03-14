@@ -35,3 +35,4 @@ DATABASES = {
 # south configuration
 SKIP_SOUTH_TESTS = True
 
+PRIMARY_BACKEND = ''
