@@ -308,6 +308,7 @@ class BroadcastViewTest(BroadcastCreateDataTest):
         after = Broadcast.objects.get(pk=before.pk)
         self.assertTrue(after.schedule_frequency is None)
 
+
 class BroadcastForwardingTest(BroadcastCreateDataTest):
 
     def setUp(self):
