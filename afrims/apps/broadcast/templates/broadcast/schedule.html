@@ -1,18 +1,22 @@
 {% extends "broadcast/base.html" %}
+{% load sorting_tags pagination_tags %}
 
 {% block title %}Broadcast Schedule{% endblock %}
 
 {% block right %}
 
+{% autosort broadcasts %}
+{% autopaginate broadcasts 15 %}
+
 <div class="module">
     <h2>Broadcast Schedule</h2>
-    <table id='broadcasts' class="sortable">
+    <table id='broadcasts' class="sortable pagination">
         <thead>
             <tr>
-                <th>Message ID</th>
-                <th>Scheduled Date</th>
-                <th>Frequency</th>
-                <th>Message</th>
+                <th>{% anchor id "Message ID" %}</th>
+                <th>{% anchor date "Scheduled Date" %}</th>
+                <th>{% anchor schedule_frequency Frequency %}</th>
+                <th>{% anchor body Message %}</th>
                 <th>Groups</th>
             </tr>
         </thead>
@@ -35,6 +39,13 @@
             <td colspan='6'>No scheduled broadcasts</td>
         </tr>
         {% endfor %}
+        <tfoot>
+            <tr>
+                <td colspan='6'>
+                    {% paginate %}
+                </td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 
