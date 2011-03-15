@@ -9,13 +9,12 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
-from rapidsms.tests.scripted import TestScript
 from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from afrims.apps.pincode import models as pincode
-from afrims.tests.testcases import CreateDataTest
+from afrims.tests.testcases import CreateDataTest, FlushTestScript
 from afrims.apps.pincode.app import PinCodeApp
 from afrims.apps.pincode.messages import PinVerifiedOutgoingMessage
 
@@ -99,7 +98,7 @@ class PinCodeTest(PinCodeCreateDataTest):
                          private_msg.text)
 
 
-class RemindersScriptedTest(TestScript, PinCodeCreateDataTest):
+class RemindersScriptedTest(FlushTestScript, PinCodeCreateDataTest):
         
     def test_send_msg_nopin(self):
         """
