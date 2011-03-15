@@ -26,7 +26,14 @@
 	{% for form in formset.forms %}
 	<tr class="{% cycle 'one' 'two' %}">
 	    {% for field in form.visible_fields %}
-	    <td>{{ field.errors }}{{ field }}</td>
+	    <td>
+		    {% if forloop.first %}
+		        {% for inv_field in form.hidden_fields %}
+		            {{ inv_field }}
+		        {% endfor %}
+		    {% endif %}
+		    {{ field.errors }}{{ field }}
+	    </td>
 	    {% endfor %}
 	</tr>
 	{% endfor %}

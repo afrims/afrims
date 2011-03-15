@@ -10,5 +10,6 @@ urlpatterns = patterns('',
     url(r'^schedule/(?P<broadcast_id>\d+)/delete/$', views.delete_broadcast,
         name='delete-broadcast'),
     url(r'^messages/$', views.list_messages, name='broadcast-messages'),
+    url(r'^forwarding/$', views.forwarding,
+        name='broadcast-forwarding'),
 )
-

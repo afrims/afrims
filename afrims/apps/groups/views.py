@@ -16,8 +16,7 @@ from django.contrib import messages
 from rapidsms.models import Contact
 
 from afrims.apps.groups.models import Group
-from afrims.apps.groups.forms import GroupForm, ContactForm, \
-                                     ForwardingRuleFormset
+from afrims.apps.groups.forms import GroupForm, ContactForm
 
 from afrims.apps.reminders.models import Patient
 
@@ -114,20 +113,4 @@ def delete_contact(request, contact_id):
         return HttpResponseRedirect(reverse('list-contacts'))
     context = {'contact': contact}
     return render_to_response('groups/contacts/delete.html', context,
-                              RequestContext(request))
-
-
-@login_required
-def forwarding(request):
-    if request.method == 'POST':
-        formset = ForwardingRuleFormset(request.POST)
-        if formset.is_valid():
-            forwarding_rules = formset.save()
-            return HttpResponseRedirect(reverse('groups-forwarding'))
-    else:
-        formset = ForwardingRuleFormset()
-    context = {
-        'formset': formset,
-    }
-    return render_to_response('groups/forwarding.html', context,
                               RequestContext(request))
