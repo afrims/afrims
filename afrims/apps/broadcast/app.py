@@ -54,7 +54,7 @@ class BroadcastApp(AppBase):
     def _forwarding_rules(self):
         """ Returns a dictionary mapping rule keywords to rule objects """
         rules = ForwardingRule.objects.all()
-        return dict([(rule.keyword, rule) for rule in rules])
+        return dict([(rule.keyword.lower(), rule) for rule in rules])
 
     def handle(self, msg):
         """
@@ -62,9 +62,12 @@ class BroadcastApp(AppBase):
         """
         msg_parts = msg.text.split()
         rules = self._forwarding_rules()
-        if not msg_parts or msg_parts[0] not in rules:
+        if not msg_parts:
             return False
-        rule = rules[msg_parts[0]]
+        keyword = msg_parts[0].lower()
+        if keyword not in rules:
+            return False
+        rule = rules[keyword]
         contact = msg.connection.contact
         if not contact or \
           not rule.source.contacts.filter(pk=contact.pk).exists():
