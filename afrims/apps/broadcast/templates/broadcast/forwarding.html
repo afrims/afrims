@@ -1,4 +1,4 @@
-{% extends "layout-split-2.html" %}
+{% extends "layout.html" %}
 
 {% block title %}Forwarding Rules{% endblock %}
 
@@ -10,11 +10,7 @@
         <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/afrims.css" />
 {% endblock %}
 
-{% block left %}
-
-{% endblock %}
-
-{% block right %}
+{% block content %}
 <div class="module">
 <h2>Forwarding Rules</h2>
 
@@ -22,7 +18,7 @@
 {% csrf_token %}
 <table id='forwarding_rules' class='sortable'>
 {{ formset.management_form }}
-    <tr><th>Keyword</th><th>Source Group</th><th>Destination Group</th><th>Delete?</th></tr>
+    <tr><th>Keyword</th><th>Source Group</th><th>Destination Group</th><th>Optional Message</th><th>Delete?</th></tr>
 	{% for form in formset.forms %}
 	<tr class="{% cycle 'one' 'two' %}">
 	    {% for field in form.visible_fields %}

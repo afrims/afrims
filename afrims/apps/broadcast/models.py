@@ -201,6 +201,7 @@ class ForwardingRule(models.Model):
     keyword = models.CharField(max_length=160)
     source = models.ForeignKey(Group, related_name='source_rules')
     dest = models.ForeignKey(Group, related_name='dest_rules')
+    message = models.CharField(max_length=160, blank=True)
 
     def __unicode__(self):
         return self.keyword
