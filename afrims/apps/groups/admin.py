@@ -1,6 +1,4 @@
 from django.contrib import admin
-from afrims.apps.groups.models import Group, ForwardingRule
+from afrims.apps.groups.models import Group
 
 admin.site.register(Group)
-
-admin.site.register(ForwardingRule)

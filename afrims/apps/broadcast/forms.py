@@ -1,8 +1,9 @@
 import datetime
 
 from django import forms
+from django.forms.models import modelformset_factory
 
-from afrims.apps.broadcast.models import Broadcast
+from afrims.apps.broadcast.models import Broadcast, ForwardingRule
 
 
 class BroadcastForm(forms.ModelForm):
@@ -71,3 +72,5 @@ class BroadcastForm(forms.ModelForm):
                 broadcast.months = []
         return broadcast
 
+
+ForwardingRuleFormset = modelformset_factory(ForwardingRule, can_delete=True)
