@@ -4,13 +4,11 @@ Tests for the Catch All app.
 
 import logging
 
-from rapidsms.tests.scripted import TestScript
 from rapidsms.tests.harness import MockRouter
 from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.apps.base import AppBase
-from rapidsms.models import Backend
 
-from afrims.tests.testcases import CreateDataTest
+from afrims.tests.testcases import CreateDataTest, FlushTestScript
 
 from afrims.apps.catch_all.app import CatchAllApp
 
@@ -44,13 +42,12 @@ class CatchAllDefaultTest(CreateDataTest):
         self.assertEqual(msg.responses[0].text, self.app.template)
 
 
-class CatchAllTest(TestScriped, CreateDataTest):
+class CatchAllTest(FlushTestScript):
 
     def test_full_stack(self):
         """ Test catch all functionality alongside other apps """
         self.router.apps = [OtherApp(self.router), CatchAllApp(self.router)]
         self.startRouter()
-        backend = self.create_backend(data={'name': 'mockbackend'})
         self.router.logger.setLevel(logging.DEBUG)
         self.runScript("""1112223333 > other-app-should-catch
                           1112223333 < caught

@@ -5,7 +5,6 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil import rrule
 
-from django.test import TransactionTestCase, TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
@@ -13,9 +12,8 @@ from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.models import Connection, Contact, Backend
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.messages.incoming import IncomingMessage
-from rapidsms.tests.scripted import TestScript
 
-from afrims.tests.testcases import CreateDataTest
+from afrims.tests.testcases import CreateDataTest, FlushTestScript
 from afrims.apps.broadcast.models import Broadcast, DateAttribute
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 from afrims.apps.broadcast.forms import BroadcastForm
@@ -298,7 +296,7 @@ class BroadcastViewTest(BroadcastCreateDataTest):
         self.assertTrue(after.schedule_frequency is None)
 
 
-class BroadcastScriptedTest(TestScript, BroadcastCreateDataTest):
+class BroadcastScriptedTest(FlushTestScript, BroadcastCreateDataTest):
     def test_entire_stack(self):
         self.startRouter()
         self.router.logger.setLevel(logging.DEBUG)
