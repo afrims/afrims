@@ -16,7 +16,8 @@ from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.tests.scripted import TestScript
 
 from afrims.tests.testcases import CreateDataTest
-from afrims.apps.broadcast.models import Broadcast, DateAttribute
+from afrims.apps.broadcast.models import Broadcast, DateAttribute,\
+                                         ForwardingRule
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 from afrims.apps.broadcast.forms import BroadcastForm
 
@@ -49,6 +50,16 @@ class BroadcastCreateDataTest(CreateDataTest):
         if months:
             broadcast.months = months
         return broadcast
+
+    def create_forwarding_rule(self, data={}):
+        defaults = {
+            'keyword': 'forward-test',
+            'source': self.create_group(data={'name': 'source group'}),
+            'dest': self.create_group(data={'name': 'dest group'}),
+            'message': self.random_string(length=25),
+        }
+        defaults.update(data)
+        return ForwardingRule.objects.create(**defaults)
 
     def get_weekday(self, day):
         return DateAttribute.objects.get(name__iexact=day,
@@ -296,6 +307,70 @@ class BroadcastViewTest(BroadcastCreateDataTest):
                          'should redirect on success')
         after = Broadcast.objects.get(pk=before.pk)
         self.assertTrue(after.schedule_frequency is None)
+
+
+class BroadcastForwardingTest(BroadcastCreateDataTest):
+
+    def setUp(self):
+        self.source_contact = self.create_contact(data={'first_name': 'John',
+                                                        'last_name': 'Smith'})
+        self.dest_contact = self.create_contact(data={'first_name': 'John',
+                                                      'last_name': 'Smith'})
+        self.backend = self.create_backend(data={'name': 'mockbackend'})
+        self.unreg_conn = self.create_connection({'backend': self.backend})
+        self.source_conn = self.create_connection({'contact': self.source_contact,
+                                                   'backend': self.backend,
+                                                   'identity': '5678'})
+        self.dest_conn = self.create_connection({'contact': self.dest_contact,
+                                                 'backend': self.backend,
+                                                 'identity': '1234'})
+        self.router = MockRouter()
+        self.app = BroadcastApp(router=self.router)
+        self.rule = self.create_forwarding_rule(data={'keyword': 'abc'})
+        self.rule.source.contacts.add(self.source_contact)
+
+    def _send(self, conn, text):
+        msg = IncomingMessage(conn, text)
+        self.app.handle(msg)
+        return msg
+
+    def test_non_matching_rule(self):
+        """ tests that no response comes for non-matching keywords """
+        msg = self._send(self.source_conn, 'non-matching-keyword')
+        self.assertEqual(len(msg.responses), 0)
+
+    def test_unregistered(self):
+        """ tests the response from an unregistered user """
+        msg = self._send(self.unreg_conn, 'abc')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.not_registered)
+
+    def test_wrong_group(self):
+        """ tests the response from a user in non-source group """
+        msg = self._send(self.dest_conn, 'abc')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.not_registered)
+
+    def test_creates_broadcast(self):
+        """ tests the response from a user in non-source group """
+        msg = self._send(self.source_conn, 'abc my-message')
+        now = datetime.datetime.now()
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(Broadcast.objects.count(), 1)
+        bc = Broadcast.objects.get()
+        self.assertDateEqual(bc.date_created, now)
+        self.assertDateEqual(bc.date, now)
+        self.assertEqual(bc.schedule_frequency, 'one-time')
+        expected_msg = 'From {name} ({number}): {msg} my-message'\
+                       .format(name=self.source_contact.name,
+                               number=self.source_conn.identity,
+                               msg=self.rule.message)
+        self.assertEqual(bc.body, expected_msg)
+        self.assertEqual(list(bc.groups.all()), [self.rule.dest])
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)
 
 
 class BroadcastScriptedTest(TestScript, BroadcastCreateDataTest):

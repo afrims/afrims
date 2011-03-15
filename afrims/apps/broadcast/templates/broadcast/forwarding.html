@@ -16,8 +16,9 @@
 
 <form method="POST" action="">
 {% csrf_token %}
-<table id='forwarding_rules' class='sortable'>
+{{ formset.non_form_errors }}
 {{ formset.management_form }}
+<table id='forwarding_rules' class='sortable'>
     <tr><th>Keyword</th><th>Source Group</th><th>Destination Group</th><th>Optional Message</th><th>Delete?</th></tr>
 	{% for form in formset.forms %}
 	<tr class="{% cycle 'one' 'two' %}">

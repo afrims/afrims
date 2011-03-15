@@ -198,7 +198,7 @@ class BroadcastMessage(models.Model):
 class ForwardingRule(models.Model):
     """ Rule for forwarding SMSes from a user in one group to a 2nd group """
 
-    keyword = models.CharField(max_length=160)
+    keyword = models.CharField(max_length=160, unique=True)
     source = models.ForeignKey(Group, related_name='source_rules')
     dest = models.ForeignKey(Group, related_name='dest_rules')
     message = models.CharField(max_length=160, blank=True)

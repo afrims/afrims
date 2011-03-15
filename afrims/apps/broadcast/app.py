@@ -6,7 +6,14 @@ from rapidsms.apps.base import AppBase
 from rapidsms.messages import OutgoingMessage
 from rapidsms.contrib.scheduler.models import EventSchedule
 
-from afrims.apps.broadcast.models import Broadcast, BroadcastMessage
+from afrims.apps.broadcast.models import Broadcast, BroadcastMessage,\
+                                         ForwardingRule
+
+
+# In RapidSMS, message translation is done in OutgoingMessage, so no need
+# to attempt the real translation here.  Use _ so that ./manage.py makemessages
+# finds our text.
+_ = lambda s: s
 
 
 def scheduler_callback(router):
@@ -24,6 +31,10 @@ class BroadcastApp(AppBase):
     cron_schedule = {'minutes': '*'}
     cron_name = 'broadcast-cron-job'
     cron_callback = 'afrims.apps.broadcast.app.scheduler_callback'
+    
+    not_registered = _('Sorry, your mobile number is not registered in the '
+                       'required group for this keyword.')
+    thank_you = _('Thank you, your message has been queued for delivery.')
 
     def start(self):
         """ setup event schedule to run cron job every minute """
@@ -39,6 +50,38 @@ class BroadcastApp(AppBase):
                 setattr(schedule, key, val)
         schedule.save()
         self.info('started')
+
+    def _forwarding_rules(self):
+        """ Returns a dictionary mapping rule keywords to rule objects """
+        rules = ForwardingRule.objects.all()
+        return dict([(rule.keyword, rule) for rule in rules])
+
+    def handle(self, msg):
+        """
+        Handles messages that match the forwarding rules in this app.
+        """
+        msg_parts = msg.text.split()
+        rules = self._forwarding_rules()
+        if not msg_parts or msg_parts[0] not in rules:
+            return False
+        rule = rules[msg_parts[0]]
+        contact = msg.connection.contact
+        if not contact or \
+          not rule.source.contacts.filter(pk=contact.pk).exists():
+            msg.respond(self.not_registered)
+            return True
+        now = datetime.datetime.now()
+        msg_text = [rule.message, ' '.join(msg_parts[1:])]
+        msg_text = [m for m in msg_text if m]
+        msg_text = ' '.join(msg_text)
+        full_msg = 'From {name} ({number}): {body}'\
+                   .format(name=contact.name, number=msg.connection.identity,
+                           body=msg_text)
+        broadcast = Broadcast.objects.create(date_created=now, date=now,
+                                             schedule_frequency='one-time',
+                                             body=full_msg)
+        broadcast.groups.add(rule.dest)
+        msg.respond(self.thank_you)
 
     def queue_outgoing_messages(self):
         """ generate queued messages for scheduled broadcasts """
