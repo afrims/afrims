@@ -42,7 +42,9 @@ class ViewsTest(RemindersCreateDataTest):
             u'form-INITIAL_FORMS': u'0',
             u'form-TOTAL_FORMS': u'3',
             u'form-0-num_days': u'2',
+            u'form-0-time_of_day': u'12:00',
             u'form-1-num_days': u'11',
+            u'form-1-time_of_day': u'15:00:00',
             u'form-2-num_days': u'',
         }
         response = self.client.post(reminders_dash, post_data)
@@ -78,14 +80,16 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
                          self.app.no_reminders)
-        appt_date = datetime.date.today()
         # test the response from a user with a pending notification
-        notification = reminders.Notification.objects.create(num_days=1)
+        now = datetime.datetime.now()
+        notification = reminders.Notification.objects.create(num_days=1,
+                                                             time_of_day=now)
         reminders.SentNotification.objects.create(notification=notification,
                                                   recipient=self.contact,
                                                   status='sent',
                                                   message='abc',
-                                                  appt_date=appt_date)
+                                                  appt_date=now,
+                                                  date_to_send=now)
         msg = self._send(self.reg_conn, '1')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
@@ -104,7 +108,9 @@ class RemindersScriptedTest(TestScript, RemindersCreateDataTest):
         backend = self.create_backend(data={'name': 'mockbackend'})
         connection = self.create_connection({'contact': contact,
                                              'backend': backend})
-        notification = reminders.Notification.objects.create(num_days=1)
+        now = datetime.datetime.now()
+        notification = reminders.Notification.objects.create(num_days=1,
+                                                             time_of_day=now)
         tomorrow = datetime.date.today() + datetime.timedelta(days=1)
         reminders.Patient.objects.create(contact=contact,
                                          date_enrolled=datetime.date.today(),

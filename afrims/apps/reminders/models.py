@@ -43,6 +43,8 @@ class SentNotification(models.Model):
     appt_date = models.DateField(help_text='The date of the appointment.')
     date_queued = models.DateTimeField(help_text='The date and time this '
                                        'notification was initially created.')
+    date_to_send = models.DateTimeField(help_text='The date and time this noti'
+                                        'fication is scheduled to be sent.')
     date_sent = models.DateTimeField(null=True, blank=True,
                                      help_text='The date and time this '
                                      'notification was sent.')

@@ -81,10 +81,13 @@ class RemindersApp(AppBase):
     def queue_outgoing_notifications(self):
         """ generate queued appointment reminders """
         # TODO: make sure this task is atomic
+        today = datetime.date.today()
         for notification in reminders.Notification.objects.all():
             self.info('Scheduling notifications for %s' % notification)
+            date_to_send = datetime.datetime.combine(today,
+                                                     notification.time_of_day)
             days_delta = datetime.timedelta(days=notification.num_days)
-            appt_date = datetime.date.today() + days_delta
+            appt_date = today + days_delta
             patients = reminders.Patient.objects.filter(next_visit=appt_date,
                                                         contact__isnull=False,)
             patients = patients.exclude(contact__sent_notifications__appt_date=appt_date,
@@ -98,15 +101,19 @@ class RemindersApp(AppBase):
                     'name': patient.contact.name,
                 }
                 message = self.appt_message.format(**msg_data)
+                date_to_send = datetime.datetime.combine(today, notification.time_of_day)
                 notification.sent_notifications.create(
                                         recipient=patient.contact,
                                         appt_date=appt_date,
                                         date_queued=datetime.datetime.now(),
+                                        date_to_send=date_to_send,
                                         message=message)
 
     def send_notifications(self):
         """ send queued for delivery messages """
-        notifications = reminders.SentNotification.objects.filter(status='queued')
+        notifications = reminders.SentNotification.objects.filter(
+                                    status='queued',
+                                    date_to_send__lt=datetime.datetime.now())
         count = notifications.count()
         self.info('found {0} notification(s) to send'.format(count))
         for notification in notifications:
