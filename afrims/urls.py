@@ -19,9 +19,7 @@ urlpatterns = patterns('',
     url(r'^$', 'rapidsms.views.dashboard', name='rapidsms-dashboard'),
 
     url(r'^settings/$', direct_to_template,
-        {'template': 'not_implemented.html'}, name='settings'),
-    url(r'^cold-chain/$', direct_to_template,
-        {'template': 'not_implemented.html'}, name='cold_chain'),
+        {'template': 'afrims/not_implemented.html'}, name='settings'),
 
     # RapidSMS contrib app URLs
     (r'^ajax/', include('rapidsms.contrib.ajax.urls')),
