@@ -102,6 +102,7 @@ def deploy():
     with cd(env.code_root):
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
         sudo('git pull', user=env.sudo_user)
+    migrate()
     touch()
     router_start()
 
