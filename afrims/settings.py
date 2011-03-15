@@ -187,6 +187,8 @@ TEST_EXCLUDED_APPS = [
 
 LANGUAGE_CODE='en'
 
+TIME_INPUT_FORMATS = ['%H:%M', '%H:%M:%S']
+
 ROOT_URLCONF = "afrims.urls"
 
 TIME_ZONE = 'America/New_York'
