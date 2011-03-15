@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     "afrims.apps.pincode",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
-    "afrims.apps.offsite",
     "afrims.apps.reminders",
     "afrims.apps.test_messager",
     "afrims.apps.default_connection",
