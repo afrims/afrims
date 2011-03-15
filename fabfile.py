@@ -80,7 +80,7 @@ def bootstrap():
 def create_virtualenv():
     """ setup virtualenv on remote host """
     require('virtualenv_root', provided_by=('staging', 'production'))
-    args = '--clear --distribute'
+    args = '--clear --distribute --no-site-packages'
     sudo('virtualenv %s %s' % (args, env.virtualenv_root), user=env.sudo_user)
 
 
