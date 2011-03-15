@@ -36,7 +36,7 @@
         {% for message in broadcast_messages %}
         <tr class="{% cycle 'odd' 'even' %}">
             <td>{{ message.broadcast.pk }}</td>
-            <td><span title='{{ broadcast.body }}'>{{ message.broadcast.body|truncatewords:2 }}</span></td>
+            <td><span title='{{ message.broadcast.body }}'>{{ message.broadcast.body|truncatewords:2 }}</span></td>
             <td>{{ message.date_created|date:"m/d/y fa" }}</td>
             <td>{{ message.get_status_display }}</td>
             <td>{{ message.recipient }}</td>
