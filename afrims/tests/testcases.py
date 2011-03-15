@@ -2,8 +2,11 @@ import string
 import random
 
 from django.test import TestCase
+from django.db import DEFAULT_DB_ALIAS
+from django.core.management import call_command
 
 from rapidsms.models import Connection, Contact, Backend
+from rapidsms.tests.scripted import TestScript
 
 from afrims.apps.groups.models import Group
 
@@ -44,3 +47,18 @@ class CreateDataTest(TestCase):
         }
         defaults.update(data)
         return Group.objects.create(**defaults)
+
+
+class FlushTestScript(TestScript):
+    """ 
+    To avoid an issue related to TestCases running after TransactionTestCases,
+    extend this class instead of TestScript in RapidSMS. This issue may
+    possibly be related to the use of the django-nose test runner in RapidSMS.
+    
+    See this post and Karen's report here:
+    http://groups.google.com/group/django-developers/browse_thread/thread/3fb1c04ac4923e90
+    """
+
+    def _fixture_teardown(self):
+        call_command('flush', verbosity=0, interactive=False,
+                     database=DEFAULT_DB_ALIAS)

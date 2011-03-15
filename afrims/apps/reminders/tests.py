@@ -9,13 +9,12 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
-from rapidsms.tests.scripted import TestScript
 from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from afrims.apps.reminders import models as reminders
-from afrims.tests.testcases import CreateDataTest
+from afrims.tests.testcases import CreateDataTest, FlushTestScript
 from afrims.apps.reminders.app import RemindersApp
 
 
@@ -99,7 +98,7 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.assertEqual(sent_notif[0].status, 'confirmed')
 
 
-class RemindersScriptedTest(TestScript, RemindersCreateDataTest):
+class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
 
     def test_scheduler(self):
         self.startRouter()
