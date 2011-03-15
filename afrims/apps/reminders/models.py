@@ -11,6 +11,7 @@ class Notification(models.Model):
     num_days = models.IntegerField('An appointment reminder will go out',
                                    help_text='days before the scheduled '
                                    'appointment.', choices=NUM_DAY_CHOICES)
+    time_of_day = models.TimeField()
 
     class Meta:
         ordering = ('num_days',)
