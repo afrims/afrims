@@ -10,3 +10,4 @@ class CatchAllApp(AppBase):
     def default(self, msg):
         """ If we reach the default phase here, always reply with help text """
         msg.respond(self.template)
+        return True
