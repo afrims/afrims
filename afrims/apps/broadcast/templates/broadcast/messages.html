@@ -25,7 +25,8 @@
     <table id='broadcast-history' class="sortable pagination">
         <thead>
             <tr>
-                <th>{% anchor id "Message ID" %}</th>
+                <th>{% anchor broadcast__id "Message ID" %}</th>
+                <th>{% anchor broadcast__body Message %}</th>
                 <th>{% anchor date_created Queued %}</th>
                 <th>{% anchor status Status %}</th>
                 <th>{% anchor recipient Recipient %}</th>
@@ -34,7 +35,8 @@
         </thead>
         {% for message in broadcast_messages %}
         <tr class="{% cycle 'odd' 'even' %}">
-            <td>{{ message.broadcast.pk }} ({{ message.broadcast.body|truncatewords:2 }})</td>
+            <td>{{ message.broadcast.pk }}</td>
+            <td><span title='{{ broadcast.body }}'>{{ message.broadcast.body|truncatewords:2 }}</span></td>
             <td>{{ message.date_created|date:"m/d/y fa" }}</td>
             <td>{{ message.get_status_display }}</td>
             <td>{{ message.recipient }}</td>
@@ -42,13 +44,13 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan='3'>No message history</td>
+            <td colspan='6'>No message history</td>
         </tr>
         {% endfor %}
         
         <tfoot>
             <tr>
-                <td colspan='5'>
+                <td colspan='6'>
                     {% paginate %}
                 </td>
             </tr>
