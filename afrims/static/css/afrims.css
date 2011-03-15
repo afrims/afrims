@@ -25,6 +25,7 @@ ul.messages li.info {
 .form-action {
     text-align: left;
     padding-bottom: 1em;
+    padding-top: 1em;
 }
 
 form.buttons .form-action {
@@ -90,6 +91,10 @@ body:last-child h2 + form.buttons {
     padding-left: 1em;
 }
 
+form#message-tester {
+    border: none;
+}
+
 /* tables */
 
 table.pagination tfoot tr td div.pagination {
@@ -108,4 +113,3 @@ table.sortable tbody tr.odd {
 table.sortable td.actions .ui-button-text-only .ui-button-text {
     padding: 2px;
 }
-
