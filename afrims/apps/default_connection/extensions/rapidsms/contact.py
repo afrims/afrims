@@ -2,6 +2,7 @@ import logging
 
 from django.db import models
 from django.conf import settings
+from django.db.models.signals import post_save
 
 
 logger = logging.getLogger('afrims.apps.default_connection')
@@ -59,3 +60,12 @@ class ContactExtra(models.Model):
 
     class Meta:
         abstract = True
+
+
+def set_primary_connection_on_save(sender, **kwargs):
+    from rapidsms.models import Contact
+    if sender == Contact:
+        instance = kwargs['instance']
+        logger.debug('setting primary connection')
+        instance.get_primary_connection()
+post_save.connect(set_primary_connection_on_save)
