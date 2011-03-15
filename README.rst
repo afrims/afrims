@@ -29,7 +29,7 @@ Developer Setup
 * PostgreSQL and the appropriate Python bindings (``psycopg2``).  In
   Debian-based distributions, you can install these using ``apt-get``, e.g.::
 
-    sudo apt-get install postgresql python-psycopg2
+    sudo apt-get install postgresql python-psycopg2 libpq-dev
 
 * The following additional build dependencies::
 
