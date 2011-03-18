@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
+from django.core.exceptions import ValidationError
 
 from rapidsms.models import Contact, Backend, Connection
 
@@ -8,6 +9,7 @@ from afrims.tests.testcases import CreateDataTest
 
 from afrims.apps.groups.models import Group
 from afrims.apps.groups import forms as group_forms
+from afrims.apps.groups.validators import validate_phone
 
 
 class GroupFormTest(CreateDataTest):
@@ -27,7 +29,7 @@ class GroupFormTest(CreateDataTest):
                 'first_name': self.random_string(8),
                 'last_name': self.random_string(8),
                 'email': 'test@abc.com',
-                'phone': '1112223333',
+                'phone': '31112223333',
             }
         data.update(initial_data)
         return data
@@ -75,4 +77,14 @@ class GroupViewTest(CreateDataTest):
         response = self.client.get(delete_url)
         self.assertEqual(response.status_code, 403)
         
-        
+
+class PhoneTest(CreateDataTest):
+    def test_valid_phone(self):
+        valid_numbers = ('12223334444', '112223334444', '1112223334444')
+        for number in valid_numbers:
+            self.assertEqual(None, validate_phone(number))       
+    
+    def test_invalid_phone(self):
+        invalid_numbers = ('2223334444', '11112223334444')
+        for number in invalid_numbers:
+            self.assertRaises(ValidationError, validate_phone, number)

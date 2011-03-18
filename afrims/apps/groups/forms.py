@@ -3,6 +3,7 @@ import logging
 from django import forms
 
 from afrims.apps.groups.models import Group
+from afrims.apps.groups.validators import validate_phone
 
 from rapidsms.models import Contact, Backend
 
@@ -31,6 +32,7 @@ class ContactForm(forms.ModelForm):
     """ Form for managing contacts """
 
     groups = forms.ModelMultipleChoiceField(queryset=Group.objects.none())
+    phone = forms.CharField(validators=[validate_phone], required=True)
 
     class Meta:
         model = Contact
