@@ -19,7 +19,7 @@ INSTALLED_BACKENDS = {
     "twilio": {
         "ENGINE": "rtwilio.backend",
         'host': '173.203.221.48', 'port': '8081',
-        'config': {},
+        'config': {'encoding': 'UTF-8'},
     },
 }
 
