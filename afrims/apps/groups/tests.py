@@ -4,15 +4,18 @@ from django.forms.models import model_to_dict
 from django.core.exceptions import ValidationError
 
 from rapidsms.models import Contact, Backend, Connection
+from rapidsms.tests.harness import MockRouter
+from rapidsms.messages.incoming import IncomingMessage
 
 from afrims.tests.testcases import CreateDataTest
 
 from afrims.apps.groups.models import Group
 from afrims.apps.groups import forms as group_forms
 from afrims.apps.groups.validators import validate_phone
+from afrims.apps.groups.app import GroupsApp
 
 
-class GroupFormTest(CreateDataTest):
+class GroupCreateDataTest(CreateDataTest):
 
     def create_contact(self, data={}):
         """ Override super's create_contact to include extension fields """
@@ -33,6 +36,9 @@ class GroupFormTest(CreateDataTest):
             }
         data.update(initial_data)
         return data
+
+
+class GroupFormTest(GroupCreateDataTest):
 
     def test_create_contact(self):
         """ Test contact creation functionality with form """
@@ -76,15 +82,43 @@ class GroupViewTest(CreateDataTest):
         delete_url = reverse('delete-group', args=[group.pk])
         response = self.client.get(delete_url)
         self.assertEqual(response.status_code, 403)
-        
 
-class PhoneTest(CreateDataTest):
+
+class PhoneTest(GroupCreateDataTest):
+
+    def setUp(self):
+        self.backend = self.create_backend(data={'name': 'test-backend'})
+        self.router = MockRouter()
+        self.app = GroupsApp(router=self.router)
+
     def test_valid_phone(self):
         valid_numbers = ('12223334444', '112223334444', '1112223334444')
         for number in valid_numbers:
             self.assertEqual(None, validate_phone(number))       
-    
+
     def test_invalid_phone(self):
         invalid_numbers = ('2223334444', '11112223334444')
         for number in invalid_numbers:
             self.assertRaises(ValidationError, validate_phone, number)
+
+    def _send(self, conn, text):
+        msg = IncomingMessage(conn, text)
+        self.app.filter(msg)
+        return msg
+
+    def test_normalize_number(self):
+        normalized = '12223334444'
+        number = '1-222-333-4444'
+        self.assertEqual(self.app._normalize_number(number), normalized)
+        number = '1 (222) 333-4444'
+        self.assertEqual(self.app._normalize_number(number), normalized)
+
+    def test_contact_association(self):
+        number = '1112223334444'
+        contact = self.create_contact({'phone': number})
+        other_contact = self.create_contact()
+        connection = self.create_connection({'backend': self.backend,
+                                             'identity': '+111-222-333-4444'})
+        msg = self._send(connection, 'test')
+        self.assertEqual(msg.connection.contact_id, contact.id)
+        self.assertNotEqual(msg.connection.contact_id, other_contact.id)
