@@ -7,7 +7,7 @@ class Notification(models.Model):
     '''
     An appointment notifications to be sent to trial participants.
     '''
-    NUM_DAY_CHOICES = [(x, u'{0} day(s) before appointment'.format(x))
+    NUM_DAY_CHOICES = [(x, u'{0} day{1} before appointment'.format(x, x > 1 and 's' or ''))
                        for x in xrange(1, 15)]
     NUM_DAY_CHOICES.insert(0, (0, u'On the appointment day'))
     RECIPIENTS_CHOICES = [
