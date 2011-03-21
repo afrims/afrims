@@ -36,9 +36,11 @@ class RemindersApp(AppBase):
 
     pin_regex = re.compile(r'^\d{4,6}$')
     
-    appt_message = _('Hello, {name}. You have an upcoming appointment in '
-                     '{days} days, on {date}. Please reply with '
-                     '{confirm_response} to confirm.')
+    future_appt_msg = _('Hello, {name}. You have an upcoming appointment in '
+                        '{days} days, on {date}. Please reply with '
+                        '{confirm_response} to confirm.')
+    today_appt_msg = _('Hello, {name}. You have an appointment today, {date}. '
+                       'Please reply with {confirm_response} to confirm.')
     not_registered = _('Sorry, your mobile number is not registered.')
     no_reminders = _('Sorry, I could not find any reminders awaiting '
                      'confirmation.')
@@ -133,7 +135,10 @@ class RemindersApp(AppBase):
                     'name': patient.contact.name,
                     'confirm_response': patient.contact.pin,
                 }
-                message = self.appt_message.format(**msg_data)
+                if appt_date == today:
+                    message = self.today_appt_msg.format(**msg_data)
+                else:
+                    message = self.future_appt_msg.format(**msg_data)
                 date_to_send = datetime.datetime.combine(today, notification.time_of_day)
                 notification.sent_notifications.create(
                                         recipient=patient.contact,
