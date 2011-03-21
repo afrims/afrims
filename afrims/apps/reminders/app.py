@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from django.db.models import Q
 
@@ -33,12 +34,18 @@ class RemindersApp(AppBase):
     cron_name = 'reminders-cron-job'
     cron_callback = 'afrims.apps.reminders.app.scheduler_callback'
 
+    pin_regex = re.compile(r'^\d{4,6}$')
+    
     appt_message = _('Hello, {name}. You have an upcoming appointment in '
-                     '{days} days, on {date}. Please reply with 1 to confirm.')
+                     '{days} days, on {date}. Please reply with '
+                     '{confirm_response} to confirm.')
     not_registered = _('Sorry, your mobile number is not registered.')
     no_reminders = _('Sorry, I could not find any reminders awaiting '
                      'confirmation.')
-    thank_you = _('Thank you for confirming your upcoming appointment.')  
+    incorrect_pin = _('That is not your PIN code. Please reply with the '
+                      'correct PIN code.')
+    pin_required = _('Please confirm appointments by sending your PIN code.')
+    thank_you = _('Thank you for confirming your upcoming appointment.')
 
     def start(self):
         """ setup event schedule to run cron job """
@@ -64,11 +71,20 @@ class RemindersApp(AppBase):
         and replies with a thank you message.
         """
         msg_parts = msg.text.split()
-        if not msg_parts or msg_parts[0] != '1':
+        if not msg_parts:
+            return False
+        response = msg_parts[0]
+        if response != '1' and not self.pin_regex.match(response):
             return False
         contact = msg.connection.contact
         if not contact:
             msg.respond(self.not_registered)
+            return True
+        if contact.pin and response == '1':
+            msg.respond(self.pin_required)
+            return True
+        if contact.pin and response != contact.pin:
+            msg.respond(self.incorrect_pin)
             return True
         notifs = reminders.SentNotification.objects.filter(recipient=contact)
         if not notifs.exists():
@@ -107,10 +123,15 @@ class RemindersApp(AppBase):
             self.info('Queuing reminders for %s patients.' % patients.count())
             for patient in patients:
                 self.debug('Creating notification for %s' % patient)
+                if patient.contact.pin:
+                    confirm_response = 'your PIN'
+                else:
+                    confirm_response = '2'
                 msg_data = {
                     'days': notification.num_days,
                     'date': appt_date,
                     'name': patient.contact.name,
+                    'confirm_response': patient.contact.pin,
                 }
                 message = self.appt_message.format(**msg_data)
                 date_to_send = datetime.datetime.combine(today, notification.time_of_day)

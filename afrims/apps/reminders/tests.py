@@ -70,19 +70,46 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.app.handle(msg)
         return msg
 
-    def test_confirm(self):
-        # test the response from an unregistered user
+    def test_unregistered(self):
+        """ test the response from an unregistered user """
         msg = self._send(self.unreg_conn, '1')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
                          self.app.not_registered)
 
-        # test the response from a registered user without any notifications
+    def test_registered_no_notifications(self):
+        """
+        test the response from a registered user without any notifications
+        """
         msg = self._send(self.reg_conn, '1')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
                          self.app.no_reminders)
-        # test the response from a user with a pending notification
+
+    def test_registered_pin_required(self):
+        """
+        test the response from a registered user without any notifications
+        """
+        self.contact.pin = '1234'
+        self.contact.save()
+        msg = self._send(self.reg_conn, '1')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.pin_required)
+
+    def test_registered_incorrect_pin(self):
+        """
+        test the response from a registered user without any notifications
+        """
+        self.contact.pin = '1234'
+        self.contact.save()
+        msg = self._send(self.reg_conn, '4444')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.incorrect_pin)
+
+    def test_registered_with_notification(self):
+        """ test the response from a user with a pending notification """
         now = datetime.datetime.now()
         notification = reminders.Notification.objects.create(num_days=1,
                                                              time_of_day=now)
