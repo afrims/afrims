@@ -28,7 +28,7 @@ class BroadcastCreateDataTest(CreateDataTest):
         defaults = {
             'date': now,
             'schedule_frequency': 'daily',
-            'body': self.random_string(160),
+            'body': self.random_string(140),
         }
         defaults.update(data)
         groups = defaults.pop('groups', [])
@@ -207,7 +207,7 @@ class BroadcastFormTest(BroadcastCreateDataTest):
         """ Start date is required for future broadcasts """
         data =  {
             'when': 'later',
-            'body': self.random_string(160),
+            'body': self.random_string(140),
             'schedule_frequency': 'one-time',
             'groups': [self.group.pk],
         }
@@ -221,7 +221,7 @@ class BroadcastFormTest(BroadcastCreateDataTest):
         """ 'now' messages automatically get date assignment """
         data =  {
             'when': 'now',
-            'body': self.random_string(160),
+            'body': self.random_string(140),
             'groups': [self.group.pk],
         }
         form = BroadcastForm(data)
@@ -235,7 +235,7 @@ class BroadcastFormTest(BroadcastCreateDataTest):
         yesterday = now - relativedelta(days=1)
         data =  {
             'when': 'later',
-            'body': self.random_string(160),
+            'body': self.random_string(140),
             'date': now,
             'schedule_end_date': yesterday,
             'schedule_frequency': 'daily',
