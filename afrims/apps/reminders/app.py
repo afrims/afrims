@@ -35,10 +35,13 @@ class RemindersApp(AppBase):
     cron_callback = 'afrims.apps.reminders.app.scheduler_callback'
 
     pin_regex = re.compile(r'^\d{4,6}$')
+    conf_keyword = '1'
     
     future_appt_msg = _('Hello, {name}. You have an upcoming appointment in '
                         '{days} days, on {date}. Please reply with '
                         '{confirm_response} to confirm.')
+    tomorrow_appt_msg = _('Hello, {name}. You have an appointment tomorrow, {date}. '
+                       'Please reply with {confirm_response} to confirm.')
     today_appt_msg = _('Hello, {name}. You have an appointment today, {date}. '
                        'Please reply with {confirm_response} to confirm.')
     not_registered = _('Sorry, your mobile number is not registered.')
@@ -76,13 +79,13 @@ class RemindersApp(AppBase):
         if not msg_parts:
             return False
         response = msg_parts[0]
-        if response != '1' and not self.pin_regex.match(response):
+        if response != self.conf_keyword and not self.pin_regex.match(response):
             return False
         contact = msg.connection.contact
         if not contact:
             msg.respond(self.not_registered)
             return True
-        if contact.pin and response == '1':
+        if contact.pin and response == self.conf_keyword:
             msg.respond(self.pin_required)
             return True
         if contact.pin and response != contact.pin:
@@ -129,7 +132,7 @@ class RemindersApp(AppBase):
                 if patient.contact.pin:
                     confirm_response = 'your PIN'
                 else:
-                    confirm_response = '2'
+                    confirm_response = self.conf_keyword
                 msg_data = {
                     'days': notification.num_days,
                     'date': appt_date.strftime('%B %d, %Y'),
