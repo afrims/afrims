@@ -1,5 +1,7 @@
 import datetime
 
+from django.db.models import Q
+
 from rapidsms.apps.base import AppBase
 from rapidsms.contrib.scheduler.models import EventSchedule
 
@@ -90,8 +92,18 @@ class RemindersApp(AppBase):
             appt_date = today + days_delta
             patients = reminders.Patient.objects.filter(next_visit=appt_date,
                                                         contact__isnull=False,)
-            patients = patients.exclude(contact__sent_notifications__appt_date=appt_date,
-                                        contact__sent_notifications__notification=notification)
+            already_sent = Q(contact__sent_notifications__appt_date=appt_date) &\
+                           Q(contact__sent_notifications__notification=notification)
+            confirmed = Q(contact__sent_notifications__appt_date=appt_date) &\
+                        Q(contact__sent_notifications__status='confirmed')
+            # .exclude() generates erroneous results - use filter(~...) instead
+            patients = patients.filter(~already_sent)
+            if notification.recipients == 'confirmed':
+                patients = patients.filter(confirmed)
+            elif notification.recipients == 'unconfirmed':
+                # unconfirmed should include those to whom we haven't sent
+                # any reminders yet, so just exclude the confirmed ones
+                patients = patients.filter(~confirmed)
             self.info('Queuing reminders for %s patients.' % patients.count())
             for patient in patients:
                 self.debug('Creating notification for %s' % patient)

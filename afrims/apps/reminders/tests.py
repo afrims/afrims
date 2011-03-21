@@ -42,9 +42,12 @@ class ViewsTest(RemindersCreateDataTest):
             u'form-TOTAL_FORMS': u'3',
             u'form-0-num_days': u'2',
             u'form-0-time_of_day': u'12:00',
+            u'form-0-recipients': u'all',
             u'form-1-num_days': u'11',
             u'form-1-time_of_day': u'15:00:00',
+            u'form-1-recipients': u'all',
             u'form-2-num_days': u'',
+            u'form-2-recipients': u'all',
         }
         response = self.client.post(reminders_dash, post_data)
         self.assertRedirects(response, reminders_dash)
