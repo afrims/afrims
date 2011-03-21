@@ -37,3 +37,16 @@ table#forwarding_rules tr.one {
 table#forwarding_rules tr.two {
     background-color: #eee;
 }
+
+div.counter {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+div.counter span.go_green {
+    color: #00BC03;
+}
+
+div.counter span.go_red {
+    color: #EB0028;
+}

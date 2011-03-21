@@ -4,6 +4,15 @@
 $(document).ready(function() {
     $('.datetimepicker').datetimepicker();
     $('.multiselect').multiselect({header: false});
+    
+    var span1 = $('<span>').attr('id', 'count').text(0);
+    var span2 = $('<span>').text(' characters remaining');
+    var counter = $('<div>').addClass('counter').append(span1).append(span2);
+    $('#id_body').before(counter);
+    $('#id_body').NobleCount('#count', {
+        on_negative: 'go_red',
+	    on_positive: 'go_green'
+    });
 
     var date_row = $('#id_date').parents('tr').addClass('date-row');
     var frequency_row = $('#id_schedule_frequency').parents('tr').addClass('frequency-row');
