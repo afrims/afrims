@@ -88,7 +88,8 @@ class RemindersApp(AppBase):
         if contact.pin and response != contact.pin:
             msg.respond(self.incorrect_pin)
             return True
-        notifs = reminders.SentNotification.objects.filter(recipient=contact)
+        notifs = reminders.SentNotification.objects.filter(recipient=contact,
+                                                           status='sent')
         if not notifs.exists():
             msg.respond(self.no_reminders)
             return True
