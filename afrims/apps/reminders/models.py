@@ -7,15 +7,16 @@ class Notification(models.Model):
     '''
     An appointment notifications to be sent to trial participants.
     '''
-    NUM_DAY_CHOICES = [(x, x) for x in xrange(1, 15)]
+    NUM_DAY_CHOICES = [(x, u'{0} day(s) before appointment'.format(x))
+                       for x in xrange(1, 15)]
+    NUM_DAY_CHOICES.insert(0, (0, u'On the appointment day'))
     RECIPIENTS_CHOICES = [
         ('all', 'All patients'),
         ('unconfirmed', 'Unconfirmed patients only'),
         ('confirmed', 'Confirmed patients only'),
     ]
     num_days = models.IntegerField('An appointment reminder will go out',
-                                   help_text='days before the scheduled '
-                                   'appointment.', choices=NUM_DAY_CHOICES)
+                                   choices=NUM_DAY_CHOICES)
     time_of_day = models.TimeField()
     recipients = models.CharField('Send to', max_length=15, default='all',
                                   choices=RECIPIENTS_CHOICES)
