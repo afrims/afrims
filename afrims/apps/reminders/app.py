@@ -131,7 +131,7 @@ class RemindersApp(AppBase):
                     confirm_response = '2'
                 msg_data = {
                     'days': notification.num_days,
-                    'date': appt_date.str,
+                    'date': appt_date.strftime('%B %d, %Y'),
                     'name': patient.contact.name,
                     'confirm_response': confirm_response,
                 }
