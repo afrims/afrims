@@ -4,9 +4,9 @@ from django.db.models import Q
 
 from rapidsms.apps.base import AppBase
 from rapidsms.contrib.scheduler.models import EventSchedule
+from rapidsms.messages.outgoing import OutgoingMessage
 
 from afrims.apps.reminders import models as reminders
-from afrims.apps.pincode.messages import PinVerifiedOutgoingMessage
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that ./manage.py makemessages
@@ -134,8 +134,8 @@ class RemindersApp(AppBase):
                 self.debug('no connection found for recipient {0}, unable '
                            'to send'.format(notification.recipient))
                 continue
-            msg = PinVerifiedOutgoingMessage(connection=connection,
-                                             template=notification.message)
+            msg = OutgoingMessage(connection=connection,
+                                  template=notification.message)
             success = True
             try:
                 msg.send()
