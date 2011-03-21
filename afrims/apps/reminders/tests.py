@@ -127,6 +127,27 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.assertEqual(sent_notif.count(), 1)
         self.assertEqual(sent_notif[0].status, 'confirmed')
 
+    def test_registered_with_notification_and_pin(self):
+        """ test the response from a user with a pending notification """
+        now = datetime.datetime.now()
+        self.contact.pin = '1234'
+        self.contact.save()
+        notification = reminders.Notification.objects.create(num_days=1,
+                                                             time_of_day=now)
+        reminders.SentNotification.objects.create(notification=notification,
+                                                  recipient=self.contact,
+                                                  status='sent',
+                                                  message='abc',
+                                                  appt_date=now,
+                                                  date_to_send=now)
+        msg = self._send(self.reg_conn, '1234')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)
+        sent_notif = reminders.SentNotification.objects.all()
+        self.assertEqual(sent_notif.count(), 1)
+        self.assertEqual(sent_notif[0].status, 'confirmed')
+
 
 class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
 
