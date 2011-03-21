@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     "django_sorting",
     "south",
     # "gunicorn",
-    "afrims.apps.pincode",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
     "afrims.apps.reminders",
