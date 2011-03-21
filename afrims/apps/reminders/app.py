@@ -131,9 +131,9 @@ class RemindersApp(AppBase):
                     confirm_response = '2'
                 msg_data = {
                     'days': notification.num_days,
-                    'date': appt_date,
+                    'date': appt_date.str,
                     'name': patient.contact.name,
-                    'confirm_response': patient.contact.pin,
+                    'confirm_response': confirm_response,
                 }
                 if appt_date == today:
                     message = self.today_appt_msg.format(**msg_data)
