@@ -40,9 +40,7 @@ class RemindersApp(AppBase):
     future_appt_msg = _('Hello, {name}. You have an upcoming appointment in '
                         '{days} days, on {date}. Please reply with '
                         '{confirm_response} to confirm.')
-    tomorrow_appt_msg = _('Hello, {name}. You have an appointment tomorrow, {date}. '
-                       'Please reply with {confirm_response} to confirm.')
-    today_appt_msg = _('Hello, {name}. You have an appointment today, {date}. '
+    near_appt_msg = _('Hello, {name}. You have an appointment {day}, {date}. '
                        'Please reply with {confirm_response} to confirm.')
     not_registered = _('Sorry, your mobile number is not registered.')
     no_reminders = _('Sorry, I could not find any reminders awaiting '
@@ -139,8 +137,12 @@ class RemindersApp(AppBase):
                     'name': patient.contact.name,
                     'confirm_response': confirm_response,
                 }
-                if appt_date == today:
-                    message = self.today_appt_msg.format(**msg_data)
+                if notification.num_days == 0:
+                    msg_data['day'] = 'today'
+                    message = self.near_appt_msg.format(**msg_data)
+                elif notification.num_days == 1:
+                    msg_data['day'] = 'tomorrow'
+                    message = self.near_appt_msg.format(**msg_data)
                 else:
                     message = self.future_appt_msg.format(**msg_data)
                 date_to_send = datetime.datetime.combine(today, notification.time_of_day)
