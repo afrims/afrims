@@ -25,6 +25,7 @@ class PatientAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_enrolled'
     ordering = ('-date_enrolled',)
     search_fields = ('subject_number', 'pin', 'mobile_number')
+    raw_id_fields = ('raw_data', 'contact')
 admin.site.register(reminders.Patient, PatientAdmin)
 
 
