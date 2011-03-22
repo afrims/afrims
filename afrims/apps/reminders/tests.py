@@ -10,6 +10,7 @@ from lxml import etree
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Permission
+from django.core.exceptions import ValidationError
 
 from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.messages.incoming import IncomingMessage
@@ -18,6 +19,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from afrims.apps.reminders import models as reminders
 from afrims.tests.testcases import CreateDataTest, FlushTestScript
 from afrims.apps.reminders.app import RemindersApp
+from afrims.apps.reminders.importer import parse_payload, parse_patient
 
 
 class RemindersCreateDataTest(CreateDataTest):
@@ -62,6 +64,10 @@ class RemindersCreateDataTest(CreateDataTest):
         for node in nodes:
             root.append(node)
         return etree.tostring(root)
+
+    def create_payload(self, nodes):
+        raw_data = self.create_xml_payload(nodes)
+        return reminders.PatientDataPayload.objects.create(raw_data=raw_data)
 
 
 class ViewsTest(RemindersCreateDataTest):
@@ -257,8 +263,8 @@ class ImportTest(RemindersCreateDataTest):
         response = self._post(data)
         self.assertEqual(response.status_code, 200)
 
-    def test_patient_creation(self):
-        """ Test basic import """
+    def test_payload_patient_creation(self):
+        """ Test basic import through the entire stack """
         self._authorize()
         data = {
             'Subject_Number': '000-1111',
@@ -272,7 +278,22 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(response.status_code, 200)
         patients = reminders.Patient.objects.all()
         self.assertEqual(patients.count(), 1)
-        self.assertEqual(patients[0].mobile_number, data['Mobile_Number'])
+
+    def test_invalid_xml(self):
+        """ Invalid XML should raise a validation error """
+        data = '---invalid xml data---'
+        payload = reminders.PatientDataPayload.objects.create(raw_data=data)
+        self.assertRaises(ValidationError, parse_payload, payload)
+
+    def test_patient_creation(self):
+        """ Test that patients get created properly """
+        node = self.create_xml_patient({'Mobile_Number': '12223334444'})
+        payload = self.create_payload([node])
+        parse_patient(node, payload)
+        patients = reminders.Patient.objects.all()
+        self.assertEqual(patients.count(), 1)
+        self.assertEqual(patients[0].mobile_number, '12223334444')
+        self.assertEqual(patients[0].raw_data.pk, payload.pk)
 
     def test_missing_patient_field(self):
         """ Invalid patient data should return a 400 status code """
