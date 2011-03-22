@@ -257,15 +257,22 @@ class ImportTest(RemindersCreateDataTest):
         response = self._post(data)
         self.assertEqual(response.status_code, 200)
 
-    def test_import(self):
+    def test_patient_creation(self):
         """ Test basic import """
         self._authorize()
-        patient = self.create_xml_patient()
+        data = {
+            'Subject_Number': '000-1111',
+            'Pin_Code': '1234',
+            'Date_Enrolled': datetime.datetime.now().strftime('%b  %d %Y '),
+            'Mobile_Number': '12223334444',
+        }
+        patient = self.create_xml_patient(data)
         payload = self.create_xml_payload([patient])
         response = self._post(payload)
         self.assertEqual(response.status_code, 200)
         patients = reminders.Patient.objects.all()
         self.assertEqual(patients.count(), 1)
+        self.assertEqual(patients[0].mobile_number, data['Mobile_Number'])
 
     def test_missing_patient_field(self):
         """ Invalid patient data should return a 400 status code """

@@ -96,7 +96,8 @@ def create_or_update_patient_model(patient, raw_data_entry):
     but we don't understand it or there was some other error).
     Returns True upon succesfully creating a Patient and related Contact
     '''
-    logger.debug(etree.tostring(patient))
+    logger.debug('Creating patient...')
+    logger.debug(etree.tostring(patient, pretty_print=True))
 
     subject_number = None
     enroll_date = None
@@ -112,11 +113,13 @@ def create_or_update_patient_model(patient, raw_data_entry):
         if data.tag == "Next_Visit": next_visit = datetime.strptime(data.text,'%b  %d %Y ')
 
     if not (subject_number and enroll_date and mobile_number and pin):
+        logger.warning('Missing data, exiting...')
         return False #something is wrong with our parsing.
     (patient_model, new_patient) = reminders.Patient.objects.get_or_create(
                             subject_number=subject_number,
                             date_enrolled=enroll_date,
                             )
+    logger.debug('Using patient ID {0}'.format(patient_model.pk))
     #these values can all change over time so we update them
     patient_model.pin=pin
     patient_model.mobile_number=mobile_number
@@ -132,16 +135,6 @@ def create_or_update_patient_model(patient, raw_data_entry):
         contact = Contact(name=subject_number)
         contact.save()
         contact.groups.add(group)
-        contact.save()
-        backend = None
-        try:
-            backend = Backend.objects.get(name=settings.DEFAULT_BACKEND_NAME)
-            (conn, new_conn) = Connection.objects.get_or_create(identity=mobile_number,backend=backend)
-            conn.contact=contact
-            conn.save()
-        except ObjectDoesNotExist:
-            logging.error("Can't find Backend specified by DEFAULT_BACKEND_NAME in settings!")
-            return False
 
     patient_model.contact = contact
     patient_model.save()
