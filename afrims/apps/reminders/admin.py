@@ -27,4 +27,10 @@ class PatientAdmin(admin.ModelAdmin):
     search_fields = ('subject_number', 'pin', 'mobile_number')
 admin.site.register(reminders.Patient, PatientAdmin)
 
-admin.site.register(reminders.PatientDataPayload)
+
+class PatientDataPayloadAdmin(admin.ModelAdmin):
+    list_display = ('id', 'submit_date')
+    list_filter = ('submit_date',)
+    search_fields = ('raw_data',)
+    ordering = ('-submit_date',)
+admin.site.register(reminders.PatientDataPayload, PatientDataPayloadAdmin)
