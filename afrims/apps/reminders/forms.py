@@ -42,5 +42,5 @@ class PatientForm(forms.ModelForm):
         # add to subject group
         group_name = settings.DEFAULT_SUBJECT_GROUP_NAME
         group, _ = Group.objects.get_or_create(name=group_name)
-        contact.groups.add(group)
+        instance.contact.groups.add(group)
         return instance

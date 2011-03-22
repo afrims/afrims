@@ -48,7 +48,7 @@ class RemindersCreateDataTest(CreateDataTest):
         next_visit = now + delta
         defaults = {
             'Subject_Number': self.random_string(10),
-            'Pin_Code': '{0}{1}{2}{3}'.format(*random.sample(range(10), 4)),
+            'Pin_Code': self.random_number_string(4),
             'Date_Enrolled': enrolled.strftime('%b  %d %Y '),
             'Next_Visit': next_visit.strftime('%b  %d %Y '),
             'Mobile_Number': '12223334444',
@@ -68,6 +68,20 @@ class RemindersCreateDataTest(CreateDataTest):
     def create_payload(self, nodes):
         raw_data = self.create_xml_payload(nodes)
         return reminders.PatientDataPayload.objects.create(raw_data=raw_data)
+
+    def create_patient(self, data={}):
+        today = datetime.date.today()
+        defaults = {
+            'subject_number': self.random_string(12),
+            'mobile_number': self.random_number_string(15),
+            'pin': self.random_number_string(4),
+            'date_enrolled': today,
+            'next_visit': today + datetime.timedelta(weeks=1),
+        }
+        defaults.update(data)
+        if 'contact' not in defaults:
+            defaults['contact'] = self.create_contact()
+        return reminders.Patient.objects.create(**defaults)
 
 
 class ViewsTest(RemindersCreateDataTest):
@@ -291,12 +305,13 @@ class ImportTest(RemindersCreateDataTest):
         node = self.create_xml_patient({'Mobile_Number': '12223334444'})
         payload = self.create_payload([node])
         parse_patient(node, payload)
+        payload = reminders.PatientDataPayload.objects.all()[0]
+        self.assertEqual(payload.status, 'success')
         patients = reminders.Patient.objects.all()
         self.assertEqual(patients.count(), 1)
         self.assertEqual(patients[0].mobile_number, '12223334444')
         self.assertEqual(patients[0].raw_data.pk, payload.pk)
-        payload = reminders.PatientDataPayload.objects.all()[0]
-        self.assertEqual(payload.status, 'success')
+        self.assertTrue(patients[0].contact is not None)
 
     def test_invalid_patient_field(self):
         """ Invalid patient data should return a 500 status code """
@@ -305,3 +320,31 @@ class ImportTest(RemindersCreateDataTest):
         payload = self.create_xml_payload([patient])
         response = self._post(payload)
         self.assertEqual(response.status_code, 500)
+
+    def test_new_contact_association(self):
+        """ Test that contacts get created for patients """
+        node = self.create_xml_patient({'Mobile_Number': '12223334444',
+                                        'Pin_Code': '4444'})
+        payload = self.create_payload([node])
+        parse_patient(node, payload)
+        patient = payload.patients.all()[0]
+        self.assertTrue(patient.contact is not None)
+        self.assertEqual(patient.contact.phone, '12223334444')
+        self.assertEqual(patient.contact.pin, '4444')
+
+    def test_update_contact_association(self):
+        """ Test that contacts get updated for patients """
+        patient1 = self.create_patient({'mobile_number': '12223334444'})
+        patient2 = self.create_patient()
+        subject_number = patient1.subject_number
+        node = self.create_xml_patient({'Subject_Number': subject_number,
+                                        'Mobile_Number': '43332221111'})
+        payload = self.create_payload([node])
+        parse_patient(node, payload)
+        patient = payload.patients.all()[0]
+        self.assertNotEqual(patient.pk, patient2.pk)
+        self.assertEqual(patient.pk, patient1.pk)
+        self.assertNotEqual(patient.contact.pk, patient2.contact.pk)
+        self.assertEqual(patient.contact.pk, patient1.contact.pk)
+        self.assertEqual(patient.mobile_number, '43332221111')
+        self.assertEqual(patient.contact.phone, '43332221111')

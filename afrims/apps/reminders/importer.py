@@ -86,4 +86,3 @@ def parse_patient(node, payload):
         logger.debug('Patient data is invalid')
         errors = dict((k, v[0]) for k, v in form.errors.items())
         raise ValidationError(errors)
-
