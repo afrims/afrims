@@ -348,3 +348,14 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(patient.contact.pk, patient1.contact.pk)
         self.assertEqual(patient.mobile_number, '43332221111')
         self.assertEqual(patient.contact.phone, '43332221111')
+
+    def test_multi_patient_creation(self):
+        """ Test that multiple patients are inserted properly """
+        node1 = self.create_xml_patient()
+        node2 = self.create_xml_patient()
+        node3 = self.create_xml_patient()
+        payload = self.create_payload([node1, node2, node3])
+        parse_payload(payload)
+        payload = reminders.PatientDataPayload.objects.all()[0]
+        self.assertEqual(payload.status, 'success')
+        self.assertEqual(payload.patients.count(), 3)
