@@ -299,6 +299,7 @@ class ImportTest(RemindersCreateDataTest):
         self.assertRaises(ValidationError, parse_payload, payload)
         payload = reminders.PatientDataPayload.objects.all()[0]
         self.assertEqual(payload.status, 'error')
+        self.assertNotEqual(payload.error_message, '')
 
     def test_patient_creation(self):
         """ Test that patients get created properly """
