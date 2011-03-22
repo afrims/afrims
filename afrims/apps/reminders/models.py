@@ -82,16 +82,18 @@ class PatientDataPayload(models.Model):
 
 
 class Patient(models.Model):
-    raw_data = models.ForeignKey(PatientDataPayload, null=True, blank=True) #we might create Patients manually
+    # Patients may be manually created, so raw data can be null
+    raw_data = models.ForeignKey(PatientDataPayload, null=True, blank=True)
     subject_number = models.CharField(max_length=20)
     date_enrolled = models.DateField()
     mobile_number = models.CharField(max_length=30)
-    pin = models.CharField(max_length=4, blank=True,help_text="A 4-digit pin code for sms authentication workflows.")
-    next_visit = models.DateField(blank=True,null=True)
+    pin = models.CharField(max_length=4, blank=True,
+                           help_text="A 4-digit pin code for sms "
+                                     "authentication workflows.")
+    next_visit = models.DateField(blank=True, null=True)
     contact = models.ForeignKey(rapidsms.Contact, null=True, blank=True)
 
-
     def __unicode__(self):
-        return u'Patient, Subject ID:{id}, Enrollment Date:{date_enrolled}'.format(id=self.subject_number,
-                                                  date_enrolled=self.date_enrolled)
-
+        msg = u'Patient, Subject ID:{id}, Enrollment Date:{date_enrolled}'
+        return msg.format(id=self.subject_number,
+                          date_enrolled=self.date_enrolled)
