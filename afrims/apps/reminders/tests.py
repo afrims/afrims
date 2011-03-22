@@ -49,6 +49,7 @@ class RemindersCreateDataTest(CreateDataTest):
             'Pin_Code': '{0}{1}{2}{3}'.format(*random.sample(range(10), 4)),
             'Date_Enrolled': enrolled.strftime('%b  %d %Y '),
             'Next_Visit': next_visit.strftime('%b  %d %Y '),
+            'Mobile_Number': '12223334444',
         }
         defaults.update(data)
         root = self._node('Table')
