@@ -281,4 +281,3 @@ class ImportTest(RemindersCreateDataTest):
         payload = self.create_xml_payload([patient])
         response = self._post(payload)
         self.assertEqual(response.status_code, 400)
-

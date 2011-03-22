@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 
 from rapidsms import models as rapidsms
@@ -71,14 +73,19 @@ class SentNotification(models.Model):
 
 
 class PatientDataPayload(models.Model):
-    '''
-        Dumping area for incoming patient data xml snippets
-    '''
+    ''' Dumping area for incoming patient data XML snippets '''
+
     raw_data = models.TextField()
     submit_date = models.DateTimeField()
 
+    def save(self, **kwargs):
+        if not self.pk:
+            self.submit_date = datetime.datetime.now()
+        return super(PatientDataPayload, self).save(**kwargs)
+
     def __unicode__(self):
-        return u'Raw Data Payload, submitted on: {date}'.format(date=self.submit_date)
+        msg = u'Raw Data Payload, submitted on: {date}'
+        return msg.format(date=self.submit_date)
 
 
 class Patient(models.Model):
