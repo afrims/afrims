@@ -96,6 +96,8 @@ def create_or_update_patient_model(patient, raw_data_entry):
     but we don't understand it or there was some other error).
     Returns True upon succesfully creating a Patient and related Contact
     '''
+    logger.debug(etree.tostring(patient))
+
     subject_number = None
     enroll_date = None
     mobile_number = None
@@ -111,7 +113,6 @@ def create_or_update_patient_model(patient, raw_data_entry):
 
     if not (subject_number and enroll_date and mobile_number and pin):
         return False #something is wrong with our parsing.
-
     (patient_model, new_patient) = reminders.Patient.objects.get_or_create(
                             subject_number=subject_number,
                             date_enrolled=enroll_date,

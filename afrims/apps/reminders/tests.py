@@ -4,10 +4,12 @@ Tests for the appointment reminders app.
 
 import datetime
 import logging
+import random
+from lxml import etree
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 
 from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.messages.incoming import IncomingMessage
@@ -20,7 +22,45 @@ from afrims.apps.reminders.app import RemindersApp
 
 class RemindersCreateDataTest(CreateDataTest):
     # add reminders-specific create_* methods here as needed
-    pass
+
+    def _node(self, name, value=None):
+        element = etree.Element(name)
+        if value:
+            element.text = value
+        return element
+
+    def create_xml_patient(self, data={}):
+        """
+        <Table>
+            <Subject_Number>xxx-nnnnn</Subject_Number>
+            <Date_Enrolled>Mar  8 2011 </Date_Enrolled>
+            <Mobile_Number>08-11111111</Mobile_Number>
+            <Pin_Code>1234</Pin_Code>
+            <Next_Visit>Apr  7 2011 </Next_Visit>
+        </Table>
+        """
+        now = datetime.datetime.now()
+        delta = datetime.timedelta(days=random.randint(1, 10) * -1)
+        enrolled = now - delta
+        delta = datetime.timedelta(days=random.randint(1, 10))
+        next_visit = now + delta
+        defaults = {
+            'Subject_Number': self.random_string(10),
+            'Pin_Code': '{0}{1}{2}{3}'.format(*random.sample(range(10), 4)),
+            'Date_Enrolled': enrolled.strftime('%b  %d %Y '),
+            'Next_Visit': next_visit.strftime('%b  %d %Y '),
+        }
+        defaults.update(data)
+        root = self._node('Table')
+        for key, value in defaults.iteritems():
+            root.append(self._node(key, value))
+        return root
+
+    def create_xml_payload(self, nodes):
+        root = self._node('NewDataSet')
+        for node in nodes:
+            root.append(node)
+        return etree.tostring(root)
 
 
 class ViewsTest(RemindersCreateDataTest):
@@ -179,3 +219,50 @@ class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
         message = contact.sent_notifications.filter(status='sent')[0]
         self.assertTrue(message.date_sent is not None)
         self.stopRouter()
+
+
+class ImportTest(RemindersCreateDataTest):
+
+    def setUp(self):
+        self.user = User.objects.create_user('test', 'a@b.com', 'pass')
+        self.url = reverse('patient-import')
+
+    def _authorize(self):
+        self.client.login(username='test', password='pass')
+        permission = Permission.objects.get(codename='add_patientdatapayload')
+        self.user.user_permissions.add(permission)
+
+    def _get(self, data={}):
+        return self.client.get(self.url, content_type='text/xml')
+
+    def _post(self, data={}):
+        return self.client.post(self.url, data, content_type='text/xml')
+
+    def test_view_security(self):
+        """ Make sure patient import view has proper security measures """
+        # create empty XML payload
+        data = self._node('NewDataSet')
+        data.append(self._node('Table'))
+        data = etree.tostring(data)
+        # GET method not allowed
+        response = self._get(data)
+        self.assertEqual(response.status_code, 405)
+        # Unauthorized, requires add_patientdatapayload permission
+        self.client.login(username='test', password='pass')
+        response = self._post(data)
+        self.assertEqual(response.status_code, 401)
+        permission = Permission.objects.get(codename='add_patientdatapayload')
+        self.user.user_permissions.add(permission)
+        response = self._post(data)
+        self.assertEqual(response.status_code, 200)
+
+    def test_import(self):
+        """ Test basic import """
+        self._authorize()
+        patient = self.create_xml_patient()
+        payload = self.create_xml_payload([patient])
+        response = self._post(payload)
+        self.assertEqual(response.status_code, 200)
+        patients = reminders.Patient.objects.all()
+        self.assertEqual(patients.count(), 1)
+
