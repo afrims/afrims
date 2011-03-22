@@ -34,16 +34,16 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     
     "pagination",
+    "django_sorting",
     "south",
     # "gunicorn",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
-    "afrims.apps.offsite",
     "afrims.apps.reminders",
     "afrims.apps.test_messager",
+    "afrims.apps.default_connection",
 
     # the rapidsms contrib apps.
-    "rapidsms.contrib.default",
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
     "rapidsms.contrib.locations",
@@ -52,6 +52,9 @@ INSTALLED_APPS = [
     "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "rapidsms.contrib.echo",
+
+    # this app should be last, as it will always reply with a help message
+    "afrims.apps.catch_all",
 ]
 
 
@@ -61,10 +64,10 @@ INSTALLED_APPS = [
 RAPIDSMS_TABS = [
     ("afrims.apps.broadcast.views.send_message", "Send a Message"),
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
-    ("afrims.apps.groups.views.list_groups", "Cold Chain"),
+    ("broadcast-forwarding", "Forwarding"),
     ("afrims.apps.groups.views.list_groups", "Groups"),
     ("afrims.apps.groups.views.list_contacts","People"),
-    ("afrims.apps.groups.views.list_groups", "Settings"),
+    ("settings", "Settings"),
 #    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
 
 #    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
@@ -139,6 +142,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'pagination.middleware.PaginationMiddleware',
+    'django_sorting.middleware.SortingMiddleware',
 ]
 
 #The default group subjects are added to when their information
@@ -181,9 +185,18 @@ TEST_EXCLUDED_APPS = [
 
 LANGUAGE_CODE='en'
 
+TIME_INPUT_FORMATS = ['%H:%M', '%H:%M:%S']
+
 ROOT_URLCONF = "afrims.urls"
 
 TIME_ZONE = 'America/New_York'
 
 LOGIN_URL = '/account/login/'
 
+SOUTH_MIGRATION_MODULES = {
+    'rapidsms': 'afrims.migrations.rapidsms',
+}
+
+PRIMARY_BACKEND = 'twilio'
+
+TEST_MESSAGER_BACKEND = 'twilio'

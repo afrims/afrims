@@ -22,3 +22,31 @@ ul#broadcast-nav li {
     margin-bottom: 5px;
 }
 
+table#forwarding_rules {
+    width: 100%;
+}
+
+table#forwarding_rules th {
+    font-weight: bold;
+}
+
+table#forwarding_rules tr.one {
+    background-color: #fff;
+}
+
+table#forwarding_rules tr.two {
+    background-color: #eee;
+}
+
+div.counter {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+div.counter span.go_green {
+    color: #00BC03;
+}
+
+div.counter span.go_red {
+    color: #EB0028;
+}

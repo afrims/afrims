@@ -20,6 +20,16 @@ table#notification_schedule tr.two {
     background-color: #eee;
 }
 
-table#notification_schedule td.submit {
-    text-align: right;
+table#notification_schedule ul {
+	list-style-type: none;
+}
+
+table#notification_schedule input.hasDatepicker {
+	width: 80px;
+}
+
+div#reminder_sample_message {
+    border: 1px solid #ddd;
+    padding: 0.5em;
+    font-size: 110%;
 }

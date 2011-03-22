@@ -7,10 +7,19 @@ class Notification(models.Model):
     '''
     An appointment notifications to be sent to trial participants.
     '''
-    NUM_DAY_CHOICES = [(x, x) for x in xrange(1, 15)]
-    num_days = models.IntegerField(help_text='Number of days before the '
-                                   'scheduled appointment to send a reminder.',
+    NUM_DAY_CHOICES = [(x, u'{0} day{1} before appointment'.format(x, x > 1 and 's' or ''))
+                       for x in xrange(1, 15)]
+    NUM_DAY_CHOICES.insert(0, (0, u'On the appointment day'))
+    RECIPIENTS_CHOICES = [
+        ('all', 'All patients'),
+        ('unconfirmed', 'Unconfirmed patients only'),
+        ('confirmed', 'Confirmed patients only'),
+    ]
+    num_days = models.IntegerField('An appointment reminder will go out',
                                    choices=NUM_DAY_CHOICES)
+    time_of_day = models.TimeField()
+    recipients = models.CharField('Send to', max_length=15, default='all',
+                                  choices=RECIPIENTS_CHOICES)
 
     class Meta:
         ordering = ('num_days',)
@@ -39,8 +48,11 @@ class SentNotification(models.Model):
                                   'notification.')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES,
                               default='queued')
+    appt_date = models.DateField(help_text='The date of the appointment.')
     date_queued = models.DateTimeField(help_text='The date and time this '
                                        'notification was initially created.')
+    date_to_send = models.DateTimeField(help_text='The date and time this noti'
+                                        'fication is scheduled to be sent.')
     date_sent = models.DateTimeField(null=True, blank=True,
                                      help_text='The date and time this '
                                      'notification was sent.')

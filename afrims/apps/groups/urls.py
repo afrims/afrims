@@ -21,4 +21,3 @@ urlpatterns = patterns('',
     url(r'^contact/(\d+)/delete/$', views.delete_contact,
         name='delete-contact'),
 )
-

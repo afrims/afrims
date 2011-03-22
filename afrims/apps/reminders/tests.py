@@ -9,13 +9,12 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
-from rapidsms.tests.scripted import TestScript
 from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from afrims.apps.reminders import models as reminders
-from afrims.tests.testcases import CreateDataTest
+from afrims.tests.testcases import CreateDataTest, FlushTestScript
 from afrims.apps.reminders.app import RemindersApp
 
 
@@ -42,8 +41,13 @@ class ViewsTest(RemindersCreateDataTest):
             u'form-INITIAL_FORMS': u'0',
             u'form-TOTAL_FORMS': u'3',
             u'form-0-num_days': u'2',
+            u'form-0-time_of_day': u'12:00',
+            u'form-0-recipients': u'all',
             u'form-1-num_days': u'11',
+            u'form-1-time_of_day': u'15:00:00',
+            u'form-1-recipients': u'all',
             u'form-2-num_days': u'',
+            u'form-2-recipients': u'all',
         }
         response = self.client.post(reminders_dash, post_data)
         self.assertRedirects(response, reminders_dash)
@@ -66,25 +70,55 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.app.handle(msg)
         return msg
 
-    def test_confirm(self):
-        # test the response from an unregistered user
+    def test_unregistered(self):
+        """ test the response from an unregistered user """
         msg = self._send(self.unreg_conn, '1')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
                          self.app.not_registered)
 
-        # test the response from a registered user without any notifications
+    def test_registered_no_notifications(self):
+        """
+        test the response from a registered user without any notifications
+        """
         msg = self._send(self.reg_conn, '1')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
                          self.app.no_reminders)
 
-        # test the response from a user with a pending notification
-        notification = reminders.Notification.objects.create(num_days=1)
+    def test_registered_pin_required(self):
+        """
+        test the response from a registered user without any notifications
+        """
+        self.contact.pin = '1234'
+        self.contact.save()
+        msg = self._send(self.reg_conn, '1')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.pin_required)
+
+    def test_registered_incorrect_pin(self):
+        """
+        test the response from a registered user without any notifications
+        """
+        self.contact.pin = '1234'
+        self.contact.save()
+        msg = self._send(self.reg_conn, '4444')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.incorrect_pin)
+
+    def test_registered_with_notification(self):
+        """ test the response from a user with a pending notification """
+        now = datetime.datetime.now()
+        notification = reminders.Notification.objects.create(num_days=1,
+                                                             time_of_day=now)
         reminders.SentNotification.objects.create(notification=notification,
                                                   recipient=self.contact,
                                                   status='sent',
-                                                  message='abc')
+                                                  message='abc',
+                                                  appt_date=now,
+                                                  date_to_send=now)
         msg = self._send(self.reg_conn, '1')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
@@ -93,17 +127,40 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.assertEqual(sent_notif.count(), 1)
         self.assertEqual(sent_notif[0].status, 'confirmed')
 
+    def test_registered_with_notification_and_pin(self):
+        """ test the response from a user with a pending notification """
+        now = datetime.datetime.now()
+        self.contact.pin = '1234'
+        self.contact.save()
+        notification = reminders.Notification.objects.create(num_days=1,
+                                                             time_of_day=now)
+        reminders.SentNotification.objects.create(notification=notification,
+                                                  recipient=self.contact,
+                                                  status='sent',
+                                                  message='abc',
+                                                  appt_date=now,
+                                                  date_to_send=now)
+        msg = self._send(self.reg_conn, '1234')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)
+        sent_notif = reminders.SentNotification.objects.all()
+        self.assertEqual(sent_notif.count(), 1)
+        self.assertEqual(sent_notif[0].status, 'confirmed')
 
-class RemindersScriptedTest(TestScript, RemindersCreateDataTest):
+
+class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
 
     def test_scheduler(self):
         self.startRouter()
         self.router.logger.setLevel(logging.DEBUG)
-        contact = self.create_contact()
+        contact = self.create_contact({'pin': '1234'})
         backend = self.create_backend(data={'name': 'mockbackend'})
         connection = self.create_connection({'contact': contact,
                                              'backend': backend})
-        notification = reminders.Notification.objects.create(num_days=1)
+        now = datetime.datetime.now()
+        notification = reminders.Notification.objects.create(num_days=1,
+                                                             time_of_day=now)
         tomorrow = datetime.date.today() + datetime.timedelta(days=1)
         reminders.Patient.objects.create(contact=contact,
                                          date_enrolled=datetime.date.today(),

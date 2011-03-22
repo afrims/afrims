@@ -1,10 +1,9 @@
-<form action='#' method='post'>
+<form id='message-tester' action='#' method='post' class='buttons'>
     {% csrf_token %}
     <table>
         {{ form }}
     </table>
     <div class='form-action'>
-        <input type='submit' name='submit' value="Submit" />
+        <input type='submit' name='submit' value="Send" />
     </div>
 </form>
-

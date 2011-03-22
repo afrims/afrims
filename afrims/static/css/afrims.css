@@ -23,8 +23,9 @@ ul.messages li.info {
 /* forms */
 
 .form-action {
-    text-align: right;
+    text-align: left;
     padding-bottom: 1em;
+    padding-top: 1em;
 }
 
 form.buttons .form-action {
@@ -50,6 +51,50 @@ ul.errorlist li {
     border: 1px solid #A33B3B;
 }
 
+form.buttons ul {
+    margin: 0;
+    padding: 0;
+}
+
+form.buttons ul li {
+    list-style-type: none;
+}
+
+form.buttons td ul.selectable-deck {
+    margin-top: 1em;
+}
+
+form.buttons td ul.selectable-deck li {
+    padding-left: 0;
+}
+
+form.buttons th {
+    padding-top: 0.9em;
+    vertical-align: top;
+}
+
+form.buttons .ui-widget-content {
+    padding: 0.2em;
+}
+
+form.buttons table td, form.buttons table th {
+    border: none;
+}
+
+select.horitzonal-multiselect {
+    width: 500px;
+    height: 200px;
+}
+
+body:last-child h2 + form.buttons {
+    padding-top: 1em;
+    padding-left: 1em;
+}
+
+form#message-tester {
+    border: none;
+}
+
 /* tables */
 
 table.pagination tfoot tr td div.pagination {
@@ -59,4 +104,12 @@ table.pagination tfoot tr td div.pagination {
 table.pagination tfoot tr td div.pagination a, table.pagination tfoot tr td div.pagination span {
     display: inline;
     float: none;
+}
+
+table.sortable tbody tr.odd {
+    background: #F3F8FD;
+}
+
+table.sortable td.actions .ui-button-text-only .ui-button-text {
+    padding: 2px;
 }

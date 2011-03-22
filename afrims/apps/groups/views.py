@@ -3,7 +3,7 @@ import logging
 from django import forms
 from django.http import HttpResponse
 from django.shortcuts import redirect, render_to_response, get_object_or_404
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.utils.translation import ugettext_lazy as _
 from django.template import RequestContext
@@ -17,6 +17,8 @@ from rapidsms.models import Contact
 
 from afrims.apps.groups.models import Group
 from afrims.apps.groups.forms import GroupForm, ContactForm
+
+from afrims.apps.reminders.models import Patient
 
 
 @login_required
@@ -35,6 +37,8 @@ def create_edit_group(request, group_id=None):
     group = None
     if group_id:
         group = get_object_or_404(Group, pk=group_id)
+        if not group.is_editable:
+            return HttpResponseForbidden('Access denied')
     if request.method == 'POST':
         form = GroupForm(request.POST, instance=group)
         if form.is_valid():
@@ -55,6 +59,8 @@ def create_edit_group(request, group_id=None):
 @transaction.commit_on_success
 def delete_group(request, group_id):
     group = get_object_or_404(Group, pk=group_id)
+    if not group.is_editable:
+        return HttpResponseForbidden('Access denied')
     if request.method == 'POST':
         group.delete()
         messages.info(request, 'Group successfully deleted')
@@ -66,7 +72,8 @@ def delete_group(request, group_id):
 
 @login_required
 def list_contacts(request):
-    contacts = Contact.objects.all()
+    # filter out patient records
+    contacts = Contact.objects.filter(patient__isnull=True)
     context = {
         'contacts': contacts.order_by('name'),
     }
@@ -107,4 +114,3 @@ def delete_contact(request, contact_id):
     context = {'contact': contact}
     return render_to_response('groups/contacts/delete.html', context,
                               RequestContext(request))
-

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
-from afrims.apps.broadcast.forms import BroadcastForm
+from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleFormset
 from afrims.apps.broadcast.models import Broadcast, BroadcastMessage
 
 
@@ -68,10 +68,25 @@ def schedule(request):
 
 @login_required
 def list_messages(request):
-    messages = BroadcastMessage.objects.all()
+    messages = BroadcastMessage.objects.select_related()
     context = {
         'broadcast_messages': messages,
     }
     return render_to_response('broadcast/messages.html', context,
                               RequestContext(request))
 
+
+@login_required
+def forwarding(request):
+    if request.method == 'POST':
+        formset = ForwardingRuleFormset(request.POST)
+        if formset.is_valid():
+            forwarding_rules = formset.save()
+            return HttpResponseRedirect(reverse('broadcast-forwarding'))
+    else:
+        formset = ForwardingRuleFormset()
+    context = {
+        'formset': formset,
+    }
+    return render_to_response('broadcast/forwarding.html', context,
+                              RequestContext(request))

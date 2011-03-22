@@ -1,0 +1,46 @@
+{% extends "broadcast/base.html" %}
+
+{% block title %}Forwarding Rules{% endblock %}
+
+{% block javascripts %}{{ block.super }}
+    <script src="{{ MEDIA_URL }}js/forms.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block stylesheets %}{{ block.super }}
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}broadcast/css/broadcast.css" />
+        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/afrims.css" />
+{% endblock %}
+
+{% block content %}
+<div class="module">
+<h2>Forwarding Rules</h2>
+
+<form method="POST" action="" class="buttons">
+{% csrf_token %}
+{{ formset.non_form_errors }}
+{{ formset.management_form }}
+<table id='forwarding_rules' class='sortable'>
+    <tr><th>Keyword</th><th>Source Group</th><th>Destination Group</th><th>Optional Message</th><th>Delete?</th></tr>
+	{% for form in formset.forms %}
+	<tr class="{% cycle 'one' 'two' %}">
+	    {% for field in form.visible_fields %}
+	    <td>
+		    {% if forloop.first %}
+		        {% for inv_field in form.hidden_fields %}
+		            {{ inv_field }}
+		        {% endfor %}
+		    {% endif %}
+		    {{ field.errors }}{{ field }}
+	    </td>
+	    {% endfor %}
+	</tr>
+	{% endfor %}
+	
+</table>
+<div class='form-action'>
+   <input type="submit" name="submit" value="Update Rules" />
+</div>
+</form>
+
+</div>
+{% endblock %}

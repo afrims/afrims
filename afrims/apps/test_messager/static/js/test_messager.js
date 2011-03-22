@@ -20,7 +20,6 @@ $.widget("ui.messager", {
             title: 'Send Test Message',
             modal: true,
             resizable: false,
-            width: 400,
             open: function (e, ui) {
                 $.getJSON(self.options.url, {'message': self.element.val()}, function(data) {
                     self._handle_response(data);
