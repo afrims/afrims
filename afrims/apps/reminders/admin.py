@@ -30,8 +30,8 @@ admin.site.register(reminders.Patient, PatientAdmin)
 
 
 class PatientDataPayloadAdmin(admin.ModelAdmin):
-    list_display = ('id', 'submit_date')
-    list_filter = ('submit_date',)
+    list_display = ('id', 'submit_date', 'status')
+    list_filter = ('status', 'submit_date',)
     search_fields = ('raw_data',)
     ordering = ('-submit_date',)
 admin.site.register(reminders.PatientDataPayload, PatientDataPayloadAdmin)
