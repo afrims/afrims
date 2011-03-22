@@ -62,6 +62,5 @@ def receive_patient_record(request):
     try:
         parse_payload(payload)
     except Exception as e:
-        logger.exception(e)
-        return HttpResponseServerError(str(e))
+        return HttpResponseServerError(unicode(e))
     return HttpResponse("Data submitted succesfully.")

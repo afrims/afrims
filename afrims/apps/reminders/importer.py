@@ -16,16 +16,27 @@ from afrims.apps.groups.models import Group
 logger = logging.getLogger('afrims.apps.reminders.importer')
 
 
-@transaction.commit_on_success
 def parse_payload(payload):
     """ Parse entire XML payload sent from external database """
+    try:
+        parse_patient_list(payload)
+    except Exception as e:
+        payload.error_message = unicode(e)
+        payload.status = 'error'
+        payload.save()
+        raise
+
+
+@transaction.commit_on_success
+def parse_patient_list(payload):
+    """
+    Parse entire XML payload sent from external database. All exceptions will 
+    be caught, logged, and the database will be rolled back
+    """
     try:
         root = etree.fromstring(payload.raw_data)
         for patient in root.iter("Table"):
             parse_patient(patient, payload)
-    except etree.XMLSyntaxError as e:
-        logger.exception(e)
-        raise ValidationError("XML Syntax Error %s" % str(e))
     except ValidationError as e:
         logger.exception(e)
         raise

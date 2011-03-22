@@ -75,8 +75,17 @@ class SentNotification(models.Model):
 class PatientDataPayload(models.Model):
     ''' Dumping area for incoming patient data XML snippets '''
 
+    STATUS_CHOICES = (
+        ('received', 'Received'),
+        ('error', 'Error'),
+        ('success', 'Success'),
+    )
+
     raw_data = models.TextField()
     submit_date = models.DateTimeField()
+    status = models.CharField(max_length=16, default='received',
+                              choices=STATUS_CHOICES)
+    error_message = models.TextField(blank=True)
 
     def save(self, **kwargs):
         if not self.pk:

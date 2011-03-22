@@ -283,6 +283,8 @@ class ImportTest(RemindersCreateDataTest):
         data = '---invalid xml data---'
         payload = reminders.PatientDataPayload.objects.create(raw_data=data)
         self.assertRaises(ValidationError, parse_payload, payload)
+        payload = reminders.PatientDataPayload.objects.all()[0]
+        self.assertEqual(payload.status, 'error')
 
     def test_patient_creation(self):
         """ Test that patients get created properly """
@@ -293,8 +295,10 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(patients.count(), 1)
         self.assertEqual(patients[0].mobile_number, '12223334444')
         self.assertEqual(patients[0].raw_data.pk, payload.pk)
+        payload = reminders.PatientDataPayload.objects.all()[0]
+        self.assertEqual(payload.status, 'success')
 
-    def test_missing_patient_field(self):
+    def test_invalid_patient_field(self):
         """ Invalid patient data should return a 500 status code """
         self._authorize()
         patient = self.create_xml_patient({'Mobile_Number': 'invalid'})

@@ -28,6 +28,8 @@ class PatientForm(forms.ModelForm):
     def save(self, payload):
         instance = super(PatientForm, self).save(commit=False)
         instance.raw_data = payload
+        instance.raw_data.status = 'success'
+        instance.raw_data.save()
         # get or create associated contact record
         if not instance.contact:
             subject_number = instance.subject_number
