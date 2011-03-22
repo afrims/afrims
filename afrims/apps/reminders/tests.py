@@ -249,7 +249,6 @@ class ImportTest(RemindersCreateDataTest):
         """ Make sure patient import view has proper security measures """
         # create empty XML payload
         data = self._node('NewDataSet')
-        data.append(self._node('Table'))
         data = etree.tostring(data)
         # GET method not allowed
         response = self._get(data)
@@ -296,9 +295,9 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(patients[0].raw_data.pk, payload.pk)
 
     def test_missing_patient_field(self):
-        """ Invalid patient data should return a 400 status code """
+        """ Invalid patient data should return a 500 status code """
         self._authorize()
         patient = self.create_xml_patient({'Mobile_Number': 'invalid'})
         payload = self.create_xml_payload([patient])
         response = self._post(payload)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 500)

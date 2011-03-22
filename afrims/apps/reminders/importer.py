@@ -9,6 +9,7 @@ from django.conf import settings
 from rapidsms.models import Contact, Connection, Backend
 
 from afrims.apps.reminders import models as reminders
+from afrims.apps.reminders.forms import PatientForm
 from afrims.apps.groups.models import Group
 
 
@@ -25,6 +26,9 @@ def parse_payload(payload):
     except etree.XMLSyntaxError as e:
         logger.exception(e)
         raise ValidationError("XML Syntax Error %s" % str(e))
+    except ValidationError as e:
+        logger.exception(e)
+        raise
     except Exception as e:
         logger.exception(e)
         raise ValidationError(e)
@@ -39,55 +43,36 @@ def parse_patient(node, payload):
     '''
     logger.debug('Creating patient...')
     logger.debug(etree.tostring(node, pretty_print=True))
+    # mapping of XML tags to Patient model fields
+    valid_field_names = {
+        "Subject_Number": 'subject_number',
+        "Date_Enrolled": 'date_enrolled',
+        "Mobile_Number": 'mobile_number',
+        "Pin_Code": 'pin',
+        "Next_Visit": 'next_visit',
+    }
+    # convert XML structure into POST-like dictionary
+    data = {}
+    for field in node.getchildren():
+        key = valid_field_names.get(field.tag, field.tag)
+        data[key] = field.text
+    logger.debug(data)
+    # look up patient by subject number to see if this is an update
+    instance = None
+    if 'subject_number' in data:
+        patient_kwargs = {'subject_number': data['subject_number']}
+        try:
+            instance = reminders.Patient.objects.get(**patient_kwargs)
+            logger.debug("Found patient {0}".format(instance.subject_number))
+        except reminders.Patient.DoesNotExist:
+            number = patient_kwargs['subject_number']
+            logger.debug("Patient {0} doesn't exist".format(number))
+    # construct model form and see if data is valid
+    form = PatientForm(data, instance=instance)
+    if form.is_valid():
+        patient = form.save(payload=payload)
+    else:
+        logger.debug('Patient data is invalid')
+        errors = dict((k, v[0]) for k, v in form.errors.items())
+        raise ValidationError(errors)
 
-    subject_number = None
-    enroll_date = None
-    mobile_number = None
-    pin = None
-    next_visit = None
-
-    for data in node.getchildren():
-        if data.tag == "Subject_Number": subject_number = data.text
-        if data.tag == "Date_Enrolled": enroll_date = datetime.strptime(data.text,'%b  %d %Y ')
-        if data.tag == "Mobile_Number": mobile_number = clean_number(data.text)
-        if data.tag == "Pin_Code": pin = (data.text if data.text else '')  #in case we opt to not use pin codes
-        if data.tag == "Next_Visit": next_visit = datetime.strptime(data.text,'%b  %d %Y ')
-
-    if not (subject_number and enroll_date and mobile_number and pin):
-        logger.warning('Missing data, exiting...')
-        return False #something is wrong with our parsing.
-    (patient_model, new_patient) = reminders.Patient.objects.get_or_create(
-                            subject_number=subject_number,
-                            date_enrolled=enroll_date,
-                            )
-    logger.debug('Using patient ID {0}'.format(patient_model.pk))
-    #these values can all change over time so we update them
-    patient_model.pin=pin
-    patient_model.mobile_number=mobile_number
-    patient_model.raw_data=payload
-    patient_model.next_visit=next_visit
-
-    contact = None
-    try:
-        contact = Contact.objects.get(name=subject_number, connection__identity=mobile_number) #assuming each Contact's name is their patient ID   
-    except Contact.DoesNotExist:
-        #create a new Contact
-        (group, group_created) = Group.objects.get_or_create(name=settings.DEFAULT_SUBJECT_GROUP_NAME)
-        contact = Contact(name=subject_number)
-        contact.save()
-        contact.groups.add(group)
-
-    patient_model.contact = contact
-    patient_model.save()
-    return True
-
-
-def clean_number(raw_number):
-    '''
-        cleans submitted phone numbers
-    '''
-    num = raw_number.replace(')','')
-    num = num.replace('(','')
-    num = num.replace('-','')
-    num = num.strip()
-    return num
