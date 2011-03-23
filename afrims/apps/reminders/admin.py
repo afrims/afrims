@@ -18,5 +18,20 @@ class SentNotificationAdmin(admin.ModelAdmin):
 admin.site.register(reminders.SentNotification, SentNotificationAdmin)
 
 
-admin.site.register(reminders.PatientDataPayload)
-admin.site.register(reminders.Patient)
+class PatientAdmin(admin.ModelAdmin):
+    list_display = ('subject_number', 'date_enrolled', 'next_visit',
+                    'mobile_number', 'pin', 'contact')
+    list_filter = ('next_visit',)
+    date_hierarchy = 'date_enrolled'
+    ordering = ('-date_enrolled',)
+    search_fields = ('subject_number', 'pin', 'mobile_number')
+    raw_id_fields = ('raw_data', 'contact')
+admin.site.register(reminders.Patient, PatientAdmin)
+
+
+class PatientDataPayloadAdmin(admin.ModelAdmin):
+    list_display = ('id', 'submit_date', 'status')
+    list_filter = ('status', 'submit_date',)
+    search_fields = ('raw_data',)
+    ordering = ('-submit_date',)
+admin.site.register(reminders.PatientDataPayload, PatientDataPayloadAdmin)

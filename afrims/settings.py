@@ -144,15 +144,6 @@ MIDDLEWARE_CLASSES = [
     'pagination.middleware.PaginationMiddleware',
     'django_sorting.middleware.SortingMiddleware',
 ]
-
-#The default group subjects are added to when their information
-#is POSTed to us
-DEFAULT_SUBJECT_GROUP_NAME = 'subjects'
-
-
-#The default backend to be used when creating new patient contacts
-#on POST submission of patient data from their server
-DEFAULT_BACKEND_NAME = "txtnation"
     
 # -------------------------------------------------------------------- #
 #                           HERE BE DRAGONS!                           #
@@ -197,6 +188,15 @@ SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'afrims.migrations.rapidsms',
 }
 
-PRIMARY_BACKEND = 'twilio'
 
+#The default group subjects are added to when their information
+#is POSTed to us
+DEFAULT_SUBJECT_GROUP_NAME = 'Subjects'
+
+#The default backend to be used when creating new patient contacts
+#on POST submission of patient data from their server
+DEFAULT_BACKEND_NAME = "twilio"
+# unless overridden, all outgoing messages will be sent using this backend
+PRIMARY_BACKEND = 'twilio'
+# if set, the message tester app will always use this backend
 TEST_MESSAGER_BACKEND = 'twilio'
