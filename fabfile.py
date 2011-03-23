@@ -176,14 +176,24 @@ def netstat_plnt():
 
 def router_start():  
     """ start router on remote host """
-    require('root', provided_by=('staging', 'production'))
-    run('sudo start afrims-router')
+    if env.environment == 'staging':
+        require('root', provided_by=('staging', 'production'))
+        run('sudo start afrims-router')
+    else:
+        for i,j in enumerate(env.settings):
+            require('root', provided_by=('staging', 'production'))
+            run('sudo start afrims-router-%s' % env.settings_files[i])
 
 
 def router_stop():  
     """ stop router on remote host """
-    require('root', provided_by=('staging', 'production'))
-    run('sudo stop afrims-router')
+    if env.environment == 'staging':
+        require('root', provided_by=('staging', 'production'))
+        run('sudo stop afrims-router')
+    else:
+        for i,j in enumerate(env.settings):
+            require('root', provided_by=('staging', 'production'))
+            run('sudo stop afrims-router-%s' % env.settings_files[i])
 
 def servers_start():
     ''' Start the gunicorn servers '''
