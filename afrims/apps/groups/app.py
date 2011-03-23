@@ -1,7 +1,7 @@
-import re
-
 from rapidsms.apps.base import AppBase
 from rapidsms.models import Contact
+
+from afrims.apps.groups.utils import normalize_number
 
 
 class GroupsApp(AppBase):
@@ -9,10 +9,10 @@ class GroupsApp(AppBase):
     number_pattern = r'[^0-9]'
 
     def _normalize_number(self, number):
-        return re.sub(self.number_pattern, '', number)
+        return normalize_number(number)
 
     def _associate_contact(self, connection):
-        normalized_number = self._normalize_number(connection.identity)
+        normalized_number = normalize_number(connection.identity)
         self.debug('Normalized number: {0}'.format(normalized_number))
         try:
             contact = Contact.objects.get(phone=normalized_number)
