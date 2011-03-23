@@ -18,6 +18,10 @@ class CreateDataTest(TestCase):
         chars = string.letters + extra_chars
         return ''.join([random.choice(chars) for i in range(length)])
 
+    def random_number_string(self, length=4):
+        numbers = [str(x) for x in random.sample(range(10), 4)]
+        return ''.join(numbers)
+
     def create_backend(self, data={}):
         defaults = {
             'name': self.random_string(12),

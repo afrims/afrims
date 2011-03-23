@@ -25,7 +25,8 @@ class ContactExtra(models.Model):
     def get_primary_connection(self, backend_name=None):
         """ Determine needed backend and return associated connection """
         from rapidsms.models import Backend
-        if not backend_name and hasattr(settings, 'PRIMARY_BACKEND'):
+        if (not backend_name and hasattr(settings, 'PRIMARY_BACKEND')
+            and settings.PRIMARY_BACKEND):
             backend_name = settings.PRIMARY_BACKEND
             logger.debug('found {0} in settings'.format(backend_name))
         if self.primary_backend_id:
