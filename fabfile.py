@@ -63,6 +63,8 @@ def production():
     env.sudo_user = 'afrims'
     env.environment = 'production'
     env.hosts = ['10.84.168.245']
+    env.settings_files=['kpp','cebu']
+    env.settings = ['afrims.localsettings_production_%s' % (env.settings_files[0]), 'afrims.localsettings_production_%s' % env.settings_files_[1]]
     _setup_path()
 
 
@@ -99,12 +101,16 @@ def deploy():
             utils.abort('Production deployment aborted.')
     with settings(warn_only=True):
         router_stop()
+        if env.environment == 'production':
+            servers_stop()
     with cd(env.code_root):
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
         sudo('git pull', user=env.sudo_user)
     migrate()
     touch()
     router_start()
+    if env.environment == 'production':
+        servers_start()
 
 
 def update_requirements():
@@ -178,20 +184,50 @@ def router_stop():
     require('root', provided_by=('staging', 'production'))
     run('sudo stop afrims-router')
 
+def servers_start():
+    ''' Start the gunicorn servers '''
+    require('root', provided_by=('staging', 'production'))
+    if env.environment == 'production':
+        for i in env.settings_files:
+            run('sudo start afrims-%s' % i)
+    else:
+        run('sudo start afrims')
+
+
+def servers_stop():
+    ''' Stop the gunicorn servers '''
+    require('root', provided_by=('staging', 'production'))
+    if env.environment == 'production':
+        for i in env.settings_files:
+            run('sudo stop afrims-%s' % i)
+    else:
+        run('sudo stop afrims')
+
+
 
 def migrate():
     """ run south migration on remote environment """
     require('project_root', provided_by=('production', 'staging'))
-    with cd(env.project_root):      
-        run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % env)        
-        run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
-
+    if env.environment == 'staging':
+        with cd(env.project_root):
+            run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % env)
+            run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
+    else:
+        for i in env.settings:
+            with cd(env.project_root):
+                run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % i)
+                run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % i)
 
 def collectstatic():
     """ run collectstatic on remote environment """
     require('project_root', provided_by=('production', 'staging'))
-    with cd(env.project_root):      
-        run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env)
+    if env.environment == 'staging':
+        with cd(env.project_root):
+            run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env)
+    else:
+        for i in env.settings:
+            with cd(env.project_root):
+                run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % i)
 
 
 def reset_local_db():

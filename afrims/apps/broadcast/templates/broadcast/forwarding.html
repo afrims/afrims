@@ -3,12 +3,12 @@
 {% block title %}Forwarding Rules{% endblock %}
 
 {% block javascripts %}{{ block.super }}
-    <script src="{{ MEDIA_URL }}js/forms.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}js/forms.js" type="text/javascript"></script>
 {% endblock %}
 
 {% block stylesheets %}{{ block.super }}
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}broadcast/css/broadcast.css" />
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}css/afrims.css" />
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}broadcast/css/broadcast.css" />
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/afrims.css" />
 {% endblock %}
 
 {% block content %}
