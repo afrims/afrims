@@ -6,6 +6,7 @@ from rapidsms.models import Contact
 
 from afrims.apps.groups.models import Group
 from afrims.apps.groups.validators import validate_phone
+from afrims.apps.groups.utils import normalize_number
 from afrims.apps.reminders import models as reminders
 
 
@@ -19,11 +20,15 @@ class PatientForm(forms.ModelForm):
 
     date_enrolled = forms.DateField(input_formats=XML_DATE_FORMATS)
     next_visit = forms.DateField(input_formats=XML_DATE_FORMATS)
-    mobile_number = forms.CharField(validators=[validate_phone])
 
     class Meta(object):
         model = reminders.Patient
         exclude = ('raw_data', 'contact')
+
+    def clean_mobile_number(self):
+        mobile_number = normalize_number(self.cleaned_data['mobile_number'])
+        validate_phone(mobile_number)
+        return mobile_number
 
     def save(self, payload):
         instance = super(PatientForm, self).save(commit=False)

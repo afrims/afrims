@@ -360,3 +360,11 @@ class ImportTest(RemindersCreateDataTest):
         payload = reminders.PatientDataPayload.objects.all()[0]
         self.assertEqual(payload.status, 'success')
         self.assertEqual(payload.patients.count(), 3)
+
+    def test_formatted_number(self):
+        """ Test that contacts get created for patients """
+        node = self.create_xml_patient({'Mobile_Number': '(33)-0001112222'})
+        payload = self.create_payload([node])
+        parse_patient(node, payload)
+        patient = payload.patients.all()[0]
+        self.assertEqual(patient.contact.phone, '330001112222')
