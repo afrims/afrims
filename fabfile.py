@@ -35,7 +35,7 @@ def _setup_path():
     env.project_static = _join(env.project_root, 'static')
     env.virtualenv_root = _join(env.root, 'python_env')
     env.services = _join(env.home, 'services')
-    env.settings = '%(project)s.localsettings' % env
+
 
 
 def setup_dirs():
@@ -54,6 +54,7 @@ def staging():
     env.sudo_user = 'afrims'
     env.environment = 'staging'
     env.hosts = ['173.203.221.48']
+    env.settings = '%(project)s.localsettings' % env
     _setup_path()
 
 
@@ -64,7 +65,7 @@ def production():
     env.environment = 'production'
     env.hosts = ['10.84.168.245']
     env.settings_files=['kpp','cebu']
-    env.settings = ['afrims.localsettings_production_%s' % (env.settings_files[0]), 'afrims.localsettings_production_%s' % env.settings_files_[1]]
+    env.settings = ['afrims.localsettings_production_%s' % (env.settings_files[0]), 'afrims.localsettings_production_%s' % env.settings_files[1]]
     _setup_path()
 
 
@@ -215,8 +216,8 @@ def migrate():
     else:
         for i in env.settings:
             with cd(env.project_root):
-                run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % i)
-                run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % i)
+                run('%s/bin/python manage.py syncdb --noinput --settings=%s' % (env.virtualenv_root,i))
+                run('%s/bin/python manage.py migrate --noinput --settings=%s' % (env.virtualenv_root,i))
 
 def collectstatic():
     """ run collectstatic on remote environment """
@@ -227,7 +228,7 @@ def collectstatic():
     else:
         for i in env.settings:
             with cd(env.project_root):
-                run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % i)
+                run('%s/bin/python manage.py collectstatic --noinput --settings=%s' % (env.virtualenv_root,i))
 
 
 def reset_local_db():
