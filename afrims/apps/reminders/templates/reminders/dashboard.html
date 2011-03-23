@@ -1,12 +1,16 @@
-{% extends "layout-split-2.html" %}
+{% extends "afrims/layout-split-2.html" %}
 
 {% block title %}Appointment Reminders{% endblock %}
 
 {% block javascripts %}{{ block.super }}
+    <script src="{{ STATIC_URL }}js/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}js/forms.js" type="text/javascript"></script>
+    <script src="{{ STATIC_URL }}reminders/js/reminders.js" type="text/javascript"></script>
 {% endblock %}
 
 {% block stylesheets %}{{ block.super }}
-        <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reminders/css/reminders.css" />
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}reminders/css/reminders.css" />
+        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/afrims.css" />
 {% endblock %}
 
 {% block left %}
@@ -15,14 +19,46 @@
 
 <table id='reminder_report' class='sortable'>
     <tr>
-        <th>Queued, Unsent Reminders:</th><td>{{ reminder_report.queued }}</td>
+        <th>Unsent Reminders:</th><td>{{ reminder_report.queued }}</td>
     </tr>
     <tr>
-        <th>Delivered, Unconfirmed Reminders:</th><td>{{ reminder_report.delivered }}</td>
+        <th>Sent and Unconfirmed:</th><td>{{ reminder_report.sent }}</td>
     </tr>
     <tr>
-        <th>Delivered, Confirmed Reminders:</th><td>{{ reminder_report.confirmed }}</td>
+        <th>Sent and Confirmed:</th><td>{{ reminder_report.confirmed }}</td>
     </tr>
 </table>
+</div>
+
+<div class="module">
+<h2>Reminder Message</h2>
+<div id='reminder_sample_message'>
+"You have an appointment with the clinic on March 16th.  Please reply '1' to confirm 
+receipt of this message, or call 1 888 343 3433 if you have any questions."
+</div>
+</table>
+</div>
+
+{% endblock %}
+
+{% block right %}
+<div class="module">
+<h2>Notification Schedule</h2>
+
+<form method="POST" action="" class="buttons">
+{% csrf_token %}
+{{ notification_formset.management_form }}
+<table id='notification_schedule' class='sortable'>
+	{% for form in notification_formset.forms %}
+	<tr class="{% cycle 'one' 'two' %}">
+	    <td><ul>{{ form.as_ul }}</ul></td>
+	</tr>
+	{% endfor %}
+</table>
+<div class='form-action'>
+   <input type="submit" name="submit" value="Update Schedule" />
+</div>
+</form>
+
 </div>
 {% endblock %}

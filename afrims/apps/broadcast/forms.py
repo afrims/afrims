@@ -1,8 +1,9 @@
 import datetime
 
 from django import forms
+from django.forms.models import modelformset_factory
 
-from afrims.apps.broadcast.models import Broadcast
+from afrims.apps.broadcast.models import Broadcast, ForwardingRule
 
 
 class BroadcastForm(forms.ModelForm):
@@ -13,6 +14,8 @@ class BroadcastForm(forms.ModelForm):
         ('later', 'Later'),
     )
     when = forms.ChoiceField(label='Send', choices=SEND_CHOICES)
+    body = forms.CharField(label="Message", max_length=140,
+                           widget=forms.Textarea)
 
     class Meta(object):
         model = Broadcast
@@ -37,7 +40,6 @@ class BroadcastForm(forms.ModelForm):
         self.fields['months'].widget.attrs['class'] = widget_class
         self.fields['groups'].help_text = ''
         self.fields['groups'].widget.attrs['class'] = widget_class
-        self.fields['body'].label = 'Message'
         self.fields['body'].widget.attrs['class'] = 'test-messager-field'
         # hide disabled frequency in form
         choices = list(Broadcast.REPEAT_CHOICES)
@@ -71,3 +73,5 @@ class BroadcastForm(forms.ModelForm):
                 broadcast.months = []
         return broadcast
 
+
+ForwardingRuleFormset = modelformset_factory(ForwardingRule, can_delete=True)

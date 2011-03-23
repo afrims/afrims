@@ -35,3 +35,5 @@ DATABASES = {
 # south configuration
 SKIP_SOUTH_TESTS = True
 
+PRIMARY_BACKEND = ''
+DEFAULT_BACKEND_NAME = 'test-backend'

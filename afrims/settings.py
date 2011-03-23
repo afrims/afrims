@@ -34,16 +34,17 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     
     "pagination",
+    "django_sorting",
     "south",
+	"staticfiles",
     # "gunicorn",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
-    "afrims.apps.offsite",
     "afrims.apps.reminders",
     "afrims.apps.test_messager",
+    "afrims.apps.default_connection",
 
     # the rapidsms contrib apps.
-    "rapidsms.contrib.default",
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
     "rapidsms.contrib.locations",
@@ -52,6 +53,9 @@ INSTALLED_APPS = [
     "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "rapidsms.contrib.echo",
+
+    # this app should be last, as it will always reply with a help message
+    "afrims.apps.catch_all",
 ]
 
 
@@ -61,10 +65,10 @@ INSTALLED_APPS = [
 RAPIDSMS_TABS = [
     ("afrims.apps.broadcast.views.send_message", "Send a Message"),
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
-    ("afrims.apps.groups.views.dashboard", "Cold Chain"),
-    ("afrims.apps.groups.views.dashboard", "Groups"),
-    ("rapidsms.contrib.registration.views.registration","People"),
-    ("afrims.apps.groups.views.dashboard", "Settings"),
+    ("broadcast-forwarding", "Forwarding"),
+    ("afrims.apps.groups.views.list_groups", "Groups"),
+    ("afrims.apps.groups.views.list_contacts","People"),
+    ("settings", "Settings"),
 #    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
 
 #    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
@@ -76,12 +80,6 @@ RAPIDSMS_TABS = [
 
 ]
 
-
-
-# Specify a logo URL for the dashboard layout.html. This logo will show up
-# at top left for every tab
-LOGO_LEFT_URL = '/static/images/trialconnect.png'
-LOGO_RIGHT_URL = '/static/images/tatrc.png'
 
 
 # -------------------------------------------------------------------- #
@@ -108,8 +106,16 @@ TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 # for some reason this setting is blank in django's global_settings.py,
 # but it is needed for static assets to be linkable.
-MEDIA_URL = "/static/"
+MEDIA_URL = "/media/"
 ADMIN_MEDIA_PREFIX = "/static/admin/"
+STATIC_URL = "/static/"
+STATIC_ROOT = "../static_files/"
+
+
+# Specify a logo URL for the dashboard layout.html. This logo will show up
+# at top left for every tab
+LOGO_LEFT_URL = '%simages/trialconnect.png' % STATIC_URL
+LOGO_RIGHT_URL = '%simages/tatrc.png' % STATIC_URL
 
 
 # this is required for the django.contrib.sites tests to run, but also
@@ -126,6 +132,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.request",
+    "staticfiles.context_processors.static",
 
     #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
     "rapidsms.context_processors.logo",
@@ -139,16 +146,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'pagination.middleware.PaginationMiddleware',
+    'django_sorting.middleware.SortingMiddleware',
 ]
-
-#The default group subjects are added to when their information
-#is POSTed to us
-DEFAULT_SUBJECT_GROUP_NAME = 'subjects'
-
-
-#The default backend to be used when creating new patient contacts
-#on POST submission of patient data from their server
-DEFAULT_BACKEND_NAME = "txtnation"
     
 # -------------------------------------------------------------------- #
 #                           HERE BE DRAGONS!                           #
@@ -181,9 +180,39 @@ TEST_EXCLUDED_APPS = [
 
 LANGUAGE_CODE='en'
 
+TIME_INPUT_FORMATS = ['%H:%M', '%H:%M:%S']
+
 ROOT_URLCONF = "afrims.urls"
 
 TIME_ZONE = 'America/New_York'
 
 LOGIN_URL = '/account/login/'
 
+SOUTH_MIGRATION_MODULES = {
+    'rapidsms': 'afrims.migrations.rapidsms',
+}
+
+
+#The default group subjects are added to when their information
+#is POSTed to us
+DEFAULT_SUBJECT_GROUP_NAME = 'Subjects'
+
+#The default backend to be used when creating new patient contacts
+#on POST submission of patient data from their server
+DEFAULT_BACKEND_NAME = "twilio"
+# unless overridden, all outgoing messages will be sent using this backend
+PRIMARY_BACKEND = 'twilio'
+# if set, the message tester app will always use this backend
+TEST_MESSAGER_BACKEND = 'twilio'
+
+STATICFILES_DIRS = (
+                    'static/',
+                    'templates/'
+)
+
+#STATICFILES_EXCLUDED_APPS = (
+#    'django.contrib.admin',
+#)
+
+
+ADMIN_MEDIA_ROOT = 'C:\Python26\Lib\site-packages\django\contrib\admin\media'

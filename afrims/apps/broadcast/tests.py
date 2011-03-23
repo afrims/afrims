@@ -5,7 +5,6 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil import rrule
 
-from django.test import TransactionTestCase, TestCase
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
@@ -13,58 +12,23 @@ from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.models import Connection, Contact, Backend
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.messages.incoming import IncomingMessage
-from rapidsms.tests.scripted import TestScript
 
-from afrims.apps.broadcast.models import Broadcast, DateAttribute
+from afrims.tests.testcases import CreateDataTest, FlushTestScript
+from afrims.apps.broadcast.models import Broadcast, DateAttribute,\
+                                         ForwardingRule
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 from afrims.apps.broadcast.forms import BroadcastForm
 
-from afrims.apps.groups.models import Group
 
-
-class CreateDataTest(TestCase):
+class BroadcastCreateDataTest(CreateDataTest):
     """ Base test case that provides helper functions to create data """
-
-    def random_string(self, length=255, extra_chars=''):
-        chars = string.letters + extra_chars
-        return ''.join([random.choice(chars) for i in range(length)])
-
-    def create_backend(self, data={}):
-        defaults = {
-            'name': self.random_string(12),
-        }
-        defaults.update(data)
-        return Backend.objects.create(**defaults)
-
-    def create_contact(self, data={}):
-        defaults = {
-            'name': self.random_string(12),
-        }
-        defaults.update(data)
-        return Contact.objects.create(**defaults)
-
-    def create_connection(self, data={}):
-        defaults = {
-            'identity': self.random_string(10),
-        }
-        defaults.update(data)
-        if 'backend' not in defaults:
-            defaults['backend'] = self.create_backend()
-        return Connection.objects.create(**defaults)
-
-    def create_group(self, data={}):
-        defaults = {
-            'name': self.random_string(12),
-        }
-        defaults.update(data)
-        return Group.objects.create(**defaults)
 
     def create_broadcast(self, when='', commit=True, data={}):
         now = datetime.datetime.now()
         defaults = {
             'date': now,
             'schedule_frequency': 'daily',
-            'body': self.random_string(160),
+            'body': self.random_string(140),
         }
         defaults.update(data)
         groups = defaults.pop('groups', [])
@@ -84,6 +48,16 @@ class CreateDataTest(TestCase):
         if months:
             broadcast.months = months
         return broadcast
+
+    def create_forwarding_rule(self, data={}):
+        defaults = {
+            'keyword': 'forward-test',
+            'source': self.create_group(data={'name': 'source group'}),
+            'dest': self.create_group(data={'name': 'dest group'}),
+            'message': self.random_string(length=25),
+        }
+        defaults.update(data)
+        return ForwardingRule.objects.create(**defaults)
 
     def get_weekday(self, day):
         return DateAttribute.objects.get(name__iexact=day,
@@ -106,7 +80,7 @@ class CreateDataTest(TestCase):
         self.assertEqual(date1, date2)
 
 
-class DateAttributeTest(CreateDataTest):
+class DateAttributeTest(BroadcastCreateDataTest):
     """ Test pre-defined data in initial_data.json against rrule constants """
 
     def test_weekdays(self):
@@ -120,7 +94,7 @@ class DateAttributeTest(CreateDataTest):
         self.assertEqual(self.get_weekday('sunday').value, rrule.SU.weekday)
 
 
-class BroadcastDateTest(CreateDataTest):
+class BroadcastDateTest(BroadcastCreateDataTest):
 
     def test_get_next_date_future(self):
         """ get_next_date shouln't increment if date is in the future """
@@ -197,7 +171,7 @@ class BroadcastDateTest(CreateDataTest):
         self.assertDateEqual(broadcast.get_next_date(), next_month)
 
 
-class BroadcastAppTest(CreateDataTest):
+class BroadcastAppTest(BroadcastCreateDataTest):
 
     def test_queue_creation(self):
         """ Test broadcast messages are queued properly """
@@ -223,7 +197,7 @@ class BroadcastAppTest(CreateDataTest):
         self.assertFalse(b2.pk in ready)
 
 
-class BroadcastFormTest(CreateDataTest):
+class BroadcastFormTest(BroadcastCreateDataTest):
     def setUp(self):
         self.contact = self.create_contact()
         self.group = self.create_group()
@@ -233,7 +207,7 @@ class BroadcastFormTest(CreateDataTest):
         """ Start date is required for future broadcasts """
         data =  {
             'when': 'later',
-            'body': self.random_string(160),
+            'body': self.random_string(140),
             'schedule_frequency': 'one-time',
             'groups': [self.group.pk],
         }
@@ -247,7 +221,7 @@ class BroadcastFormTest(CreateDataTest):
         """ 'now' messages automatically get date assignment """
         data =  {
             'when': 'now',
-            'body': self.random_string(160),
+            'body': self.random_string(140),
             'groups': [self.group.pk],
         }
         form = BroadcastForm(data)
@@ -261,7 +235,7 @@ class BroadcastFormTest(CreateDataTest):
         yesterday = now - relativedelta(days=1)
         data =  {
             'when': 'later',
-            'body': self.random_string(160),
+            'body': self.random_string(140),
             'date': now,
             'schedule_end_date': yesterday,
             'schedule_frequency': 'daily',
@@ -312,7 +286,7 @@ class BroadcastFormTest(CreateDataTest):
         self.assertEqual(after.weekdays.count(), 0)
 
 
-class BroadcastViewTest(CreateDataTest):
+class BroadcastViewTest(BroadcastCreateDataTest):
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
         self.user.save()
@@ -333,9 +307,75 @@ class BroadcastViewTest(CreateDataTest):
         self.assertTrue(after.schedule_frequency is None)
 
 
-class BroadcastScriptedTest(TestScript, CreateDataTest):
+class BroadcastForwardingTest(BroadcastCreateDataTest):
+
+    def setUp(self):
+        self.source_contact = self.create_contact(data={'first_name': 'John',
+                                                        'last_name': 'Smith'})
+        self.dest_contact = self.create_contact(data={'first_name': 'John',
+                                                      'last_name': 'Smith'})
+        self.backend = self.create_backend(data={'name': 'mockbackend'})
+        self.unreg_conn = self.create_connection({'backend': self.backend})
+        self.source_conn = self.create_connection({'contact': self.source_contact,
+                                                   'backend': self.backend,
+                                                   'identity': '5678'})
+        self.dest_conn = self.create_connection({'contact': self.dest_contact,
+                                                 'backend': self.backend,
+                                                 'identity': '1234'})
+        self.router = MockRouter()
+        self.app = BroadcastApp(router=self.router)
+        self.rule = self.create_forwarding_rule(data={'keyword': 'abc'})
+        self.rule.source.contacts.add(self.source_contact)
+
+    def _send(self, conn, text):
+        msg = IncomingMessage(conn, text)
+        self.app.handle(msg)
+        return msg
+
+    def test_non_matching_rule(self):
+        """ tests that no response comes for non-matching keywords """
+        msg = self._send(self.source_conn, 'non-matching-keyword')
+        self.assertEqual(len(msg.responses), 0)
+
+    def test_unregistered(self):
+        """ tests the response from an unregistered user """
+        msg = self._send(self.unreg_conn, 'abc')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.not_registered)
+
+    def test_wrong_group(self):
+        """ tests the response from a user in non-source group """
+        msg = self._send(self.dest_conn, 'abc')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.not_registered)
+
+    def test_creates_broadcast(self):
+        """ tests the response from a user in non-source group """
+        msg = self._send(self.source_conn, 'abc my-message')
+        now = datetime.datetime.now()
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(Broadcast.objects.count(), 1)
+        bc = Broadcast.objects.get()
+        self.assertDateEqual(bc.date_created, now)
+        self.assertDateEqual(bc.date, now)
+        self.assertEqual(bc.schedule_frequency, 'one-time')
+        expected_msg = 'From {name} ({number}): {msg} my-message'\
+                       .format(name=self.source_contact.name,
+                               number=self.source_conn.identity,
+                               msg=self.rule.message)
+        self.assertEqual(bc.body, expected_msg)
+        self.assertEqual(list(bc.groups.all()), [self.rule.dest])
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)
+
+
+class BroadcastScriptedTest(FlushTestScript, BroadcastCreateDataTest):
+
     def test_entire_stack(self):
         self.startRouter()
+        self.router.logger.setLevel(logging.DEBUG)
         contact = self.create_contact()
         backend = self.create_backend(data={'name': 'mockbackend'})
         connection = self.create_connection({'contact': contact,

@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from django.contrib import admin
+from django.views.generic.simple import direct_to_template
 
 admin.autodiscover()
 
@@ -17,6 +18,9 @@ urlpatterns = patterns('',
     (r'^account/', include('rapidsms.urls.login_logout')),
     url(r'^$', 'rapidsms.views.dashboard', name='rapidsms-dashboard'),
 
+    url(r'^settings/$', direct_to_template,
+        {'template': 'afrims/not_implemented.html'}, name='settings'),
+
     # RapidSMS contrib app URLs
     (r'^ajax/', include('rapidsms.contrib.ajax.urls')),
     (r'^export/', include('rapidsms.contrib.export.urls')),
@@ -29,7 +33,7 @@ urlpatterns = patterns('',
     (r'^broadcast/', include('afrims.apps.broadcast.urls')),
     (r'^reminders/', include('afrims.apps.reminders.urls')),
     (r'^test-messager/', include('afrims.apps.test_messager.urls')),
-    (r'^groups/', include('afrims.apps.groups.urls')),
+    (r'^crm/', include('afrims.apps.groups.urls')),
 )
 
 if settings.DEBUG:

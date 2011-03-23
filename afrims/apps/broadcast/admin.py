@@ -19,3 +19,4 @@ class BroadcastMessageAdmin(admin.ModelAdmin):
 
 admin.site.register(broadcast.BroadcastMessage, BroadcastMessageAdmin)
 
+admin.site.register(broadcast.ForwardingRule)

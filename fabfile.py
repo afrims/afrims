@@ -1,4 +1,4 @@
-import os
+import os, sys
 
 from fabric.api import *
 from fabric.contrib import files, console
@@ -63,6 +63,8 @@ def production():
     env.sudo_user = 'afrims'
     env.environment = 'production'
     env.hosts = ['10.84.168.245']
+    env.settings_files=['kpp','cebu']
+    env.settings = ['afrims.localsettings_production_%s' % (env.settings_files[0]), 'afrims.localsettings_production_%s' % env.settings_files_[1]]
     _setup_path()
 
 
@@ -80,7 +82,7 @@ def bootstrap():
 def create_virtualenv():
     """ setup virtualenv on remote host """
     require('virtualenv_root', provided_by=('staging', 'production'))
-    args = '--clear --distribute'
+    args = '--clear --distribute --no-site-packages'
     sudo('virtualenv %s %s' % (args, env.virtualenv_root), user=env.sudo_user)
 
 
@@ -99,11 +101,16 @@ def deploy():
             utils.abort('Production deployment aborted.')
     with settings(warn_only=True):
         router_stop()
+        if env.environment == 'production':
+            servers_stop()
     with cd(env.code_root):
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
         sudo('git pull', user=env.sudo_user)
+    migrate()
     touch()
     router_start()
+    if env.environment == 'production':
+        servers_start()
 
 
 def update_requirements():
@@ -177,18 +184,72 @@ def router_stop():
     require('root', provided_by=('staging', 'production'))
     run('sudo stop afrims-router')
 
+def servers_start():
+    ''' Start the gunicorn servers '''
+    require('root', provided_by=('staging', 'production'))
+    if env.environment == 'production':
+        for i in env.settings_files:
+            run('sudo start afrims-%s' % i)
+    else:
+        run('sudo start afrims')
+
+
+def servers_stop():
+    ''' Stop the gunicorn servers '''
+    require('root', provided_by=('staging', 'production'))
+    if env.environment == 'production':
+        for i in env.settings_files:
+            run('sudo stop afrims-%s' % i)
+    else:
+        run('sudo stop afrims')
+
+
 
 def migrate():
     """ run south migration on remote environment """
     require('project_root', provided_by=('production', 'staging'))
-    with cd(env.project_root):      
-        run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % env)        
-        run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
-
+    if env.environment == 'staging':
+        with cd(env.project_root):
+            run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % env)
+            run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
+    else:
+        for i in env.settings:
+            with cd(env.project_root):
+                run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % i)
+                run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % i)
 
 def collectstatic():
     """ run collectstatic on remote environment """
     require('project_root', provided_by=('production', 'staging'))
-    with cd(env.project_root):      
-        run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env)
+    if env.environment == 'staging':
+        with cd(env.project_root):
+            run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env)
+    else:
+        for i in env.settings:
+            with cd(env.project_root):
+                run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % i)
+
+
+def reset_local_db():
+    """ Reset local database from remote host """
+    require('code_root', provided_by=('production', 'staging'))
+    if env.environment == 'production':
+        utils.abort('Local DB reset is for staging environment only')
+    question = 'Are you sure you want to reset your local ' \
+               'database with the %(environment)s database?' % env
+    sys.path.append('.')
+    if not console.confirm(question, default=False):
+        utils.abort('Local database reset aborted.')
+    if env.environment == 'staging':
+        from afrims.settings_staging import DATABASES as remote
+    else:
+        from afrims.settings_production import DATABASES as remote
+    from afrims.localsettings import DATABASES as loc
+    local_db = loc['default']['NAME']
+    remote_db = remote['default']['NAME']
+    with settings(warn_only=True):
+        local('dropdb %s' % local_db)
+    local('createdb %s' % local_db)
+    host = '%s@%s' % (env.user, env.hosts[0])
+    local('ssh -C %s sudo -u afrims pg_dump -Ox %s | psql %s' % (host, remote_db, local_db))
 
