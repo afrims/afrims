@@ -214,5 +214,3 @@ STATICFILES_DIRS = (
 #    'django.contrib.admin',
 #)
 
-
-ADMIN_MEDIA_ROOT = 'C:\Python26\Lib\site-packages\django\contrib\admin\media'

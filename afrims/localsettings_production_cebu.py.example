@@ -11,6 +11,7 @@ INSTALLED_BACKENDS = {
     },
     "mach_cebu" : {"ENGINE":  "rapidsms.backends.http",
                 "port": 9088,
+                "host": "0.0.0.0",
                 "gateway_url": "http://www.smsgateway.com",
                 "params_outgoing": "user=my_username&password=my_password&id=%(phone_number)s&text=%(message)s",
                 "params_incoming": "id=%(phone_number)s&text=%(message)s"
