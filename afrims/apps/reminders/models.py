@@ -101,8 +101,8 @@ class Patient(models.Model):
     # Patients may be manually created, so raw data can be null
     raw_data = models.ForeignKey(PatientDataPayload, null=True, blank=True,
                                  related_name='patients')
-    contact = models.ForeignKey(rapidsms.Contact, null=True, blank=True)
-    subject_number = models.CharField(max_length=20)
+    contact = models.ForeignKey(rapidsms.Contact, unique=True)
+    subject_number = models.CharField(max_length=20, unique=True)
     date_enrolled = models.DateField()
     mobile_number = models.CharField(max_length=30)
     pin = models.CharField(max_length=4, blank=True,
