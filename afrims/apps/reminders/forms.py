@@ -31,7 +31,7 @@ class PatientForm(forms.ModelForm):
         instance.raw_data.status = 'success'
         instance.raw_data.save()
         # get or create associated contact record
-        if not instance.contact:
+        if not instance.contact_id:
             subject_number = instance.subject_number
             contact, _ = Contact.objects.get_or_create(name=subject_number)
             instance.contact = contact
