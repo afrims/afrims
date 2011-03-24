@@ -11,6 +11,9 @@ from rapidsms.tests.scripted import TestScript
 from afrims.apps.groups.models import Group
 
 
+UNICODE_CHARS = [unichr(x) for x in xrange(1, 0xD7FF)]
+
+
 class CreateDataTest(TestCase):
     """ Base test case that provides helper functions to create data """
 
@@ -21,6 +24,13 @@ class CreateDataTest(TestCase):
     def random_number_string(self, length=4):
         numbers = [str(x) for x in random.sample(range(10), 4)]
         return ''.join(numbers)
+
+    def random_unicode_string(self, max_length=255):
+        output = u''
+        for x in xrange(random.randint(1, max_length/2)):
+            c = UNICODE_CHARS[random.randint(0, len(UNICODE_CHARS)-1)]
+            output += c + u' '
+        return output
 
     def create_backend(self, data={}):
         defaults = {

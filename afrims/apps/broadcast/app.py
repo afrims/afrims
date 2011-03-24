@@ -66,6 +66,7 @@ class BroadcastApp(AppBase):
             return False
         keyword = msg_parts[0].lower()
         if keyword not in rules:
+            self.debug(u'{0} keyword not found in rules'.format(keyword))
             return False
         rule = rules[keyword]
         contact = msg.connection.contact
@@ -74,10 +75,10 @@ class BroadcastApp(AppBase):
             msg.respond(self.not_registered)
             return True
         now = datetime.datetime.now()
-        msg_text = [rule.message, ' '.join(msg_parts[1:])]
+        msg_text = [rule.message, u' '.join(msg_parts[1:])]
         msg_text = [m for m in msg_text if m]
-        msg_text = ' '.join(msg_text)
-        full_msg = 'From {name} ({number}): {body}'\
+        msg_text = u' '.join(msg_text)
+        full_msg = u'From {name} ({number}): {body}'\
                    .format(name=contact.name, number=msg.connection.identity,
                            body=msg_text)
         broadcast = Broadcast.objects.create(date_created=now, date=now,
