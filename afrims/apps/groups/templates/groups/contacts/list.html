@@ -33,8 +33,8 @@
                     <td>{{ contact.email }}</td>
                     <td>{{ contact.phone }}</td>
                     <td class='actions'>
-                        <a class='button' title='Edit {{ contact.name }}' href='{% url edit-contact contact.pk %}'><span class='ui-icon ui-icon-pencil' /></a>
-                        <a class='button' title='Delete {{ contact.name }}' href='{% url delete-contact contact.pk %}'><span class='ui-icon ui-icon-closethick' /></a>    
+                        <a class='button' title='Edit {{ contact.name }}' href='{% url edit-contact contact.pk %}'><span class='ui-icon ui-icon-pencil'></span></a>
+                        <a class='button' title='Delete {{ contact.name }}' href='{% url delete-contact contact.pk %}'><span class='ui-icon ui-icon-closethick'></span></a>    
                     </td>
                 </tr>
             {% endfor %}
