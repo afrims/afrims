@@ -8,3 +8,4 @@
 *.idea
 localsettings.py
 test_localsettings.py
+static_files/

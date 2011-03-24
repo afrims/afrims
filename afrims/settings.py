@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "pagination",
     "django_sorting",
     "south",
+	"staticfiles",
     # "gunicorn",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
@@ -81,12 +82,6 @@ RAPIDSMS_TABS = [
 
 
 
-# Specify a logo URL for the dashboard layout.html. This logo will show up
-# at top left for every tab
-LOGO_LEFT_URL = '/static/images/trialconnect.png'
-LOGO_RIGHT_URL = '/static/images/tatrc.png'
-
-
 # -------------------------------------------------------------------- #
 #                         BORING CONFIGURATION                         #
 # -------------------------------------------------------------------- #
@@ -111,8 +106,16 @@ TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 # for some reason this setting is blank in django's global_settings.py,
 # but it is needed for static assets to be linkable.
-MEDIA_URL = "/static/"
+MEDIA_URL = "/media/"
 ADMIN_MEDIA_PREFIX = "/static/admin/"
+STATIC_URL = "/static/"
+STATIC_ROOT = "../static_files/"
+
+
+# Specify a logo URL for the dashboard layout.html. This logo will show up
+# at top left for every tab
+LOGO_LEFT_URL = '%simages/trialconnect.png' % STATIC_URL
+LOGO_RIGHT_URL = '%simages/tatrc.png' % STATIC_URL
 
 
 # this is required for the django.contrib.sites tests to run, but also
@@ -129,6 +132,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.request",
+    "staticfiles.context_processors.static",
 
     #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
     "rapidsms.context_processors.logo",
@@ -200,3 +204,13 @@ DEFAULT_BACKEND_NAME = "twilio"
 PRIMARY_BACKEND = 'twilio'
 # if set, the message tester app will always use this backend
 TEST_MESSAGER_BACKEND = 'twilio'
+
+STATICFILES_DIRS = (
+                    'static/',
+                    'templates/'
+)
+
+#STATICFILES_EXCLUDED_APPS = (
+#    'django.contrib.admin',
+#)
+

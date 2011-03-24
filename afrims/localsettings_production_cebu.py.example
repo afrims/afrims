@@ -1,0 +1,53 @@
+from afrims.settings import *
+
+ADMINS = (
+    ('Development Team', 'afrims-dev@dimagi.com'),
+)
+MANAGERS = ADMINS
+
+INSTALLED_BACKENDS = {
+    "message_tester": {
+        "ENGINE": "rapidsms.backends.bucket",
+    },
+    "mach_cebu" : {"ENGINE":  "rapidsms.backends.http",
+                "port": 9088,
+                "host": "0.0.0.0",
+                "gateway_url": "http://www.smsgateway.com",
+                "params_outgoing": "user=my_username&password=my_password&id=%(phone_number)s&text=%(message)s",
+                "params_incoming": "id=%(phone_number)s&text=%(message)s"
+    },
+}
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "afrimsdb",
+        "USER": "afrims",
+        "PASSWORD": "", # provided by localsettings.py
+        "HOST": "localhost",
+        "PORT": "5432",
+    },
+}
+
+ADMIN_MEDIA_PREFIX = "/static/admin/"
+STATIC_URL = "/static/"
+STATIC_ROOT = "../static_files/"
+
+
+# Specify a logo URL for the dashboard layout.html. This logo will show up
+# at top left for every tab
+LOGO_LEFT_URL = '%simages/trialconnect.png' % STATIC_URL
+LOGO_RIGHT_URL = '%simages/tatrc.png' % STATIC_URL
+
+#The default backend to be used when creating new patient contacts
+#on POST submission of patient data from their server
+DEFAULT_BACKEND_NAME = "mach_cebu"
+
+DEBUG = False
+DJANGO_LOG_FILE = "afrims-cebu.django.log"
+LOG_LEVEL = "DEBUG"
+LOG_FILE = '/home/afrims/www/production/log/router-cebu.log'
+LOG_FORMAT = "%(asctime)s %(levelname)-8s - %(name)-26s %(message)s"
+LOG_SIZE = 33554432 # 2^25
+LOG_BACKUPS = 10 # number of logs to keep
+
