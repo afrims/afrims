@@ -26,8 +26,8 @@
                     <td>{{ group.count }}</td>
                     <td class='actions'>
                         {% if group.is_editable %}
-                            <a class='button' title='Edit {{ group.name }}' href='{% url edit-group group.pk %}'><span class='ui-icon ui-icon-pencil' /></a>
-                            <a class='button' title='Delete {{ group.name }}' href='{% url delete-group group.pk %}'><span class='ui-icon ui-icon-closethick' /></a>    
+                            <a class='button' title='Edit {{ group.name }}' href='{% url edit-group group.pk %}'><span class='ui-icon ui-icon-pencil'></span></a>
+                            <a class='button' title='Delete {{ group.name }}' href='{% url delete-group group.pk %}'><span class='ui-icon ui-icon-closethick'></span></a>    
                         {% endif %}
                     </td>
                 </tr>

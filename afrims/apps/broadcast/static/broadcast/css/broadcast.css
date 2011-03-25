@@ -15,6 +15,7 @@ form#broadcast-form table td, form#broadcast-form table th {
 
 ul#broadcast-nav {
     padding: 0;
+    margin-left: 0;
 }
 
 ul#broadcast-nav li {

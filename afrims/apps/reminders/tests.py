@@ -54,6 +54,9 @@ class RemindersCreateDataTest(CreateDataTest):
             'Mobile_Number': '12223334444',
         }
         defaults.update(data)
+        empty_items = [k for k, v in defaults.iteritems() if not v]
+        for item in empty_items:
+            del defaults[item]
         root = self._node('Table')
         for key, value in defaults.iteritems():
             root.append(self._node(key, value))
@@ -368,3 +371,10 @@ class ImportTest(RemindersCreateDataTest):
         parse_patient(node, payload)
         patient = payload.patients.all()[0]
         self.assertEqual(patient.contact.phone, '330001112222')
+
+    def test_next_visit_not_required(self):
+        """ Next_Visit shoudn't be required """
+        node = self.create_xml_patient({'Next_Visit': ''})
+        payload = self.create_payload([node])
+        parse_patient(node, payload)
+        self.assertEqual(payload.patients.count(), 1)

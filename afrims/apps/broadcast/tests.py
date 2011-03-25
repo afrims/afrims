@@ -370,6 +370,13 @@ class BroadcastForwardingTest(BroadcastCreateDataTest):
         self.assertEqual(msg.responses[0].text,
                          self.app.thank_you)
 
+    def test_unicode_broadcast_body(self):
+        """ Make sure unicode strings can be broadcasted """
+        text = u'abc ' + self.random_unicode_string(2)
+        msg = self._send(self.source_conn, text)
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(Broadcast.objects.count(), 1)
+
 
 class BroadcastScriptedTest(FlushTestScript, BroadcastCreateDataTest):
 

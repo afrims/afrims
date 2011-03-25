@@ -19,7 +19,8 @@ XML_DATE_FORMATS = ('%b  %d %Y ',)
 class PatientForm(forms.ModelForm):
 
     date_enrolled = forms.DateField(input_formats=XML_DATE_FORMATS)
-    next_visit = forms.DateField(input_formats=XML_DATE_FORMATS)
+    next_visit = forms.DateField(input_formats=XML_DATE_FORMATS,
+                                 required=False)
 
     class Meta(object):
         model = reminders.Patient
