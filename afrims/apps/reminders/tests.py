@@ -31,7 +31,7 @@ class RemindersCreateDataTest(CreateDataTest):
             element.text = value
         return element
 
-    def create_xml_patient(self, data={}):
+    def create_xml_patient(self, data=None):
         """
         <Table>
             <Subject_Number>xxx-nnnnn</Subject_Number>
@@ -39,8 +39,10 @@ class RemindersCreateDataTest(CreateDataTest):
             <Mobile_Number>08-11111111</Mobile_Number>
             <Pin_Code>1234</Pin_Code>
             <Next_Visit>Apr  7 2011 </Next_Visit>
+            <Reminder_Time>12:00</Reminder_Time>
         </Table>
         """
+        data = data or {}
         now = datetime.datetime.now()
         delta = datetime.timedelta(days=random.randint(1, 10) * -1)
         enrolled = now - delta
@@ -72,7 +74,8 @@ class RemindersCreateDataTest(CreateDataTest):
         raw_data = self.create_xml_payload(nodes)
         return reminders.PatientDataPayload.objects.create(raw_data=raw_data)
 
-    def create_patient(self, data={}):
+    def create_patient(self, data=None):
+        data = data or {}
         today = datetime.date.today()
         defaults = {
             'subject_number': self.random_string(12),
@@ -410,3 +413,27 @@ class ImportTest(RemindersCreateDataTest):
         payload = self.create_payload([node])
         parse_patient(node, payload)
         self.assertEqual(payload.patients.count(), 1)
+
+    def test_reminder_time(self):
+        """ Parse patient preferred reminder time """
+        node = self.create_xml_patient({'Reminder_Time': '12:00'})
+        payload = self.create_payload([node])
+        parse_patient(node, payload)
+        self.assertEqual(payload.patients.count(), 1)
+        patient = payload.patients.all()[0]
+        self.assertEqual(patient.reminder_time, datetime.time(12, 0))
+
+    def test_reminder_time_format(self):
+        """ Errors parsing Reminder_Time """
+        node = self.create_xml_patient({'Reminder_Time': 'XX:XX'})
+        payload = self.create_payload([node])
+        self.assertRaises(ValidationError, parse_payload, payload)
+
+    def test_reminder_time_not_required(self):
+        """ Reminder_Time is not required """
+        node = self.create_xml_patient({'Reminder_Time': ''})
+        payload = self.create_payload([node])
+        parse_patient(node, payload)
+        self.assertEqual(payload.patients.count(), 1)
+        patient = payload.patients.all()[0]
+        self.assertFalse(patient.reminder_time)

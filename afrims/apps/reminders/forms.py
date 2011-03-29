@@ -14,13 +14,15 @@ NotificationFormset = modelformset_factory(reminders.Notification,
                                            can_delete=True)
 
 XML_DATE_FORMATS = ('%b  %d %Y ',)
-
+XML_TIME_FORMATS = ('%H:%M', )
 
 class PatientForm(forms.ModelForm):
 
     date_enrolled = forms.DateField(input_formats=XML_DATE_FORMATS)
     next_visit = forms.DateField(input_formats=XML_DATE_FORMATS,
                                  required=False)
+    reminder_time = forms.TimeField(input_formats=XML_TIME_FORMATS,
+                                    required=False)
 
     class Meta(object):
         model = reminders.Patient
