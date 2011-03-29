@@ -244,6 +244,38 @@ class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
         self.assertTrue(message.date_sent is not None)
         self.stopRouter()
 
+    def test_patient_reminder_time(self):
+        self.startRouter()
+        self.router.logger.setLevel(logging.DEBUG)
+        contact = self.create_contact({'pin': '1234'})
+        backend = self.create_backend(data={'name': 'mockbackend'})
+        connection = self.create_connection({'contact': contact,
+                                             'backend': backend})
+        now = datetime.datetime.now()
+        notification = reminders.Notification.objects.create(num_days=1,
+                                                             time_of_day=now)
+        tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+        next_hour = now + + datetime.timedelta(hours=1)
+        patient = reminders.Patient.objects.create(contact=contact,
+                                         date_enrolled=datetime.date.today(),
+                                         subject_number='1234',
+                                         mobile_number='tester',
+                                         next_visit=tomorrow,
+                                         reminder_time=next_hour.time())
+        # run cronjob
+        from afrims.apps.reminders.app import scheduler_callback
+        scheduler_callback(self.router)
+        queued = contact.sent_notifications.filter(status='queued').count()
+        sent = contact.sent_notifications.filter(status='sent').count()
+        # patient message should be queued since they have asked for a later time
+        self.assertEqual(queued, 1)
+        # no messages ready to be sent
+        self.assertEqual(sent, 0)
+        message = contact.sent_notifications.filter(status='queued')[0]
+        self.assertTrue(message.date_sent is None)
+        self.assertEqual(message.date_to_send, datetime.datetime.combine(now, patient.reminder_time))
+        self.stopRouter()
+
 
 class ImportTest(RemindersCreateDataTest):
 
