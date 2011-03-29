@@ -3,6 +3,8 @@
 # encoding=utf-8
 import os
 
+PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
+
 # -------------------------------------------------------------------- #
 #                          MAIN CONFIGURATION                          #
 # -------------------------------------------------------------------- #
@@ -109,7 +111,7 @@ TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 MEDIA_URL = "/media/"
 ADMIN_MEDIA_PREFIX = "/static/admin/"
 STATIC_URL = "/static/"
-STATIC_ROOT = "../static_files/"
+STATIC_ROOT = os.path.join(PROJECT_PATH, '..', 'static_files')
 
 
 # Specify a logo URL for the dashboard layout.html. This logo will show up
@@ -157,8 +159,6 @@ MIDDLEWARE_CLASSES = [
 AJAX_PROXY_HOST = '127.0.0.1'
 AJAX_PROXY_PORT = 9988
 
-PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
-
 MEDIA_ROOT = os.path.join(PROJECT_PATH, 'static')
 
 TEMPLATE_DIRS = [
@@ -205,10 +205,8 @@ PRIMARY_BACKEND = 'twilio'
 # if set, the message tester app will always use this backend
 TEST_MESSAGER_BACKEND = 'twilio'
 
-STATICFILES_DIRS = (
-                    'static/',
-                    'templates/'
-)
+STATICFILES_DIRS = (os.path.join(PROJECT_PATH, 'static'),
+                    os.path.join(PROJECT_PATH, 'templates'))
 
 #STATICFILES_EXCLUDED_APPS = (
 #    'django.contrib.admin',
