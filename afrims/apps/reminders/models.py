@@ -109,6 +109,7 @@ class Patient(models.Model):
                            help_text="A 4-digit pin code for sms "
                                      "authentication workflows.")
     next_visit = models.DateField(blank=True, null=True)
+    reminder_time = models.TimeField(blank=True, null=True)
 
     def __unicode__(self):
         msg = u'Patient, Subject ID:{id}, Enrollment Date:{date_enrolled}'
