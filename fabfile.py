@@ -108,6 +108,7 @@ def deploy():
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
         sudo('git pull', user=env.sudo_user)
     migrate()
+    collectstatic()
     touch()
     router_start()
     if env.environment == 'production':
