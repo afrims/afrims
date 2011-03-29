@@ -17,7 +17,7 @@
 {% block content %}
 <div class="module">
     <h2>{% if form.instance.pk %}Edit Notification Schedule{% else %}Create Notification Schedule{% endif %}</h2>
-    <form action="" method="POST" class="buttons">
+    <form action="#" method="POST" class="buttons">
         {% csrf_token %}
         <table>
             {{ form }}
