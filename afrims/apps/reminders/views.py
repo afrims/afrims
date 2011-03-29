@@ -1,6 +1,6 @@
 import logging
 
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.context import RequestContext
 from django.http import HttpResponse, HttpResponseServerError,\
                         HttpResponseBadRequest, HttpResponseRedirect
@@ -15,7 +15,7 @@ from rapidsms.models import Contact, Connection, Backend
 
 from afrims.decorators import has_perm_or_basicauth
 from afrims.apps.reminders import models as reminders
-from afrims.apps.reminders.forms import NotificationFormset
+from afrims.apps.reminders.forms import NotificationForm
 from afrims.apps.reminders.importer import parse_payload
 
 logger = logging.getLogger('afrims.apps.reminder')
@@ -31,16 +31,9 @@ def dashboard(request):
         'sent': sent.count(),
         'confirmed': confirmed.count(),
     }
-    if request.method == 'POST':
-        notification_formset = NotificationFormset(request.POST)
-        if notification_formset.is_valid():
-            notifications = notification_formset.save()
-            return HttpResponseRedirect(reverse('reminders_dashboard'))
-    else:
-        notification_formset = NotificationFormset()
+    notifications = reminders.Notification.objects.all()
     context = {
-        'reminder_report': reminder_report,
-        'notification_formset': notification_formset,
+        'notifications': notifications,
     }
     return render_to_response('reminders/dashboard.html', context,
                               RequestContext(request))
@@ -64,3 +57,24 @@ def receive_patient_record(request):
     except Exception as e:
         return HttpResponseServerError(unicode(e))
     return HttpResponse("Data submitted succesfully.")
+
+
+@login_required
+def create_edit_notification(request, notification_id=None):
+    notification = None
+    if notification_id:
+        notification = get_object_or_404(reminders.Notification, pk=notification_id)
+    if request.method == 'POST':
+        form = NotificationForm(request.POST, instance=notification)
+        if form.is_valid():
+            form.save()
+            messages.info(request, "Notification Schedule saved successfully")
+            return redirect('reminders_dashboard')
+    else:
+        form = NotificationForm(instance=notification)
+    context = {
+        'form': form,
+        'group': notification,
+    }
+    return render_to_response('reminders/create_edit.html', context,
+                              context_instance=RequestContext(request))
