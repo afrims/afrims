@@ -18,6 +18,7 @@
                 <th>{% anchor schedule_frequency Frequency %}</th>
                 <th>{% anchor body Message %}</th>
                 <th>Groups</th>
+                <th>Actions</th>
             </tr>
         </thead>
         {% for broadcast in broadcasts %}
@@ -40,11 +41,13 @@
         </tr>
         {% endfor %}
         <tfoot>
+            {% if paginator.count > paginator.per_page %}
             <tr>
                 <td colspan='6'>
                     {% paginate %}
                 </td>
             </tr>
+            {% endif %}
         </tfoot>
     </table>
 </div>

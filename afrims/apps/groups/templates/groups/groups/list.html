@@ -35,11 +35,13 @@
             {% endfor %}
         </tbody>
         <tfoot>
+            {% if paginator.count > paginator.per_page %}
             <tr>
                 <td colspan='4'>
                     {% paginate %}
                 </td>
             </tr>
+            {% endif %}
         </tfoot>
     </table>
 </div>
