@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib import messages
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.context import RequestContext
 from django.http import HttpResponse, HttpResponseServerError,\
@@ -78,3 +79,15 @@ def create_edit_notification(request, notification_id=None):
     }
     return render_to_response('reminders/create_edit.html', context,
                               context_instance=RequestContext(request))
+
+
+@login_required
+def delete_notification(request, notification_id):
+    notification = get_object_or_404(reminders.Notification, pk=notification_id)
+    if request.method == 'POST':
+        notification.delete()
+        messages.info(request, 'Notification Schedule successfully deleted')
+        return redirect('reminders_dashboard')
+    context = {'notification': notification}
+    return render_to_response('reminders/delete.html', context,
+                              RequestContext(request))

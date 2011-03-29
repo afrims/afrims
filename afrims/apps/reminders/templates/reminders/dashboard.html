@@ -65,8 +65,8 @@ receipt of this message, or call 1 888 343 3433 if you have any questions."
                 {{ notification.get_recipients_display }}
             </td>
             <td class='actions'>
-                <a class='button' title='Edit notification #{{ notification.pk }}' href='{% url edit-notification  notification.pk %}'><span class='ui-icon ui-icon-pencil'></span></a>
-                <a class='button' title='Delete notification #{{ notification.pk }}' href=''><span class='ui-icon ui-icon-closethick'></span></a>    
+                <a class='button' title='Edit notification #{{ notification.pk }}' href='{% url edit-notification notification.pk %}'><span class='ui-icon ui-icon-pencil'></span></a>
+                <a class='button' title='Delete notification #{{ notification.pk }}' href='{% url delete-notification notification.pk %}'><span class='ui-icon ui-icon-closethick'></span></a>    
             </td>
         </tr>
         {% empty %}
