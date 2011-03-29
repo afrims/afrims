@@ -52,6 +52,7 @@ receipt of this message, or call 1 888 343 3433 if you have any questions."
     <table id='notifications' class="pagination sortable">
         <thead>
             <tr>
+                <th>{% anchor id "ID" %}</th>                
                 <th>{% anchor num_days "Reminder Schedule" %}</th>
                 <th>{% anchor time_of_day "Time of Day" %}</th>
                 <th>{% anchor recipients "Recipients" %}</th>
@@ -60,6 +61,7 @@ receipt of this message, or call 1 888 343 3433 if you have any questions."
         </thead>
         {% for notification in notifications %}
         <tr class="{% cycle 'odd' 'even' %}">
+            <td>{{ notification.id }}</td>
             <td>{{ notification.get_num_days_display }}</td>
             <td>{{ notification.formatted_time }}</td>
             <td>
@@ -78,7 +80,7 @@ receipt of this message, or call 1 888 343 3433 if you have any questions."
         <tfoot>
             {% if paginator.count > paginator.per_page %}
             <tr>
-                <td colspan='4'>
+                <td colspan='5'>
                     {% paginate %}
                 </td>
             </tr>
