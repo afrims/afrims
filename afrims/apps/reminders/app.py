@@ -106,8 +106,6 @@ class RemindersApp(AppBase):
         today = datetime.date.today()
         for notification in reminders.Notification.objects.all():
             self.info('Scheduling notifications for %s' % notification)
-            date_to_send = datetime.datetime.combine(today,
-                                                     notification.time_of_day)
             days_delta = datetime.timedelta(days=notification.num_days)
             appt_date = today + days_delta
             patients = reminders.Patient.objects.filter(next_visit=appt_date,
@@ -145,7 +143,7 @@ class RemindersApp(AppBase):
                     message = self.near_appt_msg.format(**msg_data)
                 else:
                     message = self.future_appt_msg.format(**msg_data)
-                date_to_send = datetime.datetime.combine(today, notification.time_of_day)
+                date_to_send = datetime.datetime.combine(today, patient.reminder_time or notification.time_of_day)
                 notification.sent_notifications.create(
                                         recipient=patient.contact,
                                         appt_date=appt_date,
