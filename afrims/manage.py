@@ -15,10 +15,10 @@ if not settings_specified and len(sys.argv) >= 2:
         settings = DEFAULT_TEST_SETTINGS
     else:
         settings = DEFAULT_SETTINGS
-    print "NOTICE: using default settings module '%s'" % settings    
+    if 'RAPIDSMS_SETTINGS' in os.environ:
+        settings = os.environ['RAPIDSMS_SETTINGS']
     sys.argv.append('--settings=%s' % settings)
-
-
+    print "NOTICE: using default settings module '%s'" % settings    
 
 if __name__ == "__main__":
     # all imports should begin with the full Python package ('afrims.'):
