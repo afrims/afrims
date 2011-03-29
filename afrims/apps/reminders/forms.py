@@ -52,3 +52,10 @@ class PatientForm(forms.ModelForm):
         group, _ = Group.objects.get_or_create(name=group_name)
         instance.contact.groups.add(group)
         return instance
+
+
+class NotificationForm(forms.ModelForm):
+
+    class Meta(object):
+        model = reminders.Notification
+

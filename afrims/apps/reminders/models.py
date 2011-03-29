@@ -29,6 +29,10 @@ class Notification(models.Model):
     def __unicode__(self):
         return u'{0} day'.format(self.num_days)
 
+    @property
+    def formatted_time(self):
+        return self.time_of_day.strftime('%I:%M %p')
+
 
 class SentNotification(models.Model):
     '''

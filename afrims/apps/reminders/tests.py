@@ -96,29 +96,95 @@ class ViewsTest(RemindersCreateDataTest):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
         self.user.save()
         self.client.login(username='test', password='abc')
+        self.dashboard_url = reverse('reminders_dashboard')
+
+    def get_valid_data(self):
+        data = {
+            'num_days': random.choice(reminders.Notification.NUM_DAY_CHOICES)[0],
+            'time_of_day': '12:00',
+            'recipients': random.choice(reminders.Notification.RECIPIENTS_CHOICES)[0],
+        }
+        return data
 
     def test_notification_schedule(self):
         """
-        Test that the notification schedule loads and updates properly.
+        Test that the notification schedule loads properly.
         """
-        reminders_dash = reverse('reminders_dashboard')
-        response = self.client.get(reminders_dash)
+
+        response = self.client.get(self.dashboard_url)
         self.assertEqual(response.status_code, 200)
-        post_data = {
-            u'form-INITIAL_FORMS': u'0',
-            u'form-TOTAL_FORMS': u'3',
-            u'form-0-num_days': u'2',
-            u'form-0-time_of_day': u'12:00',
-            u'form-0-recipients': u'all',
-            u'form-1-num_days': u'11',
-            u'form-1-time_of_day': u'15:00:00',
-            u'form-1-recipients': u'all',
-            u'form-2-num_days': u'',
-            u'form-2-recipients': u'all',
-        }
-        response = self.client.post(reminders_dash, post_data)
-        self.assertRedirects(response, reminders_dash)
-        self.assertEqual(reminders.Notification.objects.count(), 2)
+        
+    def test_get_create_page(self):
+        """
+        Test retriving the create notification schedule form.
+        """
+
+        url = reverse('create-notification')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_notification(self):
+        """
+        Test creating notification via form.
+        """
+
+        start_count = reminders.Notification.objects.count()
+        url = reverse('create-notification')
+        data = self.get_valid_data()
+        response = self.client.post(url, data)
+        self.assertRedirects(response, self.dashboard_url)
+        end_count = reminders.Notification.objects.count()
+        self.assertEqual(end_count, start_count + 1)
+
+    def test_get_edit_page(self):
+        """
+        Test retriving the edit notification schedule form.
+        """
+
+        data = self.get_valid_data()
+        notification = reminders.Notification.objects.create(**data)
+        url = reverse('edit-notification', args=[notification.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_edit_notification(self):
+        """
+        Test editing notification via form.
+        """
+
+        data = self.get_valid_data()
+        notification = reminders.Notification.objects.create(**data)
+        start_count = reminders.Notification.objects.count()
+        url = reverse('edit-notification', args=[notification.pk])
+        response = self.client.post(url, data)
+        self.assertRedirects(response, self.dashboard_url)
+        end_count = reminders.Notification.objects.count()
+        self.assertEqual(end_count, start_count)
+
+    def test_get_delete_page(self):
+        """
+        Test retriving the delete notification schedule form.
+        """
+
+        data = self.get_valid_data()
+        notification = reminders.Notification.objects.create(**data)
+        url = reverse('delete-notification', args=[notification.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_notification(self):
+        """
+        Test delete notification via form.
+        """
+
+        data = self.get_valid_data()
+        notification = reminders.Notification.objects.create(**data)
+        start_count = reminders.Notification.objects.count()
+        url = reverse('delete-notification', args=[notification.pk])
+        response = self.client.post(url, data)
+        self.assertRedirects(response, self.dashboard_url)
+        end_count = reminders.Notification.objects.count()
+        self.assertEqual(end_count, start_count - 1)
 
 
 class RemindersConfirmHandlerTest(RemindersCreateDataTest):

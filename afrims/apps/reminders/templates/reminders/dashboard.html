@@ -42,23 +42,50 @@ receipt of this message, or call 1 888 343 3433 if you have any questions."
 {% endblock %}
 
 {% block right %}
+{% load pagination_tags sorting_tags %}
+
+{% autosort notifications %}
+{% autopaginate notifications 15 %}
 <div class="module">
-<h2>Notification Schedule</h2>
-
-<form method="POST" action="" class="buttons">
-{% csrf_token %}
-{{ notification_formset.management_form }}
-<table id='notification_schedule' class='sortable'>
-	{% for form in notification_formset.forms %}
-	<tr class="{% cycle 'one' 'two' %}">
-	    <td><ul>{{ form.as_ul }}</ul></td>
-	</tr>
-	{% endfor %}
-</table>
-<div class='form-action'>
-   <input type="submit" name="submit" value="Update Schedule" />
-</div>
-</form>
-
+    <h2>Notification Schedule</h2>
+    <p><a class='button add' title='Add Notification Schedule' href="{% url create-notification %}" >Add notification schedule...</a></p>
+    <table id='notifications' class="pagination sortable">
+        <thead>
+            <tr>
+                <th>{% anchor id "ID" %}</th>                
+                <th>{% anchor num_days "Reminder Schedule" %}</th>
+                <th>{% anchor time_of_day "Time of Day" %}</th>
+                <th>{% anchor recipients "Recipients" %}</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        {% for notification in notifications %}
+        <tr class="{% cycle 'odd' 'even' %}">
+            <td>{{ notification.id }}</td>
+            <td>{{ notification.get_num_days_display }}</td>
+            <td>{{ notification.formatted_time }}</td>
+            <td>
+                {{ notification.get_recipients_display }}
+            </td>
+            <td class='actions'>
+                <a class='button' title='Edit notification #{{ notification.pk }}' href='{% url edit-notification notification.pk %}'><span class='ui-icon ui-icon-pencil'></span></a>
+                <a class='button' title='Delete notification #{{ notification.pk }}' href='{% url delete-notification notification.pk %}'><span class='ui-icon ui-icon-closethick'></span></a>    
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan='6'>No notification schedules</td>
+        </tr>
+        {% endfor %}
+        <tfoot>
+            {% if paginator.count > paginator.per_page %}
+            <tr>
+                <td colspan='5'>
+                    {% paginate %}
+                </td>
+            </tr>
+            {% endif %}
+        </tfoot>
+    </table>
 </div>
 {% endblock %}

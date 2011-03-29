@@ -75,3 +75,9 @@ class BroadcastForm(forms.ModelForm):
 
 
 ForwardingRuleFormset = modelformset_factory(ForwardingRule, can_delete=True)
+
+
+class ForwardingRuleForm(forms.ModelForm):
+
+    class Meta(object):
+        model = ForwardingRule

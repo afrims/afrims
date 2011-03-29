@@ -1,15 +1,15 @@
 from django.db import transaction
 from django.core.urlresolvers import reverse
 from django.template.context import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 
-from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleFormset
-from afrims.apps.broadcast.models import Broadcast, BroadcastMessage
+from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm
+from afrims.apps.broadcast.models import Broadcast, BroadcastMessage, ForwardingRule
 
 
 @login_required
@@ -78,15 +78,42 @@ def list_messages(request):
 
 @login_required
 def forwarding(request):
-    if request.method == 'POST':
-        formset = ForwardingRuleFormset(request.POST)
-        if formset.is_valid():
-            forwarding_rules = formset.save()
-            return HttpResponseRedirect(reverse('broadcast-forwarding'))
-    else:
-        formset = ForwardingRuleFormset()
     context = {
-        'formset': formset,
+        'rules': ForwardingRule.objects.all(),
     }
     return render_to_response('broadcast/forwarding.html', context,
                               RequestContext(request))
+
+
+@login_required
+def create_edit_rule(request, rule_id=None):
+    rule = None
+    if rule_id:
+        rule = get_object_or_404(ForwardingRule, pk=rule_id)
+    if request.method == 'POST':
+        form = ForwardingRuleForm(request.POST, instance=rule)
+        if form.is_valid():
+            form.save()
+            messages.info(request, "Forwarding Rule saved successfully")
+            return redirect('broadcast-forwarding')
+    else:
+        form = ForwardingRuleForm(instance=rule)
+    context = {
+        'form': form,
+        'rule': rule,
+    }
+    return render_to_response('broadcast/create_edit_rule.html', context,
+                              context_instance=RequestContext(request))
+
+
+@login_required
+def delete_rule(request, rule_id):
+    rule = get_object_or_404(ForwardingRule, pk=rule_id)
+    if request.method == 'POST':
+        rule.delete()
+        messages.info(request, 'Forwarding Rule successfully deleted')
+        return redirect('broadcast-forwarding')
+    context = {'rule': rule}
+    return render_to_response('broadcast/delete_rule.html', context,
+                              RequestContext(request))
+

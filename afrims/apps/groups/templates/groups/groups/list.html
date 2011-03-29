@@ -16,6 +16,7 @@
                 <th>{% anchor id ID %}</th>
                 <th>{% anchor name Name %}</th>
                 <th>{% anchor count "# Recipients" %}</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -34,11 +35,13 @@
             {% endfor %}
         </tbody>
         <tfoot>
+            {% if paginator.count > paginator.per_page %}
             <tr>
                 <td colspan='4'>
                     {% paginate %}
                 </td>
             </tr>
+            {% endif %}
         </tfoot>
     </table>
 </div>
