@@ -35,6 +35,7 @@ def dashboard(request):
     notifications = reminders.Notification.objects.all()
     context = {
         'notifications': notifications,
+        'reminder_report': reminder_report,
     }
     return render_to_response('reminders/dashboard.html', context,
                               RequestContext(request))
