@@ -76,7 +76,7 @@ def create_edit_notification(request, notification_id=None):
         form = NotificationForm(instance=notification)
     context = {
         'form': form,
-        'group': notification,
+        'notification': notification,
     }
     return render_to_response('reminders/create_edit.html', context,
                               context_instance=RequestContext(request))
