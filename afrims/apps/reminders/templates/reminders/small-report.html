@@ -45,4 +45,13 @@
         </tfoot>
     </table>
 </div>
+<div class="module">
+    <form class="date-form buttons" action="{% url reminders-report %}" method="get">
+        <div class='form-action'>
+            {{ report_form }}
+            <input type='hidden' name="status" value="{{ status }}" />
+            <input type='submit' value="Change Report Date" />
+        </div>
+    </form>
+</div>
 {% endblock %}

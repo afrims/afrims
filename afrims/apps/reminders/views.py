@@ -17,7 +17,7 @@ from rapidsms.models import Contact, Connection, Backend
 
 from afrims.decorators import has_perm_or_basicauth
 from afrims.apps.reminders import models as reminders
-from afrims.apps.reminders.forms import NotificationForm
+from afrims.apps.reminders.forms import NotificationForm, ReportForm
 from afrims.apps.reminders.importer import parse_payload
 
 logger = logging.getLogger('afrims.apps.reminder')
@@ -98,14 +98,18 @@ def report(request):
     Weekly appointment reminder report.
     """
     
+    
     status = request.GET.get('status', None)
     today = datetime.date.today()
-    appt_date = today + datetime.timedelta(weeks=1)    
-
+    appt_date = today + datetime.timedelta(weeks=1)
+    form = ReportForm(request.GET or None)
+    if form.is_valid():
+        appt_date = form.cleaned_data['date'] or appt_date
     confirmed_patients = reminders.Patient.objects.confirmed_for_date(appt_date)
     unconfirmed_patients = reminders.Patient.objects.unconfirmed_for_date(appt_date)
 
     context = {
+        'report_form': form,
         'status': status,
         'appt_date': appt_date,
         'confirmed_patients': confirmed_patients,

@@ -28,7 +28,7 @@
         <tfoot>
             <tr>
                 <td colspan='3'>
-                    <a href="{% url reminders-report %}?status=unconfirmed">See all unconfirmed appointments</a>
+                    <a href="{% url reminders-report %}?status=unconfirmed{% if request.GET.date %}&date={{ request.GET.date|urlencode }}{% endif %}">See all unconfirmed appointments</a>
                 </td>
             </tr>
         </tfoot>
@@ -60,11 +60,19 @@
         <tfoot>
             <tr>
                 <td colspan='3'>
-                    <a href="{% url reminders-report %}?status=confirmed">See all confirmed appointments</a>
+                    <a href="{% url reminders-report %}?status=confirmed{% if request.GET.date %}&date={{ request.GET.date|urlencode }}{% endif %}">See all confirmed appointments</a>
                 </td>
             </tr>
         </tfoot>
     </table>
     {% endwith %}
+</div>
+<div class="module">
+    <form class="date-form buttons" action="{% url reminders-report %}" method="get">
+        <div class='form-action'>
+            {{ report_form }}
+            <input type='submit' value="Change Report Date" />
+        </div>
+    </form>
 </div>
 {% endblock %}
