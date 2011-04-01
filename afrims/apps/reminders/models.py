@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.db.models import Q, Max
 
 from rapidsms import models as rapidsms
 
@@ -101,6 +102,25 @@ class PatientDataPayload(models.Model):
         return msg.format(date=self.submit_date)
 
 
+class PatientManager(models.Manager):
+
+    def confirmed_for_date(self, appt_date):
+        return self.filter(
+            contact__sent_notifications__appt_date=appt_date,
+            contact__sent_notifications__status='confirmed'
+        ).annotate(
+            confirm_time=Max('contact__sent_notifications__date_confirmed')
+        ).distinct()
+
+    def unconfirmed_for_date(self, appt_date):
+        return self.filter(
+            ~Q(contact__sent_notifications__status='confirmed'),
+            contact__sent_notifications__appt_date=appt_date,        
+        ).annotate(
+            last_reminder_time=Max('contact__sent_notifications__date_sent')
+        ).distinct()
+
+
 class Patient(models.Model):
     # Patients may be manually created, so raw data can be null
     raw_data = models.ForeignKey(PatientDataPayload, null=True, blank=True,
@@ -114,6 +134,8 @@ class Patient(models.Model):
                                      "authentication workflows.")
     next_visit = models.DateField(blank=True, null=True)
     reminder_time = models.TimeField(blank=True, null=True)
+
+    objects = PatientManager()
 
     def __unicode__(self):
         msg = u'Patient, Subject ID:{id}, Enrollment Date:{date_enrolled}'

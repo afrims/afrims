@@ -33,3 +33,17 @@ div#reminder_sample_message {
     padding: 0.5em;
     font-size: 110%;
 }
+
+table.patient-reminders {
+    width: 100%
+}
+
+ul#reminder-nav {
+    margin-left: 0;
+    padding: 0;
+}
+
+ul#reminder-nav li {
+    list-style: none outside none;
+    margin-bottom: 5px;
+}

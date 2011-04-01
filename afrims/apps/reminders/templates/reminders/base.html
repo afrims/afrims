@@ -16,18 +16,12 @@
 {% block left %}
 <div class="module">
 <h2>Appointment Reminders</h2>
-
-<table id='reminder_report' class='sortable'>
-    <tr>
-        <th>Unsent Reminders:</th><td>{{ reminder_report.queued }}</td>
-    </tr>
-    <tr>
-        <th>Sent and Unconfirmed:</th><td>{{ reminder_report.sent }}</td>
-    </tr>
-    <tr>
-        <th>Sent and Confirmed:</th><td>{{ reminder_report.confirmed }}</td>
-    </tr>
-</table>
+<ul id="reminder-nav">
+    <li><a href="{% url reminders_dashboard %}">Reminder Dashboard</a></li>    
+    <li><a href="{% url reminders-report %}">Reminder Reports</a></li>
+    <li><a href="{% url reminders-report %}?status=confirmed">Confirmed Reminders</a></li>
+    <li><a href="{% url reminders-report %}?status=unconfirmed">Unconfirmed Reminders</a></li>
+</ul>
 </div>
 
 <div class="module">
@@ -36,7 +30,6 @@
 "You have an appointment with the clinic on March 16th.  Please reply '1' to confirm 
 receipt of this message, or call 1 888 343 3433 if you have any questions."
 </div>
-</table>
 </div>
 
 {% endblock %}
