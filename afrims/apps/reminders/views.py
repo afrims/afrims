@@ -26,11 +26,15 @@ logger = logging.getLogger('afrims.apps.reminder')
 @login_required
 def dashboard(request):
     today = datetime.date.today()
-    appt_date = today + datetime.timedelta(weeks=1)    
+    appt_date = today + datetime.timedelta(weeks=1)
+    form = ReportForm(request.GET or None)
+    if form.is_valid():
+        appt_date = form.cleaned_data['date'] or appt_date
 
     unconfirmed_patients = reminders.Patient.objects.unconfirmed_for_date(appt_date)
     notifications = reminders.Notification.objects.all()
     context = {
+        'report_form': form,
         'notifications': notifications,
         'unconfirmed_patients': unconfirmed_patients,
         'appt_date': appt_date,

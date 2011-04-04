@@ -32,6 +32,14 @@
         </tfoot>
     </table>
 </div>
+<div class="module">
+    <form class="date-form buttons" action="{% url reminders_dashboard %}" method="get">
+        <div class='form-action'>
+            {{ report_form }}
+            <input type='submit' value="Change Report Date" />
+        </div>
+    </form>
+</div>
 {% autosort notifications %}
 {% autopaginate notifications 15 %}
 <div class="module">
