@@ -59,3 +59,8 @@ class NotificationForm(forms.ModelForm):
     class Meta(object):
         model = reminders.Notification
 
+
+class ReportForm(forms.Form):
+    date = forms.DateField(label='Report Date', required=False)
+    date.widget.attrs.update({'class': 'datepicker'})
+

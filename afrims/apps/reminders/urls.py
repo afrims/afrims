@@ -7,5 +7,6 @@ urlpatterns = patterns('',
     url(r'^(\d+)/edit/$', views.create_edit_notification, name='edit-notification'),
     url(r'^(\d+)/delete/$', views.delete_notification, name='delete-notification'),
     url(r'^$', views.dashboard, name='reminders_dashboard'),
-    url(r'post$', views.receive_patient_record, name='patient-import')
+    url(r'report/$', views.report, name='reminders-report'),
+    url(r'post$', views.receive_patient_record, name='patient-import'),
 )

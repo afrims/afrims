@@ -1,49 +1,37 @@
-{% extends "afrims/layout-split-2.html" %}
-
-{% block title %}Appointment Reminders{% endblock %}
-
-{% block javascripts %}{{ block.super }}
-    <script src="{{ STATIC_URL }}js/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
-    <script src="{{ STATIC_URL }}js/forms.js" type="text/javascript"></script>
-    <script src="{{ STATIC_URL }}reminders/js/reminders.js" type="text/javascript"></script>
-{% endblock %}
-
-{% block stylesheets %}{{ block.super }}
-        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}reminders/css/reminders.css" />
-        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/afrims.css" />
-{% endblock %}
-
-{% block left %}
-<div class="module">
-<h2>Appointment Reminders</h2>
-
-<table id='reminder_report' class='sortable'>
-    <tr>
-        <th>Unsent Reminders:</th><td>{{ reminder_report.queued }}</td>
-    </tr>
-    <tr>
-        <th>Sent and Unconfirmed:</th><td>{{ reminder_report.sent }}</td>
-    </tr>
-    <tr>
-        <th>Sent and Confirmed:</th><td>{{ reminder_report.confirmed }}</td>
-    </tr>
-</table>
-</div>
-
-<div class="module">
-<h2>Reminder Message</h2>
-<div id='reminder_sample_message'>
-"You have an appointment with the clinic on March 16th.  Please reply '1' to confirm 
-receipt of this message, or call 1 888 343 3433 if you have any questions."
-</div>
-</table>
-</div>
-
-{% endblock %}
+{% extends "reminders/base.html" %}
 
 {% block right %}
 {% load pagination_tags sorting_tags %}
-
+<div class="module">
+    <h2>Unconfirmed Reminders For Appointments on {{ appt_date }}</h2>
+    <table class="pagination sortable patient-reminders">
+        <thead>
+            <tr>
+                <th>Study ID</th>                
+                <th>Number</th>
+                <th>Time of Last Reminder</th>
+            </tr>
+        </thead>
+        {% for patient in unconfirmed_patients|slice:":20" %}
+        <tr class="{% cycle 'odd' 'even' %}">
+            <td>{{ patient.subject_number }}</td>
+            <td>{{ patient.mobile_number }}</td>
+            <td>{{ patient.last_reminder_time }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan='3'>No pending reminders</td>
+        </tr>
+        {% endfor %}
+        <tfoot>
+            <tr>
+                <td colspan='3'>
+                    <a href="{% url reminders-report %}?status=unconfirmed">See all unconfirmed appointments</a>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
 {% autosort notifications %}
 {% autopaginate notifications 15 %}
 <div class="module">

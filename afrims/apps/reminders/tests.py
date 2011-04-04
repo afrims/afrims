@@ -89,6 +89,33 @@ class RemindersCreateDataTest(CreateDataTest):
             defaults['contact'] = self.create_contact()
         return reminders.Patient.objects.create(**defaults)
 
+    def create_notification(self, data=None):
+        data = data or {}
+        defaults = {
+            'num_days': random.choice(reminders.Notification.NUM_DAY_CHOICES)[0],
+            'time_of_day': '12:00',
+            'recipients': random.choice(reminders.Notification.RECIPIENTS_CHOICES)[0],
+        }
+        defaults.update(data)
+        return reminders.Notification.objects.create(**defaults)
+
+    def create_sent_notification(self, data=None):
+        data = data or {}
+        today = datetime.date.today()
+        defaults = {
+            'status': random.choice(reminders.SentNotification.STATUS_CHOICES)[0],
+            'appt_date': today,
+            'date_queued': today,
+            'date_to_send': today,
+            'message': self.random_string(),
+        }
+        defaults.update(data)
+        if 'recipient' not in defaults:
+            defaults['recipient'] = self.create_patient().contact
+        if 'notification' not in defaults:
+            defaults['notification'] = self.create_notification()
+        return reminders.SentNotification.objects.create(**defaults)
+
 
 class ViewsTest(RemindersCreateDataTest):
 
@@ -503,3 +530,82 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(payload.patients.count(), 1)
         patient = payload.patients.all()[0]
         self.assertFalse(patient.reminder_time)
+
+
+class PatientManagerTest(RemindersCreateDataTest):
+    """Tests for patient manager methods"""
+
+    def setUp(self):
+        super(PatientManagerTest, self).setUp()
+        self.test_patient = self.create_patient()
+        self.other_patient = self.create_patient()
+        self.unrelated_patient = self.create_patient()
+
+    def create_confirmed_notification(self, patient, appt_date=None):
+        appt_date = appt_date or datetime.date.today()
+        return self.create_sent_notification(data={
+            'status': 'confirmed',
+            'date_sent': appt_date - datetime.timedelta(days=1),
+            'date_confirmed': appt_date - datetime.timedelta(days=1),
+            'appt_date': appt_date,
+            'recipient': patient.contact
+        })
+
+    def create_unconfirmed_notification(self, patient, appt_date=None):
+        appt_date = appt_date or datetime.date.today()
+        return self.create_sent_notification(data={
+            'status': 'sent',
+            'date_sent': appt_date - datetime.timedelta(days=1),
+            'date_confirmed': None,
+            'appt_date': appt_date,
+            'recipient': patient.contact
+        })
+
+    def test_simple_confirmed(self):
+        """Basic confirmed query test."""
+        appt_date = datetime.date.today()
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
+        unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
+        qs = reminders.Patient.objects.confirmed_for_date(appt_date)
+        self.assertTrue(self.test_patient in qs)
+        self.assertFalse(self.other_patient in qs)
+        self.assertFalse(self.unrelated_patient in qs)
+
+    def test_simple_unconfirmed(self):
+        """Basic unconfirmed query test."""
+        appt_date = datetime.date.today()
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
+        unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
+        qs = reminders.Patient.objects.unconfirmed_for_date(appt_date)
+        self.assertFalse(self.test_patient in qs)
+        self.assertTrue(self.other_patient in qs)
+        self.assertFalse(self.unrelated_patient in qs)
+
+    def test_multiple_notifications_confirmed(self):
+        """Confirmed patients returned should be distinct."""
+        appt_date = datetime.date.today()
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
+        confirmed_again = self.create_confirmed_notification(self.test_patient, appt_date)
+        qs = reminders.Patient.objects.confirmed_for_date(appt_date)
+        self.assertTrue(self.test_patient in qs)
+        self.assertTrue(qs.count(), 1)
+
+    def test_multiple_notifications_unconfirmed(self):
+        """Unconfirmed patients returned should be distinct."""
+        appt_date = datetime.date.today()
+        notified = self.create_unconfirmed_notification(self.test_patient, appt_date)
+        notified_again = self.create_unconfirmed_notification(self.test_patient, appt_date)
+        qs = reminders.Patient.objects.unconfirmed_for_date(appt_date)
+        self.assertTrue(self.test_patient in qs)
+        self.assertTrue(qs.count(), 1)
+
+    def test_mixed_messages_confirmed(self):
+        """Only need to confirm once to be considered confirmed."""
+        appt_date = datetime.date.today()
+        notified = self.create_unconfirmed_notification(self.test_patient, appt_date)
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
+        notified_again = self.create_unconfirmed_notification(self.test_patient, appt_date)
+        qs = reminders.Patient.objects.confirmed_for_date(appt_date)
+        self.assertTrue(self.test_patient in qs)
+        self.assertTrue(qs.count(), 1)
+

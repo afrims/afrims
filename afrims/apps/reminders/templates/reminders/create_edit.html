@@ -1,20 +1,9 @@
-{% extends "afrims/layout-split-2.html" %}
+{% extends "reminders/base.html" %}
 {% load i18n %}
 
 {% block title %}{% if form.instance.pk %}Edit Notification Schedule{% else %}Create Notification Schedule{% endif %}{% endblock %}
 
-{% block javascripts %}{{ block.super }}
-    <script src="{{ STATIC_URL }}js/jquery-ui-timepicker-addon.js" type="text/javascript"></script>
-    <script src="{{ STATIC_URL }}js/forms.js" type="text/javascript"></script>
-    <script src="{{ STATIC_URL }}reminders/js/reminders.js" type="text/javascript"></script>
-{% endblock %}
-
-{% block stylesheets %}{{ block.super }}
-        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}reminders/css/reminders.css" />
-        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/afrims.css" />
-{% endblock %}
-
-{% block content %}
+{% block right %}
 <div class="module">
     <h2>{% if form.instance.pk %}Edit Notification Schedule{% else %}Create Notification Schedule{% endif %}</h2>
     <form action="#" method="POST" class="buttons">
