@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib import messages
 
 from afrims.apps.reminders import models as reminders
+from afrims.apps.reminders.forms import PatientPayloadUploadForm
 from afrims.apps.reminders.importer import parse_payload
 
 
@@ -38,6 +39,16 @@ class PatientDataPayloadAdmin(admin.ModelAdmin):
     list_filter = ('status', 'submit_date', )
     search_fields = ('raw_data', )
     ordering = ('-submit_date', )
+    add_form = PatientPayloadUploadForm
+    add_fieldsets = (
+        ('Upload a patient data file', {'fields': ('data_file', )}),
+        ('Or paste in raw xml data', {'fields': ('raw_data', )}),
+    )
+
+    def get_fieldsets(self, request, obj=None):
+        if not obj:
+            return self.add_fieldsets
+        return super(PatientDataPayloadAdmin, self).get_fieldsets(request, obj)
 
     def get_form(self, request, obj=None, **kwargs):
         """
@@ -45,7 +56,7 @@ class PatientDataPayloadAdmin(admin.ModelAdmin):
         """
         defaults = {}
         if obj is None:
-            defaults.update({'fields': ('raw_data', ),})
+            defaults.update({'form': self.add_form})
         defaults.update(kwargs)
         return super(PatientDataPayloadAdmin, self).get_form(request, obj, **defaults)
 
