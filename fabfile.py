@@ -235,7 +235,7 @@ def collectstatic():
     require('project_root', provided_by=('production', 'staging'))
     if env.environment == 'staging':
         with cd(env.project_root):
-            run('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env)
+            sudo('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env, user=env.sudo_user)
     else:
         for i in env.settings:
             with cd(env.project_root):
