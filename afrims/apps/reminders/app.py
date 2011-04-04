@@ -24,6 +24,13 @@ def scheduler_callback(router):
     app.cronjob()
 
 
+def daily_email_callback(router, *args, **kwargs):
+    """
+    Send out daily email report of confirmed/unconfirmed appointments.
+    """
+    pass
+
+
 class RemindersApp(AppBase):
     """ RapidSMS app to send appointment reminders """
 
@@ -63,6 +70,18 @@ class RemindersApp(AppBase):
             if hasattr(schedule, key):
                 setattr(schedule, key, val)
         schedule.save()
+        # Daily email schedule
+        name = 'reminders-daily-email'
+        info = {
+            'callback': 'afrims.apps.reminders.app.daily_email_callback',
+            'hours': [12],
+            'minutes': [0],
+        }
+        schedule, created = EventSchedule.objects.get_or_create(description=name,
+            defaults=info
+        )
+        if created:
+            schedule.save()
         self.info('started')
 
     def handle(self, msg):
