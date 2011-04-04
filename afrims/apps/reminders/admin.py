@@ -1,6 +1,11 @@
+import datetime
+
 from django.contrib import admin
+from django.contrib import messages
 
 from afrims.apps.reminders import models as reminders
+from afrims.apps.reminders.forms import PatientPayloadUploadForm
+from afrims.apps.reminders.importer import parse_payload
 
 
 class NotificationAdmin(admin.ModelAdmin):
@@ -31,7 +36,36 @@ admin.site.register(reminders.Patient, PatientAdmin)
 
 class PatientDataPayloadAdmin(admin.ModelAdmin):
     list_display = ('id', 'submit_date', 'status')
-    list_filter = ('status', 'submit_date',)
-    search_fields = ('raw_data',)
-    ordering = ('-submit_date',)
+    list_filter = ('status', 'submit_date', )
+    search_fields = ('raw_data', )
+    ordering = ('-submit_date', )
+    add_form = PatientPayloadUploadForm
+    add_fieldsets = (
+        ('Upload a patient data file', {'fields': ('data_file', )}),
+        ('Or paste in raw xml data', {'fields': ('raw_data', )}),
+    )
+
+    def get_fieldsets(self, request, obj=None):
+        if not obj:
+            return self.add_fieldsets
+        return super(PatientDataPayloadAdmin, self).get_fieldsets(request, obj)
+
+    def get_form(self, request, obj=None, **kwargs):
+        """
+        Use special form during creation
+        """
+        defaults = {}
+        if obj is None:
+            defaults.update({'form': self.add_form})
+        defaults.update(kwargs)
+        return super(PatientDataPayloadAdmin, self).get_form(request, obj, **defaults)
+
+    def save_model(self, request, obj, form, change):
+        if not obj.submit_date:
+            obj.submit_date = datetime.datetime.now()
+        obj.save()
+        try:
+            parse_payload(obj)
+        except Exception as e:
+            messages.error(request, u"Error parsing patient data: %s" % unicode(e))
 admin.site.register(reminders.PatientDataPayload, PatientDataPayloadAdmin)
