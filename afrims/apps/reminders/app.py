@@ -1,12 +1,16 @@
 import datetime
 import re
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db.models import Q
+from django.template.loader import render_to_string
 
 from rapidsms.apps.base import AppBase
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages.outgoing import OutgoingMessage
 
+from afrims.apps.groups import models as groups
 from afrims.apps.reminders import models as reminders
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -28,7 +32,27 @@ def daily_email_callback(router, *args, **kwargs):
     """
     Send out daily email report of confirmed/unconfirmed appointments.
     """
-    pass
+    days = kwargs.get('days', 7)
+    try:
+        days = int(days)
+    except ValueError:
+        days = 7
+    today = datetime.date.today()
+    appt_date = today + datetime.timedelta(days=days)
+    confirmed_patients = reminders.Patient.objects.confirmed_for_date(appt_date)
+    unconfirmed_patients = reminders.Patient.objects.unconfirmed_for_date(appt_date)
+    context = {
+        'appt_date': appt_date,
+        'confirmed_patients': confirmed_patients,
+        'unconfirmed_patients': unconfirmed_patients,
+    }
+    subject = u'Confirmation Report For Appointments on %(appt_date)s' % context
+    body = render_to_string('reminders/emails/daily_report_message.html', context)
+    group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
+    group, created = groups.Group.objects.get_or_create(name=group_name)
+    if not created:
+        emails = [c.email for c in group.contacts.all() if c.email]
+        send_mail(subject, body, None, emails, fail_silently=True)
 
 
 class RemindersApp(AppBase):
@@ -76,12 +100,18 @@ class RemindersApp(AppBase):
             'callback': 'afrims.apps.reminders.app.daily_email_callback',
             'hours': [12],
             'minutes': [0],
+            'callback_kwargs': {'days': 7},
         }
         schedule, created = EventSchedule.objects.get_or_create(description=name,
             defaults=info
         )
-        if created:
-            schedule.save()
+#        if not created:
+#            for key, val in info.iteritems():
+#                if hasattr(schedule, key):
+#                    setattr(schedule, key, val)  
+#        schedule.save()        
+        group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
+        group, _ = groups.Group.objects.get_or_create(name=group_name)
         self.info('started')
 
     def handle(self, msg):
