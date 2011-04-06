@@ -196,6 +196,7 @@ SOUTH_MIGRATION_MODULES = {
 #The default group subjects are added to when their information
 #is POSTed to us
 DEFAULT_SUBJECT_GROUP_NAME = 'Subjects'
+DEFAULT_DAILY_REPORT_GROUP_NAME = 'Daily Report Recipients'
 
 #The default backend to be used when creating new patient contacts
 #on POST submission of patient data from their server
