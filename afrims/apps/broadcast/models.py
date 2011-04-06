@@ -202,8 +202,17 @@ class ForwardingRule(models.Model):
     source = models.ForeignKey(Group, related_name='source_rules')
     dest = models.ForeignKey(Group, related_name='dest_rules')
     message = models.CharField(max_length=160, blank=True)
-    rule_type = models.CharField(verbose_name='type', max_length=100, blank=True, null=True)
-    label = models.CharField(max_length=150, blank=True, null=True)
+    rule_type = models.CharField(verbose_name='type', max_length=100,
+        blank=True, null=True,
+        help_text="""Types organize forwarding rules by their purpose.
+            For instance there might be multiple keywords that trigger the same actions.
+            Examples would be 'Cold Chain' or 'Staff Communication'."""
+    )
+    label = models.CharField(max_length=150, blank=True, null=True,
+        help_text="""Labels organize forwarding rules within their type. 
+            For instance you might give rules with the same source or destination a common label.
+            Examples would be 'System Messages' or 'To Staff'."""
+    )
 
     def __unicode__(self):
         return self.keyword
