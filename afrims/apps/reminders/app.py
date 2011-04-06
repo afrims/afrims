@@ -46,7 +46,8 @@ def daily_email_callback(router, *args, **kwargs):
         'confirmed_patients': confirmed_patients,
         'unconfirmed_patients': unconfirmed_patients,
     }
-    subject = u'Confirmation Report For Appointments on %(appt_date)s' % context
+    subject_template = _(u'Confirmation Report For Appointments on {appt_date}')
+    subject = subject_template.format(**context)
     body = render_to_string('reminders/emails/daily_report_message.html', context)
     group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
     group, created = groups.Group.objects.get_or_create(name=group_name)
