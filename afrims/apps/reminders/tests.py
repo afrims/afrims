@@ -5,9 +5,12 @@ Tests for the appointment reminders app.
 import datetime
 import logging
 import random
+import re
 from lxml import etree
 
 from django.test import TestCase
+from django.conf import settings
+from django.core import mail
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Permission
 from django.core.exceptions import ValidationError
@@ -115,6 +118,26 @@ class RemindersCreateDataTest(CreateDataTest):
         if 'notification' not in defaults:
             defaults['notification'] = self.create_notification()
         return reminders.SentNotification.objects.create(**defaults)
+
+    def create_confirmed_notification(self, patient, appt_date=None):
+        appt_date = appt_date or datetime.date.today()
+        return self.create_sent_notification(data={
+            'status': 'confirmed',
+            'date_sent': appt_date - datetime.timedelta(days=1),
+            'date_confirmed': appt_date - datetime.timedelta(days=1),
+            'appt_date': appt_date,
+            'recipient': patient.contact
+        })
+
+    def create_unconfirmed_notification(self, patient, appt_date=None):
+        appt_date = appt_date or datetime.date.today()
+        return self.create_sent_notification(data={
+            'status': 'sent',
+            'date_sent': appt_date - datetime.timedelta(days=1),
+            'date_confirmed': None,
+            'appt_date': appt_date,
+            'recipient': patient.contact
+        })
 
 
 class ViewsTest(RemindersCreateDataTest):
@@ -541,26 +564,6 @@ class PatientManagerTest(RemindersCreateDataTest):
         self.other_patient = self.create_patient()
         self.unrelated_patient = self.create_patient()
 
-    def create_confirmed_notification(self, patient, appt_date=None):
-        appt_date = appt_date or datetime.date.today()
-        return self.create_sent_notification(data={
-            'status': 'confirmed',
-            'date_sent': appt_date - datetime.timedelta(days=1),
-            'date_confirmed': appt_date - datetime.timedelta(days=1),
-            'appt_date': appt_date,
-            'recipient': patient.contact
-        })
-
-    def create_unconfirmed_notification(self, patient, appt_date=None):
-        appt_date = appt_date or datetime.date.today()
-        return self.create_sent_notification(data={
-            'status': 'sent',
-            'date_sent': appt_date - datetime.timedelta(days=1),
-            'date_confirmed': None,
-            'appt_date': appt_date,
-            'recipient': patient.contact
-        })
-
     def test_simple_confirmed(self):
         """Basic confirmed query test."""
         appt_date = datetime.date.today()
@@ -608,4 +611,94 @@ class PatientManagerTest(RemindersCreateDataTest):
         qs = reminders.Patient.objects.confirmed_for_date(appt_date)
         self.assertTrue(self.test_patient in qs)
         self.assertTrue(qs.count(), 1)
+
+
+class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
+
+    def setUp(self):
+        super(DailyReportTest, self).setUp()
+        group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
+        self.group = self.create_group(data={'name': group_name})
+        self.test_contact = self.create_contact(data={'email': 'test@example.com'})
+        self.group.contacts.add(self.test_contact)
+        self.test_patient = self.create_patient()
+        self.other_patient = self.create_patient()
+        self.unrelated_patient = self.create_patient()
+
+    def assertPatientInMessage(self, message, patient):
+        self.assertTrue(patient.subject_number in message.body)
+
+    def assertPatientNotInMessage(self, message, patient):
+        self.assertFalse(patient.subject_number in message.body)
+
+    def test_sending_mail(self):
+        """Test email goes out the contacts in the daily report group."""
+        self.startRouter()
+        self.router.logger.setLevel(logging.DEBUG)
+
+        # run email job
+        from afrims.apps.reminders.app import daily_email_callback
+        daily_email_callback(self.router)
+
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertTrue(self.test_contact.email in message.to)
+        self.stopRouter()
+
+    def test_appointment_date(self):
+        """Test email contains info for the appointment date."""
+        appt_date = datetime.date.today() + datetime.timedelta(days=7) # Default for email
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
+        unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
+
+        self.startRouter()
+        self.router.logger.setLevel(logging.DEBUG)
+
+        # run email job
+        from afrims.apps.reminders.app import daily_email_callback
+        daily_email_callback(self.router)
+
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertPatientInMessage(message, self.test_patient)
+        self.assertPatientInMessage(message, self.other_patient)
+        self.assertPatientNotInMessage(message, self.unrelated_patient)
+        self.stopRouter()
+
+    def test_changing_date(self):
+        """Test changing appointment date via callback kwarg."""
+        days = 2
+        appt_date = datetime.date.today() + datetime.timedelta(days=days)
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
+        unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
+
+        self.startRouter()
+        self.router.logger.setLevel(logging.DEBUG)
+
+        # run email job
+        from afrims.apps.reminders.app import daily_email_callback
+        daily_email_callback(self.router, days=days)
+
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertPatientInMessage(message, self.test_patient)
+        self.assertPatientInMessage(message, self.other_patient)
+        self.assertPatientNotInMessage(message, self.unrelated_patient)
+        self.stopRouter()
+
+    def test_skip_blank_emails(self):
+        """Test handling contacts with blank/null email addresses."""
+        blank_contact = self.create_contact(data={'email': ''})
+        null_contact = self.create_contact(data={'email': None})
+        self.group.contacts.add(blank_contact)
+        self.group.contacts.add(null_contact)
+
+        # run email job
+        from afrims.apps.reminders.app import daily_email_callback
+        daily_email_callback(self.router)
+
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(len(message.to), 1)
+        self.stopRouter()
 
