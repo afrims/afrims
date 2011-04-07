@@ -27,6 +27,8 @@
                 <th>{% anchor source Source %}</th>
                 <th>{% anchor dest Destination %}</th>
                 <th>{% anchor message Message %}</th>
+                <th>{% anchor rule_type Type %}</th>
+                <th>{% anchor label Label %}</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -37,6 +39,8 @@
             <td>{{ rule.source }}</td>
             <td>{{ rule.dest }}</td>
             <td>{{ rule.message }}</td>
+            <td>{{ rule.rule_type }}</td>
+            <td>{{ rule.label }}</td>
             <td class='actions'>
                 <a class='button' title='Edit rule #{{ rule.pk }}' href='{% url broadcast-forwarding-edit rule.pk %}'><span class='ui-icon ui-icon-pencil'></span></a>
                 <a class='button' title='Delete rule #{{ rule.pk }}' href='{% url broadcast-forwarding-delete rule.pk %}'><span class='ui-icon ui-icon-closethick'></span></a>    
@@ -44,13 +48,13 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan='6'>No forwarding rules</td>
+            <td colspan='8'>No forwarding rules</td>
         </tr>
         {% endfor %}
         <tfoot>
             {% if paginator.count > paginator.per_page %}
             <tr>
-                <td colspan='6'>
+                <td colspan='8'>
                     {% paginate %}
                 </td>
             </tr>
