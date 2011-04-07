@@ -125,19 +125,27 @@ def delete_rule(request, rule_id):
 
 def dashboard(request):
     today = datetime.date.today()
-    report_date = today - datetime.timedelta(days=today.day)
+    report_date = today #- datetime.timedelta(days=today.day)
     start_date = datetime.date(report_date.year, report_date.month, 1)
     end_date = report_date
-    # Add ability to change the report date
+    # TODO: Add ability to change the report date
     # Get forwarding rule data
     named_rules = ForwardingRule.objects.filter(
         ~Q(Q(label__isnull=True) | Q(label=u"")),
         ~Q(Q(rule_type__isnull=True) | Q(rule_type=u"")),
     )
+    # This count includes all queued, sent and error messages from this broadcast
     broadcasts = Broadcast.objects.filter(
+        date_created__range=(start_date, end_date),
+        schedule_frequency='one-time',
         forward__in=named_rules
     ).select_related('rule').annotate(message_count=Count('messages'))
     rule_data = {}
+    for rule in named_rules:
+        data = rule_data.get(rule.rule_type, {})
+        label_data = data.get(rule.label, [0, 0])
+        data[rule.label] = label_data   
+        rule_data[rule.rule_type] = data
     for broadcast in broadcasts:
         rule = broadcast.forward
         data = rule_data.get(rule.rule_type, {})
@@ -146,6 +154,8 @@ def dashboard(request):
         label_data[1] += broadcast.message_count
         data[rule.label] = label_data   
         rule_data[rule.rule_type] = data
+
+    # Get patient reminder data
     confirmed_count = SentNotification.objects.confirmed_for_range(
         start_date, end_date).count()
     unconfirmed_count = SentNotification.objects.unconfirmed_for_range(

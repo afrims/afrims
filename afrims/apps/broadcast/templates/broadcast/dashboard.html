@@ -11,14 +11,14 @@
             <li>{{ type }}
                 <ul>
                     {% for label, counts in label_data.items %}
-                        <li>{{ label }}: {{ counts.1 }}</li>
+                        <li>{{ label }}: Incoming - {{ counts.0 }} Outgoing - {{ counts.1 }}</li>
                     {% endfor %}
                 </ul>
             </li>
         {% endfor %}
     </ul>
     {% else %}
-    <p>No fowarded messages</p>
+    <p>No categorized forwarding rules.</p>
     {% endif %}
 </div>
 <div class="module">
