@@ -34,11 +34,12 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.sessions",
     "django.contrib.contenttypes",
+    "django.contrib.staticfiles",
     
     "pagination",
     "django_sorting",
     "south",
-	"staticfiles",
+	# "staticfiles",
     # "gunicorn",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
