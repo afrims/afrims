@@ -1,4 +1,4 @@
-django==1.2.4
+django==1.3
 South==0.7.3
 gunicorn==0.12.0
 python-dateutil==1.5
@@ -7,7 +7,8 @@ python-dateutil==1.5
 django-pagination==1.0.7
 lxml==2.3
 twilio==2.0.6
--e git+http://github.com/caktus/rapidsms-twilio.git@ac99162da98303b63775#egg=rtwilio
+-e git+http://github.com/caktus/rapidsms-twilio.git@feature/threadless#egg=rtwilio
+-e git+http://github.com/caktus/rapidsms-threadless-router.git#egg=threadless_router
 django-sorting==0.1
 psycopg2==2.4
 django-staticfiles==1.0
