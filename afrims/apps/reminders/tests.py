@@ -455,6 +455,21 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(payload.status, 'error')
         self.assertNotEqual(payload.error_message, '')
 
+    def test_email_sent_on_failure(self):
+        """ Failed XML payloads should send email to ADMINS """
+        self._authorize()
+        data = {
+            'Subject_Number': '000-1111',
+            'Pin_Code': '1234',
+            'Date_Enrolled': datetime.datetime.now().strftime('%b  %d %Y '),
+            'Mobile_Number': '2223334444',
+        }
+        patient = self.create_xml_patient(data)
+        payload = self.create_xml_payload([patient])
+        response = self._post(payload)
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(len(mail.outbox), 1)
+
     def test_patient_creation(self):
         """ Test that patients get created properly """
         node = self.create_xml_patient({'Mobile_Number': '12223334444'})
