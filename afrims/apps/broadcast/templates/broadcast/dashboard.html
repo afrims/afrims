@@ -1,0 +1,41 @@
+{% extends "broadcast/base.html" %}
+
+
+{% block right %}
+<h1>Monthly Report - {{ report_date|date:"F Y" }}</h1>
+<div class="module">
+    <h2>Fowarded Messages</h2>
+    {% if rule_data %}
+    <ul>
+        {% for type, label_data in rule_data.items %}
+            <li>{{ type }}
+                <ul>
+                    {% for label, counts in label_data.items %}
+                        <li>{{ label }}: {{ counts.1 }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No fowarded messages</p>
+    {% endif %}
+</div>
+<div class="module">
+    <h2>Appointment Reminders</h2>
+    <ul>
+        <li>Sent: {{ total_reminders  }}</li>
+        <li>Confirmed: {{ confirmed_count }}</li>
+        <li>Unconfirmed: {{ unconfirmed_count }}</li>
+        <li>Percent Confirmed: {{ confirm_percent }}%</li>
+    </ul>
+</div>
+<div class="module">
+    <h2>Usage Totals</h2>
+    <ul>
+        <li>Incoming Messages: {{ incoming_count }}</li>
+        <li>Outgoing Messages: {{ outgoing_count }}</li>
+        <li>Total Messages: {{ total_messages }}</li>
+    </ul>
+</div>
+{% endblock %}
