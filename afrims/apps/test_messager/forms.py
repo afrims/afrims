@@ -2,8 +2,9 @@ from django import forms
 from django.conf import settings
 
 from rapidsms.models import Backend, Connection
+from rapidsms.messages import OutgoingMessage
 
-from rapidsms.contrib.messaging.utils import send_message
+from threadless_router.router import Router
 
 
 class MessageForm(forms.Form):
@@ -28,4 +29,6 @@ class MessageForm(forms.Form):
         backend = self.cleaned_data['backend']
         connection, _ = Connection.objects.get_or_create(backend=backend,
                                                          identity=number)
-        return send_message(connection, self.cleaned_data['message'])
+        msg = OutgoingMessage(connection, self.cleaned_data['message'])
+        router = Router()
+        router.backends[backend.name].send(msg)
