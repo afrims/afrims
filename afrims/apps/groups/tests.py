@@ -7,7 +7,7 @@ from rapidsms.models import Contact, Backend, Connection
 from rapidsms.tests.harness import MockRouter
 from rapidsms.messages.incoming import IncomingMessage
 
-from afrims.tests.testcases import CreateDataTest
+from afrims.tests.testcases import CreateDataTest, patch_settings
 
 from afrims.apps.groups.models import Group
 from afrims.apps.groups import forms as group_forms
@@ -107,11 +107,23 @@ class PhoneTest(GroupCreateDataTest):
         return msg
 
     def test_normalize_number(self):
+        """
+        All numbers should be stripped of non-numeric characters and, if
+        defined, should be prepended with the COUNTRY_CODE
+        """
         normalized = '12223334444'
         number = '1-222-333-4444'
         self.assertEqual(self.app._normalize_number(number), normalized)
         number = '1 (222) 333-4444'
         self.assertEqual(self.app._normalize_number(number), normalized)
+        with patch_settings(COUNTRY_CODE='66'):
+            normalized = '662223334444'
+            number = '22-23334444'
+            self.assertEqual(self.app._normalize_number(number), normalized)
+        with patch_settings(COUNTRY_CODE=None):
+            normalized = '2223334444'
+            number = '22-23334444'
+            self.assertEqual(self.app._normalize_number(number), normalized)
 
     def test_contact_association(self):
         number = '1112223334444'
