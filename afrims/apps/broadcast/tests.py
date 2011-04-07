@@ -378,6 +378,13 @@ class BroadcastForwardingTest(BroadcastCreateDataTest):
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(Broadcast.objects.count(), 1)
 
+    def test_rule_tracking(self):
+        """Test the broadcast is correctly associated with the rule via FK."""
+        msg = self._send(self.source_conn, 'abc my-message')
+        self.assertEqual(Broadcast.objects.count(), 1)
+        bc = Broadcast.objects.get()
+        self.assertEqual(bc.forward, self.rule)
+
 
 class BroadcastScriptedTest(FlushTestScript, BroadcastCreateDataTest):
 

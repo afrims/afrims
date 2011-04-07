@@ -83,7 +83,7 @@ class BroadcastApp(AppBase):
                            body=msg_text)
         broadcast = Broadcast.objects.create(date_created=now, date=now,
                                              schedule_frequency='one-time',
-                                             body=full_msg)
+                                             body=full_msg, forward=rule)
         broadcast.groups.add(rule.dest)
         msg.respond(self.thank_you)
 
