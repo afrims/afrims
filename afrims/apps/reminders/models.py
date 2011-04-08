@@ -35,6 +35,22 @@ class Notification(models.Model):
         return self.time_of_day.strftime('%I:%M %p')
 
 
+class SentNotificationManager(models.Manager):
+    # Should these be based on appointment dates or when they were sent?
+
+    def confirmed_for_range(self, start_date, end_date):
+        return self.filter(
+            appt_date__range=(start_date, end_date),
+            status='confirmed'
+        ).distinct()
+
+    def unconfirmed_for_range(self, start_date, end_date):
+        return self.filter(
+            ~Q(status='confirmed'),
+            appt_date__range=(start_date, end_date),  
+        ).distinct()
+
+
 class SentNotification(models.Model):
     '''
     A notification sent to a trial participant.
@@ -69,6 +85,8 @@ class SentNotification(models.Model):
                                           'from the recipient.')
     message = models.CharField(max_length=160, help_text='The actual message '
                                'that was sent to the user.')
+    
+    objects = SentNotificationManager()
 
     def __unicode__(self):
         return u'{notification} for {recipient} created on {date}'.format(

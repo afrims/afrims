@@ -93,6 +93,8 @@ class Broadcast(models.Model):
                                     related_name='broadcast_months')
     body = models.TextField()
     groups = models.ManyToManyField(Group, related_name='broadcasts')
+    forward = models.ForeignKey('ForwardingRule', related_name='broadcasts',
+                                null=True, blank=True)
 
     objects = models.Manager()
     ready = BroadcastReadyManager()

@@ -1,3 +1,6 @@
+import calendar
+import datetime
+
 from django.db import transaction
 from django.core.urlresolvers import reverse
 from django.template.context import RequestContext
@@ -5,11 +8,15 @@ from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
-from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm
+from rapidsms.views import dashboard as default_dashboard
+from rapidsms.contrib.messagelog.models import Message
+
+from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm, ReportForm
 from afrims.apps.broadcast.models import Broadcast, BroadcastMessage, ForwardingRule
+from afrims.apps.reminders.models import SentNotification
 
 
 @login_required
@@ -116,4 +123,84 @@ def delete_rule(request, rule_id):
     context = {'rule': rule}
     return render_to_response('broadcast/delete_rule.html', context,
                               RequestContext(request))
+
+
+def dashboard(request):
+    if request.user.is_authenticated():
+        today = datetime.date.today()
+        report_date = today
+        initial = {'report_year': report_date.year, 'report_month': report_date.month}
+        form = ReportForm(request.GET or None, initial=initial)
+        if form.is_valid():
+            report_year = form.cleaned_data.get('report_year') or report_date.year
+            report_month = form.cleaned_data.get('report_month') or report_date.month
+            last_day = calendar.monthrange(report_year, report_month)[1]
+            report_date = datetime.date(report_year, report_month, last_day)
+        start_date = datetime.date(report_date.year, report_date.month, 1)
+        end_date = report_date
+        context = usage_report_context(start_date, end_date)
+        context['report_date'] = report_date
+        context['report_form'] = form 
+        return render_to_response('broadcast/dashboard.html', context,
+                                  RequestContext(request))
+    else:
+        return default_dashboard(request)
+
+
+def usage_report_context(start_date, end_date):
+    # Get forwarding rule data
+    named_rules = ForwardingRule.objects.filter(
+        ~Q(Q(label__isnull=True) | Q(label=u"")),
+        ~Q(Q(rule_type__isnull=True) | Q(rule_type=u"")),
+    )
+    # This count includes all queued, sent and error messages from this broadcast
+    broadcasts = Broadcast.objects.filter(
+        date_created__range=(start_date, end_date),
+        schedule_frequency='one-time',
+        forward__in=named_rules
+    ).select_related('rule').annotate(message_count=Count('messages'))
+    rule_data = {}
+    for rule in named_rules:
+        data = rule_data.get(rule.rule_type, {})
+        label_data = data.get(rule.label, [0, 0])
+        data[rule.label] = label_data   
+        rule_data[rule.rule_type] = data
+    for broadcast in broadcasts:
+        rule = broadcast.forward
+        data = rule_data.get(rule.rule_type, {})
+        label_data = data.get(rule.label, [0, 0])
+        label_data[0] += 1
+        label_data[1] += broadcast.message_count
+        data[rule.label] = label_data   
+        rule_data[rule.rule_type] = data
+
+    # Get patient reminder data
+    confirmed_count = SentNotification.objects.confirmed_for_range(
+        start_date, end_date).count()
+    unconfirmed_count = SentNotification.objects.unconfirmed_for_range(
+        start_date, end_date).count()
+    total_reminders = confirmed_count + unconfirmed_count
+
+    # Get total incoming/outgoing data
+    incoming_count = Message.objects.filter(
+        date__range=(start_date, end_date),
+        direction='I'
+    ).count()
+    outgoing_count = Message.objects.filter(
+        date__range=(start_date, end_date),
+        direction='O'
+    ).count()
+    total_messages = incoming_count + outgoing_count
+
+    context = {
+        'rule_data': rule_data,
+        'confirmed_count': confirmed_count,
+        'unconfirmed_count': unconfirmed_count,
+        'total_reminders': total_reminders,
+        'confirm_percent': confirmed_count * 100.0 / total_reminders if total_reminders else 100.0,
+        'incoming_count': incoming_count,
+        'outgoing_count': outgoing_count,
+        'total_messages': total_messages,
+    }
+    return context
 
