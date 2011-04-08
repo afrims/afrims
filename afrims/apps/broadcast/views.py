@@ -1,3 +1,4 @@
+import calendar
 import datetime
 
 from django.db import transaction
@@ -12,7 +13,7 @@ from django.shortcuts import get_object_or_404
 
 from rapidsms.contrib.messagelog.models import Message
 
-from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm
+from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm, ReportForm
 from afrims.apps.broadcast.models import Broadcast, BroadcastMessage, ForwardingRule
 from afrims.apps.reminders.models import SentNotification
 
@@ -125,12 +126,19 @@ def delete_rule(request, rule_id):
 
 def dashboard(request):
     today = datetime.date.today()
-    report_date = today #- datetime.timedelta(days=today.day)
+    report_date = today
+    initial = {'report_year': report_date.year, 'report_month': report_date.month}
+    form = ReportForm(request.GET or None, initial=initial)
+    if form.is_valid():
+        report_year = form.cleaned_data.get('report_year') or report_date.year
+        report_month = form.cleaned_data.get('report_month') or report_date.month
+        last_day = calendar.monthrange(report_year, report_month)[1]
+        report_date = datetime.date(report_year, report_month, last_day)
     start_date = datetime.date(report_date.year, report_date.month, 1)
     end_date = report_date
-    # TODO: Add ability to change the report date
     context = usage_report_context(start_date, end_date)
     context['report_date'] = report_date
+    context['report_form'] = form 
     return render_to_response('broadcast/dashboard.html', context,
                               RequestContext(request))
 

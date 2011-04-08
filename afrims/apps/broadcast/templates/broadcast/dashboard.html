@@ -4,6 +4,14 @@
 {% block right %}
 <h1>Monthly Report - {{ report_date|date:"F Y" }}</h1>
 <div class="module">
+    <form class="date-form buttons" action="." method="get">
+        <div class='form-action'>
+            {{ report_form }}
+            <input type='submit' value="Change Report Date" />
+        </div>
+    </form>
+</div>
+<div class="module">
     <h2>Fowarded Messages</h2>
     {% if rule_data %}
     <ul>
