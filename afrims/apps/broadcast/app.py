@@ -2,12 +2,18 @@
 # vim: ai ts=4 sts=4 et sw=4
 import datetime
 
+from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
 from rapidsms.apps.base import AppBase
 from rapidsms.messages import OutgoingMessage
 from rapidsms.contrib.scheduler.models import EventSchedule
 
 from afrims.apps.broadcast.models import Broadcast, BroadcastMessage,\
                                          ForwardingRule
+from afrims.apps.broadcast.views import usage_report_context
+from afrims.apps.groups import models as groups
 
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -23,6 +29,28 @@ def scheduler_callback(router):
     """
     app = router.get_app("afrims.apps.broadcast")
     app.cronjob()
+
+
+def usage_email_callback(router, *args, **kwargs):
+    """
+    Send out month email report of broadcast usage.
+    """
+
+    today = datetime.date.today()
+    report_date = today - datetime.timedelta(days=today.day)
+    start_date = datetime.date(report_date.year, report_date.month, 1)
+    end_date = report_date
+    context = usage_report_context(start_date, end_date)
+    context['report_month'] = report_date.strftime('%B')
+    context['report_year'] = report_date.strftime('%Y')
+    subject_template = _(u'TrialConnect Monthly Report - {report_month} {report_year}')
+    subject = subject_template.format(**context)
+    body = render_to_string('broadcast/emails/usage_report_message.html', context)
+    group_name = settings.DEFAULT_MONTHLY_REPORT_GROUP_NAME
+    group, created = groups.Group.objects.get_or_create(name=group_name)
+    if not created:
+        emails = [c.email for c in group.contacts.all() if c.email]
+        send_mail(subject, body, None, emails, fail_silently=True)
 
 
 class BroadcastApp(AppBase):
@@ -49,6 +77,25 @@ class BroadcastApp(AppBase):
             if hasattr(schedule, key):
                 setattr(schedule, key, val)
         schedule.save()
+        name = 'broadcast-monthly-email'
+        info = {
+            'callback': 'afrims.apps.broadcast.app.usage_email_callback',
+            'days_of_month': [1],
+            'hours': [12],
+            'minutes': [0],
+        }
+        schedule, created = EventSchedule.objects.get_or_create(description=name,
+            defaults=info
+        )
+        # Uncommenting these lines will reset the schedule every time the router
+        # is started.
+#        if not created:
+#            for key, val in info.iteritems():
+#                if hasattr(schedule, key):
+#                    setattr(schedule, key, val)  
+#        schedule.save()        
+        group_name = settings.DEFAULT_MONTHLY_REPORT_GROUP_NAME
+        group, _ = groups.Group.objects.get_or_create(name=group_name)
         self.info('started')
 
     def _forwarding_rules(self):

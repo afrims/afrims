@@ -129,6 +129,12 @@ def dashboard(request):
     start_date = datetime.date(report_date.year, report_date.month, 1)
     end_date = report_date
     # TODO: Add ability to change the report date
+    context = usage_report_context(start_date, end_date)
+    context['report_date'] = report_date
+    return render_to_response('broadcast/dashboard.html', context,
+                              RequestContext(request))
+
+def usage_report_context(start_date, end_date):
     # Get forwarding rule data
     named_rules = ForwardingRule.objects.filter(
         ~Q(Q(label__isnull=True) | Q(label=u"")),
@@ -175,7 +181,6 @@ def dashboard(request):
 
     context = {
         'rule_data': rule_data,
-        'report_date': report_date,
         'confirmed_count': confirmed_count,
         'unconfirmed_count': unconfirmed_count,
         'total_reminders': total_reminders,
@@ -184,6 +189,5 @@ def dashboard(request):
         'outgoing_count': outgoing_count,
         'total_messages': total_messages,
     }
-    return render_to_response('broadcast/dashboard.html', context,
-                              RequestContext(request))
+    return context
 
