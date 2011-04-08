@@ -159,7 +159,7 @@ class BroadcastApp(AppBase):
             except Exception, e:
                 self.exception(e)
                 success = False
-            if success:
+            if success and msg.sent:
                 self.debug('message sent successfully')
                 message.status = 'sent'
                 message.date_sent = datetime.datetime.now()

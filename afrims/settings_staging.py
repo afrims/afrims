@@ -46,3 +46,4 @@ LOG_FORMAT = "%(asctime)s %(levelname)-8s - %(name)-26s %(message)s"
 LOG_SIZE = 33554432 # 2^25
 LOG_BACKUPS = 10 # number of logs to keep
 
+COUNTRY_CODE = '1'

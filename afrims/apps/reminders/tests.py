@@ -20,7 +20,8 @@ from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from afrims.apps.reminders import models as reminders
-from afrims.tests.testcases import CreateDataTest, FlushTestScript
+from afrims.tests.testcases import (CreateDataTest, FlushTestScript,
+                                    patch_settings)
 from afrims.apps.reminders.app import RemindersApp
 from afrims.apps.reminders.importer import parse_payload, parse_patient
 
@@ -455,6 +456,21 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(payload.status, 'error')
         self.assertNotEqual(payload.error_message, '')
 
+    def test_email_sent_on_failure(self):
+        """ Failed XML payloads should send email to ADMINS """
+        self._authorize()
+        data = {
+            'Subject_Number': '000-1111',
+            'Pin_Code': '1234',
+            'Date_Enrolled': datetime.datetime.now().strftime('%b  %d %Y '),
+            'Mobile_Number': '2223334444',
+        }
+        patient = self.create_xml_patient(data)
+        payload = self.create_xml_payload([patient])
+        response = self._post(payload)
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(len(mail.outbox), 1)
+
     def test_patient_creation(self):
         """ Test that patients get created properly """
         node = self.create_xml_patient({'Mobile_Number': '12223334444'})
@@ -467,6 +483,15 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(patients[0].mobile_number, '12223334444')
         self.assertEqual(patients[0].raw_data.pk, payload.pk)
         self.assertTrue(patients[0].contact is not None)
+
+    def test_patient_creation_without_country_code(self):
+        """ Test patients missing country code are still inserted """
+        node = self.create_xml_patient({'Mobile_Number': '2223334444'})
+        payload = self.create_payload([node])
+        with patch_settings(COUNTRY_CODE='66'):
+            parse_patient(node, payload)
+            patients = reminders.Patient.objects.all()
+            self.assertEqual(patients[0].mobile_number, '662223334444')
 
     def test_invalid_patient_field(self):
         """ Invalid patient data should return a 500 status code """

@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "afrims.apps.default_connection",
 
     # the rapidsms contrib apps.
-    "rapidsms.contrib.export",
+    # "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
     "rapidsms.contrib.locations",
     "rapidsms.contrib.messagelog",

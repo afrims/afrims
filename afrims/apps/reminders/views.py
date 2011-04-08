@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
+from django.core.mail import mail_admins
 
 from rapidsms.models import Contact, Connection, Backend
 
@@ -59,6 +60,7 @@ def receive_patient_record(request):
     try:
         parse_payload(payload)
     except Exception as e:
+        mail_admins(subject="Patient Import Failed", message=unicode(e))
         return HttpResponseServerError(unicode(e))
     return HttpResponse("Data submitted succesfully.")
 

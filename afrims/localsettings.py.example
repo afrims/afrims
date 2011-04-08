@@ -84,6 +84,8 @@ LOG_FILE    = "afrims.router.log"
 LOG_FORMAT  = "%(asctime)s - [%(levelname)s]\t[%(name)s]: %(message)s"
 LOG_BACKUPS = 256 # number of logs to keep
 
+COUNTRY_CODE = '1'
+
 # MIDDLEWARE_CLASSES = list(MIDDLEWARE_CLASSES)
 # MIDDLEWARE_CLASSES.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 # INTERNAL_IPS = ('127.0.0.1',)
