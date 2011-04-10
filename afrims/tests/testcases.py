@@ -7,7 +7,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.core.management import call_command
 
 from rapidsms.models import Connection, Contact, Backend
-from rapidsms.tests.scripted import TestScript
+from threadless_router.tests.scripted import TestScript
 
 from afrims.apps.groups.models import Group
 

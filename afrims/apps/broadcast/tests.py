@@ -19,6 +19,8 @@ from afrims.apps.broadcast.models import Broadcast, DateAttribute,\
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 from afrims.apps.broadcast.forms import BroadcastForm
 
+from threadless_router.tests.base import SimpleRouterMixin
+
 
 class BroadcastCreateDataTest(CreateDataTest):
     """ Base test case that provides helper functions to create data """
@@ -379,11 +381,9 @@ class BroadcastForwardingTest(BroadcastCreateDataTest):
         self.assertEqual(Broadcast.objects.count(), 1)
 
 
-class BroadcastScriptedTest(FlushTestScript, BroadcastCreateDataTest):
+class BroadcastScriptedTest(SimpleRouterMixin, BroadcastCreateDataTest):
 
     def test_entire_stack(self):
-        self.startRouter()
-        self.router.logger.setLevel(logging.DEBUG)
         contact = self.create_contact()
         backend = self.create_backend(data={'name': 'mockbackend'})
         connection = self.create_connection({'contact': contact,
@@ -406,7 +406,6 @@ class BroadcastScriptedTest(FlushTestScript, BroadcastCreateDataTest):
         self.assertEqual(sent, 1)
         message = contact.broadcast_messages.filter(status='sent')[0]
         self.assertTrue(message.date_sent is not None)
-        self.stopRouter()
 
 
 class ForwardingViewsTest(BroadcastCreateDataTest):

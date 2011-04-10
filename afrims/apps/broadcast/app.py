@@ -28,27 +28,11 @@ def scheduler_callback(router):
 class BroadcastApp(AppBase):
     """ RapidSMS app to send broadcast messages """
 
-    cron_schedule = {'minutes': '*'}
-    cron_name = 'broadcast-cron-job'
-    cron_callback = 'afrims.apps.broadcast.app.scheduler_callback'
-    
     not_registered = _('Sorry, your mobile number is not registered in the '
                        'required group for this keyword.')
     thank_you = _('Thank you, your message has been queued for delivery.')
 
     def start(self):
-        """ setup event schedule to run cron job every minute """
-        try:
-            schedule = EventSchedule.objects.get(description=self.name)
-        except EventSchedule.DoesNotExist:
-            schedule = EventSchedule.objects.create(description=self.name,
-                                                    callback=self.cron_callback,
-                                                    minutes='*')
-        schedule.callback = self.cron_callback
-        for key, val in self.cron_schedule.iteritems():
-            if hasattr(schedule, key):
-                setattr(schedule, key, val)
-        schedule.save()
         self.info('started')
 
     def _forwarding_rules(self):
@@ -122,7 +106,7 @@ class BroadcastApp(AppBase):
             message.save()
 
     def cronjob(self):
-        self.debug('{0} running'.format(self.cron_name))
+        self.debug('cron job running')
         # grab all broadcasts ready to go out and queue their messages
         self.queue_outgoing_messages()
         # send queued messages

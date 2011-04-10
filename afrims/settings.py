@@ -216,11 +216,21 @@ STATICFILES_DIRS = (os.path.join(PROJECT_PATH, 'static'),
 from celery.schedules import crontab
 
 CELERYBEAT_SCHEDULE = {
-    "runs-every-30-seconds": {
+    "broadcast-task": {
         "task": "afrims.apps.broadcast.tasks.BroadcastCronTask",
+        "schedule": crontab(), # every minute
+    },
+    "reminder-scheduler": {
+        "task": "afrims.apps.reminders.tasks.ReminderSchedulerTask",
         "schedule": crontab(),
     },
+    "reminder-email-task": {
+        "task": "afrims.apps.reminders.tasks.ReminderEmailTask",
+        "schedule": crontab(hour=12, minute=0),
+    },
 }
+
+INSTALLED_BACKENDS = {}
 
 #STATICFILES_EXCLUDED_APPS = (
 #    'django.contrib.admin',

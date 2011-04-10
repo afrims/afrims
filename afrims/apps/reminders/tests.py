@@ -25,6 +25,9 @@ from afrims.tests.testcases import (CreateDataTest, FlushTestScript,
 from afrims.apps.reminders.app import RemindersApp
 from afrims.apps.reminders.importer import parse_payload, parse_patient
 
+from threadless_router.router import Router
+from threadless_router.tests.base import SimpleRouterMixin
+
 
 class RemindersCreateDataTest(CreateDataTest):
     # add reminders-specific create_* methods here as needed
@@ -333,11 +336,9 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         self.assertEqual(sent_notif[0].status, 'confirmed')
 
 
-class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
+class RemindersScriptedTest(SimpleRouterMixin, RemindersCreateDataTest):
 
     def test_scheduler(self):
-        self.startRouter()
-        self.router.logger.setLevel(logging.DEBUG)
         contact = self.create_contact({'pin': '1234'})
         backend = self.create_backend(data={'name': 'mockbackend'})
         connection = self.create_connection({'contact': contact,
@@ -362,11 +363,8 @@ class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
         self.assertEqual(sent, 1)
         message = contact.sent_notifications.filter(status='sent')[0]
         self.assertTrue(message.date_sent is not None)
-        self.stopRouter()
 
     def test_patient_reminder_time(self):
-        self.startRouter()
-        self.router.logger.setLevel(logging.DEBUG)
         contact = self.create_contact({'pin': '1234'})
         backend = self.create_backend(data={'name': 'mockbackend'})
         connection = self.create_connection({'contact': contact,
@@ -394,7 +392,6 @@ class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
         message = contact.sent_notifications.filter(status='queued')[0]
         self.assertTrue(message.date_sent is None)
         self.assertEqual(message.date_to_send, datetime.datetime.combine(now, patient.reminder_time))
-        self.stopRouter()
 
 
 class ImportTest(RemindersCreateDataTest):
@@ -638,7 +635,7 @@ class PatientManagerTest(RemindersCreateDataTest):
         self.assertTrue(qs.count(), 1)
 
 
-class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
+class DailyReportTest(RemindersCreateDataTest):
 
     def setUp(self):
         super(DailyReportTest, self).setUp()
@@ -649,6 +646,7 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         self.test_patient = self.create_patient()
         self.other_patient = self.create_patient()
         self.unrelated_patient = self.create_patient()
+        self.router = Router()
 
     def assertPatientInMessage(self, message, patient):
         self.assertTrue(patient.subject_number in message.body)
@@ -658,9 +656,6 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
 
     def test_sending_mail(self):
         """Test email goes out the contacts in the daily report group."""
-        self.startRouter()
-        self.router.logger.setLevel(logging.DEBUG)
-
         # run email job
         from afrims.apps.reminders.app import daily_email_callback
         daily_email_callback(self.router)
@@ -668,16 +663,12 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]
         self.assertTrue(self.test_contact.email in message.to)
-        self.stopRouter()
 
     def test_appointment_date(self):
         """Test email contains info for the appointment date."""
         appt_date = datetime.date.today() + datetime.timedelta(days=7) # Default for email
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
-
-        self.startRouter()
-        self.router.logger.setLevel(logging.DEBUG)
 
         # run email job
         from afrims.apps.reminders.app import daily_email_callback
@@ -688,7 +679,6 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         self.assertPatientInMessage(message, self.test_patient)
         self.assertPatientInMessage(message, self.other_patient)
         self.assertPatientNotInMessage(message, self.unrelated_patient)
-        self.stopRouter()
 
     def test_changing_date(self):
         """Test changing appointment date via callback kwarg."""
@@ -696,9 +686,6 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         appt_date = datetime.date.today() + datetime.timedelta(days=days)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
-
-        self.startRouter()
-        self.router.logger.setLevel(logging.DEBUG)
 
         # run email job
         from afrims.apps.reminders.app import daily_email_callback
@@ -709,7 +696,6 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         self.assertPatientInMessage(message, self.test_patient)
         self.assertPatientInMessage(message, self.other_patient)
         self.assertPatientNotInMessage(message, self.unrelated_patient)
-        self.stopRouter()
 
     def test_skip_blank_emails(self):
         """Test handling contacts with blank/null email addresses."""
@@ -725,5 +711,4 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]
         self.assertEqual(len(message.to), 1)
-        self.stopRouter()
 

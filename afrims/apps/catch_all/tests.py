@@ -44,14 +44,11 @@ class CatchAllDefaultTest(CreateDataTest):
 
 class CatchAllTest(FlushTestScript):
 
+    apps = [OtherApp, CatchAllApp]
+
     def test_full_stack(self):
         """ Test catch all functionality alongside other apps """
-        self.router.apps = [OtherApp(self.router), CatchAllApp(self.router)]
-        self.startRouter()
-        self.router.logger.setLevel(logging.DEBUG)
         self.runScript("""1112223333 > other-app-should-catch
                           1112223333 < caught
                           1112223333 > uncaught-message-test
                           1112223333 > %s""" % CatchAllApp.template)
-        self.stopRouter()
-

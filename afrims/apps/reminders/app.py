@@ -7,7 +7,6 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 
 from rapidsms.apps.base import AppBase
-from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from afrims.apps.groups import models as groups
@@ -59,13 +58,6 @@ def daily_email_callback(router, *args, **kwargs):
 class RemindersApp(AppBase):
     """ RapidSMS app to send appointment reminders """
 
-    # for production, we'll probably want something like:
-#    cron_schedule = {'minutes': ['0'], 'hours': ['10']}
-    # for testing and debugging, run every minute:
-    cron_schedule = {'minutes': '*'}
-    cron_name = 'reminders-cron-job'
-    cron_callback = 'afrims.apps.reminders.app.scheduler_callback'
-
     pin_regex = re.compile(r'^\d{4,6}$')
     conf_keyword = '1'
     
@@ -82,35 +74,7 @@ class RemindersApp(AppBase):
     pin_required = _('Please confirm appointments by sending your PIN code.')
     thank_you = _('Thank you for confirming your upcoming appointment.')
 
-    def start(self):
-        """ setup event schedule to run cron job """
-        try:
-            schedule = EventSchedule.objects.get(description=self.name)
-        except EventSchedule.DoesNotExist:
-            schedule = EventSchedule.objects.create(description=self.name,
-                                                    callback=self.cron_callback,
-                                                    **self.cron_schedule)
-        schedule.callback = self.cron_callback
-        for key, val in self.cron_schedule.iteritems():
-            if hasattr(schedule, key):
-                setattr(schedule, key, val)
-        schedule.save()
-        # Daily email schedule
-        name = 'reminders-daily-email'
-        info = {
-            'callback': 'afrims.apps.reminders.app.daily_email_callback',
-            'hours': [12],
-            'minutes': [0],
-            'callback_kwargs': {'days': 7},
-        }
-        schedule, created = EventSchedule.objects.get_or_create(description=name,
-            defaults=info
-        )
-#        if not created:
-#            for key, val in info.iteritems():
-#                if hasattr(schedule, key):
-#                    setattr(schedule, key, val)  
-#        schedule.save()        
+    def start(self):    
         group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
         group, _ = groups.Group.objects.get_or_create(name=group_name)
         self.info('started')
@@ -218,7 +182,7 @@ class RemindersApp(AppBase):
                                   template=notification.message)
             success = True
             try:
-                msg.send()
+                self.router.outgoing(msg)
             except Exception, e:
                 self.exception(e)
                 success = False
@@ -232,7 +196,7 @@ class RemindersApp(AppBase):
             notification.save()
 
     def cronjob(self):
-        self.debug('{0} running'.format(self.cron_name))
+        self.debug('cron job running')
         # grab all reminders ready to go out and queue their messages
         self.queue_outgoing_notifications()
         # send queued notifications
