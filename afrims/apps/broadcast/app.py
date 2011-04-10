@@ -108,7 +108,7 @@ class BroadcastApp(AppBase):
                                   template=message.broadcast.body)
             success = True
             try:
-                msg.send()
+                self.router.outgoing(msg)
             except Exception, e:
                 self.exception(e)
                 success = False

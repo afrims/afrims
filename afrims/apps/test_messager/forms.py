@@ -31,4 +31,4 @@ class MessageForm(forms.Form):
                                                          identity=number)
         msg = OutgoingMessage(connection, self.cleaned_data['message'])
         router = Router()
-        router.backends[backend.name].send(msg)
+        return router.backends[backend.name].send(msg)
