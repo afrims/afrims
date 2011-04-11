@@ -18,4 +18,6 @@ urlpatterns = patterns('',
         name='broadcast-forwarding-edit'),
     url(r'^forwarding/(?P<rule_id>\d+)/delete/$', views.delete_rule,
         name='broadcast-forwarding-delete'),
+    url('^usage-data/$', views.report_graph_data,
+        name='broadcast-usage-graph-data'),
 )
