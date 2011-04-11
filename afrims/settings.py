@@ -65,6 +65,7 @@ INSTALLED_APPS = [
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
+    ("afrims.apps.broadcast.views.dashboard", "Dashboard"),    
     ("afrims.apps.broadcast.views.send_message", "Send a Message"),
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
     ("broadcast-forwarding", "Forwarding"),
