@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-04-11 18:09-0400\n"
+"POT-Creation-Date: 2011-04-11 19:10-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,38 +31,46 @@ msgstr ""
 msgid "Thank you, your message has been queued for delivery."
 msgstr ""
 
-#: apps/reminders/app.py:49
-msgid "Confirmation Report For Appointments on {appt_date}"
-msgstr ""
-
-#: apps/reminders/app.py:72
+#: apps/reminders/app.py:73
 msgid ""
-"Hello, {name}. You have an upcoming appointment in {days} days, on {date}. "
-"Please reply with {confirm_response} to confirm."
+"You have an upcoming appointment in {days} days, on {date}. Please reply "
+"with {confirm_response} to confirm."
 msgstr ""
 
-#: apps/reminders/app.py:75
+#: apps/reminders/app.py:76
 msgid ""
-"Hello, {name}. You have an appointment {day}, {date}. Please reply with "
-"{confirm_response} to confirm."
-msgstr ""
-
-#: apps/reminders/app.py:77
-msgid "Sorry, your mobile number is not registered."
+"You have an appointment {day}, {date}. Please reply with {confirm_response} "
+"to confirm."
 msgstr ""
 
 #: apps/reminders/app.py:78
+msgid "Sorry, your mobile number is not registered."
+msgstr ""
+
+#: apps/reminders/app.py:79
 msgid "Sorry, I could not find any reminders awaiting confirmation."
 msgstr ""
 
-#: apps/reminders/app.py:80
+#: apps/reminders/app.py:81
 msgid "That is not your PIN code. Please reply with the correct PIN code."
 msgstr ""
 
-#: apps/reminders/app.py:82
+#: apps/reminders/app.py:83
 msgid "Please confirm appointments by sending your PIN code."
 msgstr ""
 
-#: apps/reminders/app.py:83
+#: apps/reminders/app.py:84
 msgid "Thank you for confirming your upcoming appointment."
+msgstr ""
+
+#: apps/reminders/app.py:185
+msgid "your PIN"
+msgstr ""
+
+#: apps/reminders/app.py:194
+msgid "today"
+msgstr ""
+
+#: apps/reminders/app.py:197
+msgid "tomorrow"
 msgstr ""
