@@ -207,6 +207,7 @@ def usage_report_context(start_date, end_date):
     return context
 
 
+@login_required
 def report_graph_data(request):
     # Allow changing the report date
     today = datetime.date.today()
