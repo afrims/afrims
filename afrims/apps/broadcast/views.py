@@ -212,7 +212,19 @@ def report_graph_data(request):
     today = datetime.date.today()
     report_date = today
     data = []
-    for i in range(6):
+    start_date = datetime.date(report_date.year, report_date.month, 1)
+    end_date = report_date
+    incoming_count = Message.objects.filter(
+        date__range=(start_date, end_date),
+        direction='I'
+    ).count()
+    outgoing_count = Message.objects.filter(
+        date__range=(start_date, end_date),
+        direction='O'
+    ).count()
+    row = [end_date.isoformat(), incoming_count, outgoing_count]
+    data.append(row)
+    for i in range(1, 7):
         month = report_date.month - i
         year = report_date.year
         if month <= 0:
@@ -229,7 +241,7 @@ def report_graph_data(request):
             date__range=(start_date, end_date),
             direction='O'
         ).count()
-        row = [start_date.isoformat(), incoming_count, outgoing_count]
+        row = [end_date.isoformat(), incoming_count, outgoing_count]
         data.append(row)
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
