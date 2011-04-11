@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django_sorting",
     "south",
 	"staticfiles",
+    "rosetta",
     # "gunicorn",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
@@ -179,7 +180,13 @@ TEST_EXCLUDED_APPS = [
 
 # the project-level url patterns
 
-LANGUAGE_CODE='en'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = (
+    ('en', 'English'),
+    ('th', 'Thai'),
+    ('tl', 'Filipino'),
+)
 
 TIME_INPUT_FORMATS = ['%H:%M', '%H:%M:%S']
 
