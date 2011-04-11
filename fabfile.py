@@ -50,7 +50,7 @@ def setup_dirs():
 
 def staging():
     """ use staging environment on remote host"""
-    env.code_branch = 'develop'
+    env.code_branch = 'feature/translation'
     env.sudo_user = 'afrims'
     env.environment = 'staging'
     env.hosts = ['173.203.221.48']
@@ -105,8 +105,8 @@ def deploy():
         if env.environment == 'production':
             servers_stop()
     with cd(env.code_root):
-        sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
         sudo('git pull', user=env.sudo_user)
+        sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
     migrate()
     collectstatic()
     touch()
