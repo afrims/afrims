@@ -5,11 +5,12 @@ from django.db import transaction
 from django.core.urlresolvers import reverse
 from django.template.context import RequestContext
 from django.shortcuts import render_to_response, redirect
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
+from django.utils import simplejson as json
 
 from rapidsms.views import dashboard as default_dashboard
 from rapidsms.contrib.messagelog.models import Message
@@ -140,7 +141,8 @@ def dashboard(request):
         end_date = report_date
         context = usage_report_context(start_date, end_date)
         context['report_date'] = report_date
-        context['report_form'] = form 
+        context['report_form'] = form
+        # Graph data 
         return render_to_response('broadcast/dashboard.html', context,
                                   RequestContext(request))
     else:
@@ -203,4 +205,32 @@ def usage_report_context(start_date, end_date):
         'total_messages': total_messages,
     }
     return context
+
+
+def report_graph_data(request):
+    # Allow changing the report date
+    today = datetime.date.today()
+    report_date = today
+    data = []
+    for i in range(6):
+        month = report_date.month - i
+        year = report_date.year
+        if month <= 0:
+            month += 12
+            year -= 1
+        last_day = calendar.monthrange(year, month)[1]
+        start_date = datetime.date(year, month, 1)
+        end_date = datetime.date(year, month, last_day)
+        incoming_count = Message.objects.filter(
+            date__range=(start_date, end_date),
+            direction='I'
+        ).count()
+        outgoing_count = Message.objects.filter(
+            date__range=(start_date, end_date),
+            direction='O'
+        ).count()
+        row = [start_date.isoformat(), incoming_count, outgoing_count]
+        data.append(row)
+    return HttpResponse(json.dumps(data), mimetype='application/json')
+
 
