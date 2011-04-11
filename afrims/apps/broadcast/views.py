@@ -12,7 +12,6 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import simplejson as json
 
-from rapidsms.views import dashboard as default_dashboard
 from rapidsms.contrib.messagelog.models import Message
 
 from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm, ReportForm
@@ -125,28 +124,25 @@ def delete_rule(request, rule_id):
     return render_to_response('broadcast/delete_rule.html', context,
                               RequestContext(request))
 
-
+@login_required
 def dashboard(request):
-    if request.user.is_authenticated():
-        today = datetime.date.today()
-        report_date = today
-        initial = {'report_year': report_date.year, 'report_month': report_date.month}
-        form = ReportForm(request.GET or None, initial=initial)
-        if form.is_valid():
-            report_year = form.cleaned_data.get('report_year') or report_date.year
-            report_month = form.cleaned_data.get('report_month') or report_date.month
-            last_day = calendar.monthrange(report_year, report_month)[1]
-            report_date = datetime.date(report_year, report_month, last_day)
-        start_date = datetime.date(report_date.year, report_date.month, 1)
-        end_date = report_date
-        context = usage_report_context(start_date, end_date)
-        context['report_date'] = report_date
-        context['report_form'] = form
-        # Graph data 
-        return render_to_response('broadcast/dashboard.html', context,
-                                  RequestContext(request))
-    else:
-        return default_dashboard(request)
+    today = datetime.date.today()
+    report_date = today
+    initial = {'report_year': report_date.year, 'report_month': report_date.month}
+    form = ReportForm(request.GET or None, initial=initial)
+    if form.is_valid():
+        report_year = form.cleaned_data.get('report_year') or report_date.year
+        report_month = form.cleaned_data.get('report_month') or report_date.month
+        last_day = calendar.monthrange(report_year, report_month)[1]
+        report_date = datetime.date(report_year, report_month, last_day)
+    start_date = datetime.date(report_date.year, report_date.month, 1)
+    end_date = report_date
+    context = usage_report_context(start_date, end_date)
+    context['report_date'] = report_date
+    context['report_form'] = form
+    # Graph data 
+    return render_to_response('broadcast/dashboard.html', context,
+                              RequestContext(request))
 
 
 def usage_report_context(start_date, end_date):
