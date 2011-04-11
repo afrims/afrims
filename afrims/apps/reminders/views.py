@@ -1,5 +1,6 @@
 import datetime
 import logging
+import urlparse
 
 from django.contrib import messages
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -132,4 +133,25 @@ def report(request):
     else:
         return render_to_response('reminders/report.html', context,
                                   RequestContext(request))
+
+
+@login_required
+def manually_confirm(request, reminder_id):
+    reminder = get_object_or_404(reminders.SentNotification, pk=reminder_id)
+    if request.method == 'POST':
+        redirect_to = request.POST.get('next', 'reminders_dashboard')
+        try:
+            netloc = urlparse.urlparse(redirect_to)[1]
+        except IndexError:
+            netloc = ''
+        if netloc and netloc != request.get_host():
+            redirect_to = 'reminders_dashboard'
+        reminder.manually_confirm()
+        messages.info(request, 'Patient has been confirmed manually')
+        return redirect(redirect_to)
+    context = {
+        'reminder': reminder
+    }
+    return render_to_response('reminders/confirm.html', context,
+                              RequestContext(request))
 

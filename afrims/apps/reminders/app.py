@@ -163,7 +163,7 @@ class RemindersApp(AppBase):
             already_sent = Q(contact__sent_notifications__appt_date=appt_date) &\
                            Q(contact__sent_notifications__notification=notification)
             confirmed = Q(contact__sent_notifications__appt_date=appt_date) &\
-                        Q(contact__sent_notifications__status='confirmed')
+                        Q(contact__sent_notifications__status__in=['confirmed', 'manual'])
             # .exclude() generates erroneous results - use filter(~...) instead
             patients = patients.filter(~already_sent)
             if notification.recipients == 'confirmed':

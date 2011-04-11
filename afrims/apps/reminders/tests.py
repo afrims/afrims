@@ -727,3 +727,37 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         self.assertEqual(len(message.to), 1)
         self.stopRouter()
 
+
+class ManualConfirmationTest(RemindersCreateDataTest):
+
+    def setUp(self):
+        self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.save()
+        self.client.login(username='test', password='abc')
+        self.test_patient = self.create_patient()
+        self.appt_date = datetime.date.today()
+        self.unconfirmed = self.create_unconfirmed_notification(self.test_patient, self.appt_date)
+        self.url = reverse('manually-confirm-patient', args=[self.unconfirmed.pk])
+
+    def test_get_page(self):
+        """Get manual confirmation page."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_manually_confirm(self):
+        """Test manually confirming a patient reminder."""
+        data = {}
+        response = self.client.post(self.url, data)
+        self.assertRedirects(response, reverse('reminders_dashboard'))
+
+        reminder = reminders.SentNotification.objects.get(pk=self.unconfirmed.pk)
+        self.assertEqual(reminder.status, 'manual')
+        self.assertEqual(reminder.date_confirmed.date(), datetime.date.today())
+
+    def test_redirect(self):
+        """Test post redirect."""
+        next_url = reverse('reminders-report')
+        data = {'next': next_url}
+        response = self.client.post(self.url, data)
+        self.assertRedirects(response, next_url)
+
