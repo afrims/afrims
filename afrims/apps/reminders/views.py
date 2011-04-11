@@ -140,7 +140,10 @@ def manually_confirm(request, reminder_id):
     reminder = get_object_or_404(reminders.SentNotification, pk=reminder_id)
     if request.method == 'POST':
         redirect_to = request.POST.get('next', 'reminders_dashboard')
-        netloc = urlparse.urlparse(redirect_to)[1]
+        try:
+            netloc = urlparse.urlparse(redirect_to)[1]
+        except IndexError:
+            netloc = ''
         if netloc and netloc != request.get_host():
             redirect_to = 'reminders_dashboard'
         reminder.manually_confirm()
