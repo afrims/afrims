@@ -209,9 +209,15 @@ def usage_report_context(start_date, end_date):
 
 @login_required
 def report_graph_data(request):
-    # Allow changing the report date
     today = datetime.date.today()
     report_date = today
+    initial = {'report_year': report_date.year, 'report_month': report_date.month}
+    form = ReportForm(request.GET or None, initial=initial)
+    if form.is_valid():
+        report_year = form.cleaned_data.get('report_year') or report_date.year
+        report_month = form.cleaned_data.get('report_month') or report_date.month
+        last_day = calendar.monthrange(report_year, report_month)[1]
+        report_date = datetime.date(report_year, report_month, last_day)
     data = []
     start_date = datetime.date(report_date.year, report_date.month, 1)
     end_date = report_date

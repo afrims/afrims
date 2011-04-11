@@ -10,11 +10,12 @@ function drawChart(response) {
         rows.push([new Date(r[0]), r[1], r[2]]);
     });
     data.addRows(rows);
-    var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('chart_div'));
+    var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('usage-chart'));
     chart.draw(data, {displayAnnotations: false});
 }
 function getChartData() {
-    $.getJSON('/broadcast/usage-data/', {}, drawChart);
+    var url = $('#usage-chart').data('url');
+    $.getJSON(url, {}, drawChart);
 }
 $(document).ready(function() {
     $('.form-action input[type=submit]').button();
