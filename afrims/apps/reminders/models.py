@@ -41,12 +41,12 @@ class SentNotificationManager(models.Manager):
     def confirmed_for_range(self, start_date, end_date):
         return self.filter(
             appt_date__range=(start_date, end_date),
-            status='confirmed'
+            status__in=['confirmed', 'manual'],
         ).distinct()
 
     def unconfirmed_for_range(self, start_date, end_date):
         return self.filter(
-            ~Q(status='confirmed'),
+            ~Q(status__in=['confirmed', 'manual']),
             appt_date__range=(start_date, end_date),  
         ).distinct()
 
@@ -60,6 +60,7 @@ class SentNotification(models.Model):
         ('sent', 'Sent'),
         ('error', 'Error'),
         ('confirmed', 'Confirmed'),
+        ('manual', 'Manually Confirmed'),
     )
     notification = models.ForeignKey(Notification,
                                     related_name='sent_notifications',
@@ -94,6 +95,11 @@ class SentNotification(models.Model):
                                         recipient=self.recipient,
                                         date=self.date_queued)
 
+    def manually_confirm(self):
+        self.date_confirmed = datetime.datetime.now()
+        self.status = 'manual'
+        self.save()
+
 
 class PatientDataPayload(models.Model):
     ''' Dumping area for incoming patient data XML snippets '''
@@ -125,17 +131,18 @@ class PatientManager(models.Manager):
     def confirmed_for_date(self, appt_date):
         return self.filter(
             contact__sent_notifications__appt_date=appt_date,
-            contact__sent_notifications__status='confirmed'
+            contact__sent_notifications__status__in=['confirmed', 'manual']
         ).annotate(
             confirm_time=Max('contact__sent_notifications__date_confirmed')
         ).distinct()
 
     def unconfirmed_for_date(self, appt_date):
         return self.filter(
-            ~Q(contact__sent_notifications__status='confirmed'),
+            ~Q(contact__sent_notifications__status__in=['confirmed', 'manual']),
             contact__sent_notifications__appt_date=appt_date,        
         ).annotate(
-            last_reminder_time=Max('contact__sent_notifications__date_sent')
+            last_reminder_time=Max('contact__sent_notifications__date_sent'),
+            reminder_id=Max('contact__sent_notifications__id'),
         ).distinct()
 
 
