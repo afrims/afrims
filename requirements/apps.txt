@@ -11,4 +11,3 @@ twilio==2.0.6
 django-sorting==0.1
 psycopg2==2.4
 django-staticfiles==1.0
-django-googlecharts==1.0-alpha-1
