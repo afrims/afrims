@@ -6,14 +6,13 @@ from afrims.apps.reminders.app import RemindersApp
 from afrims.apps.reminders.models import Notification
 
 def messages(request):
+    
     try:
-        days = Notification.objects.order_by('-num_days')[0].num_days
+        days = Notification.objects.order_by('?')[0].num_days
     except IndexError:
-        days = 1
-    date = datetime.datetime.today() + datetime.timedelta(days=days)
-    msg = ugettext(RemindersApp.future_appt_msg)
-    msg = msg.format(days=days, date=date.strftime(RemindersApp.date_format),
-                     confirm_response=RemindersApp.conf_keyword)
+        days = 2
+    date = datetime.date.today() + datetime.timedelta(days=days)
+    msg = RemindersApp._notification_msg(date)
     return {
-        'future_appt_msg': msg,
+        'reminder_message': msg,
     }

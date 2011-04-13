@@ -120,6 +120,31 @@ class RemindersApp(AppBase):
         group, _ = groups.Group.objects.get_or_create(name=group_name)
         self.info('started')
 
+    @classmethod
+    def _notification_msg(cls, appt_date, confirm_response=None):
+        """
+        Formats an appointment reminder message for the given notification,
+        appointment date, and confirm response (usually the confirm keyword or
+        'your PIN').
+        """
+        num_days = (appt_date - datetime.date.today()).days
+        if confirm_response is None:
+            confirm_response = cls.conf_keyword
+        msg_data = {
+            'days': num_days,
+            'date': appt_date.strftime(cls.date_format),
+            'confirm_response': confirm_response,
+        }
+        if num_days == 0:
+            msg_data['day'] = ugettext('today')
+            message = ugettext(cls.near_appt_msg)
+        elif num_days == 1:
+            msg_data['day'] = ugettext('tomorrow')
+            message = ugettext(cls.near_appt_msg)
+        else:
+            message = ugettext(cls.future_appt_msg)
+        return message.format(**msg_data)
+
     def handle(self, msg):
         """
         Handles messages that start with a '1' (to ease responding in
@@ -201,19 +226,7 @@ class RemindersApp(AppBase):
                     confirm_response = ugettext('your PIN')
                 else:
                     confirm_response = self.conf_keyword
-                msg_data = {
-                    'days': notification.num_days,
-                    'date': appt_date.strftime(self.date_format),
-                    'confirm_response': confirm_response,
-                }
-                if notification.num_days == 0:
-                    msg_data['day'] = ugettext('today')
-                    message = ugettext(self.near_appt_msg)
-                elif notification.num_days == 1:
-                    msg_data['day'] = ugettext('tomorrow')
-                    message = ugettext(self.near_appt_msg)
-                else:
-                    message = ugettext(self.future_appt_msg)
+                message = self._notification_msg(appt_date, confirm_response)
                 time_of_day = patient.reminder_time or notification.time_of_day
                 date_to_send = datetime.datetime.combine(today, time_of_day)
                 notification.sent_notifications.create(
@@ -221,7 +234,7 @@ class RemindersApp(AppBase):
                                         appt_date=appt_date,
                                         date_queued=datetime.datetime.now(),
                                         date_to_send=date_to_send,
-                                        message=message.format(**msg_data))
+                                        message=message)
 
     def send_notifications(self):
         """ send queued for delivery messages """
