@@ -70,7 +70,8 @@ class RemindersApp(AppBase):
 
     pin_regex = re.compile(r'^\d{4,6}$')
     conf_keyword = '1'
-    
+    date_format = '%B %d, %Y'
+
     future_appt_msg = _('You have an upcoming appointment in '
                         '{days} days, on {date}. Please reply with '
                         '{confirm_response} to confirm.')
@@ -202,7 +203,7 @@ class RemindersApp(AppBase):
                     confirm_response = self.conf_keyword
                 msg_data = {
                     'days': notification.num_days,
-                    'date': appt_date.strftime('%B %d, %Y'),
+                    'date': appt_date.strftime(self.date_format),
                     'confirm_response': confirm_response,
                 }
                 if notification.num_days == 0:

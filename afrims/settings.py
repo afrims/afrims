@@ -140,6 +140,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 
     #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
     "rapidsms.context_processors.logo",
+    "afrims.apps.reminders.context_processors.messages",
 ]
 
 
