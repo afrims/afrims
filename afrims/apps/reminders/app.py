@@ -10,6 +10,7 @@ from rapidsms.apps.base import AppBase
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages.outgoing import OutgoingMessage
 
+from afrims.apps.broadcast.models import Broadcast
 from afrims.apps.groups import models as groups
 from afrims.apps.reminders import models as reminders
 
@@ -113,6 +114,8 @@ class RemindersApp(AppBase):
 #        schedule.save()        
         group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
         group, _ = groups.Group.objects.get_or_create(name=group_name)
+        group_name = settings.DEFAULT_CONFIRMATIONS_GROUP_NAME
+        group, _ = groups.Group.objects.get_or_create(name=group_name)
         self.info('started')
 
     def handle(self, msg):
@@ -144,10 +147,22 @@ class RemindersApp(AppBase):
         if not notifs.exists():
             msg.respond(self.no_reminders)
             return True
+        now = datetime.datetime.now()        
         sent_notification = notifs.order_by('-date_sent')[0]
         sent_notification.status = 'confirmed'
-        sent_notification.date_confirmed = datetime.datetime.now()
+        sent_notification.date_confirmed = now
         sent_notification.save()
+        msg_text = u'Appointment on %s confirmed.' % sent_notification.appt_date
+        full_msg = u'From {number}: {body}'.format(
+            number=msg.connection.identity, body=msg_text
+        )
+        broadcast = Broadcast.objects.create(
+            date_created=now, date=now,
+            schedule_frequency='one-time', body=full_msg
+        )
+        group_name = settings.DEFAULT_CONFIRMATIONS_GROUP_NAME
+        group, _ = groups.Group.objects.get_or_create(name=group_name)
+        broadcast.groups.add(group)
         msg.respond(self.thank_you)
 
     def queue_outgoing_notifications(self):
