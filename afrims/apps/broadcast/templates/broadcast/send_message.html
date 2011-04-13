@@ -18,7 +18,7 @@
 {% endblock %}
 
 {% block right %}
-<div class="module">
+<div class="module message-form">
     <h2>{% if form.instance.pk %}Edit Broadcast{% else %}Send a Message{% endif %}</h2>
     <form method="POST" action="#" id="broadcast-form" class='buttons'>
         {% csrf_token %}
@@ -34,6 +34,14 @@
             {% endif %}
         </div>
     </form>
+</div>
+<div class="module message-list">
+    <h2>Recent Messages</h2>
+    <ul>
+        {% for message in recent %}
+        <li class="message-item" title="{{ message }}">{{ message }} <a class='copy' title="Copy message body">Copy</a></li>
+        {% endfor %}
+    </ul>        
 </div>
 {% endblock %}
 

@@ -38,10 +38,14 @@ def send_message(request, broadcast_id=None):
             return HttpResponseRedirect(reverse('broadcast-schedule'))
     else:
         form = BroadcastForm(instance=broadcast)
-    broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True)
+    broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True).order_by('date')
+    recent = broadcasts.exclude(
+        forward__isnull=False
+    ).order_by('-date').values_list('body', flat=True).distinct()[:10]
     context = {
         'form': form,
         'broadcasts': broadcasts.order_by('date'),
+        'recent': recent
     }
     return render_to_response('broadcast/send_message.html', context,
                               RequestContext(request))

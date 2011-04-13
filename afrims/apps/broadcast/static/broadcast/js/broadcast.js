@@ -64,5 +64,13 @@ $(document).ready(function() {
     $('#id_schedule_frequency').change(function() {
         refresh_broadcast_form();
     });
+    
+    $('.message-list a.copy').live('click', function(e) {
+        e.preventDefault();
+        var msg = $(this).closest('.message-item').attr('title');
+        $('#id_body').val(msg);
+        $('#id_body').keyup();
+    });
+    $('#tabs li.app-sendamessage').addClass('active');
 });
 
