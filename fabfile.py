@@ -78,6 +78,8 @@ def bootstrap():
     create_virtualenv()
     deploy()
     update_requirements()
+    setup_translation()
+    fix_locale_perms()
 
 
 def create_virtualenv():
@@ -104,6 +106,7 @@ def deploy():
         router_stop()
         if env.environment == 'production':
             servers_stop()
+    fix_locale_perms()
     with cd(env.code_root):
         sudo('git pull', user=env.sudo_user)
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
@@ -282,6 +285,7 @@ def fix_locale_perms():
 
 def commit_locale_changes():
     """ Commit locale changes on the remote server and pull them in locally """
+    fix_locale_perms()
     with cd(env.code_root):
         run('sudo -H -u %s git add afrims/locale' % env.sudo_user)
         run('sudo -H -u %s git commit -m "updating translation"' % env.sudo_user)
