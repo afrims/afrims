@@ -19,6 +19,7 @@ from rapidsms.tests.harness import MockRouter, MockBackend
 from rapidsms.messages.incoming import IncomingMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 
+from afrims.apps.groups.models import Group
 from afrims.apps.reminders import models as reminders
 from afrims.tests.testcases import (CreateDataTest, FlushTestScript,
                                     patch_settings)
@@ -331,6 +332,22 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         sent_notif = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notif.count(), 1)
         self.assertEqual(sent_notif[0].status, 'confirmed')
+
+    def test_forward_broadcast(self):
+        """Confirmations should be forwarded to DEFAULT_CONFIRMATIONS_GROUP_NAME"""
+        now = datetime.datetime.now()
+        notification = reminders.Notification.objects.create(num_days=1,
+                                                             time_of_day=now)
+        reminders.SentNotification.objects.create(notification=notification,
+                                                  recipient=self.contact,
+                                                  status='sent',
+                                                  message='abc',
+                                                  appt_date=now,
+                                                  date_to_send=now)
+        msg = self._send(self.reg_conn, '1')
+        group = Group.objects.get(name=settings.DEFAULT_CONFIRMATIONS_GROUP_NAME)
+        broadcasts = group.broadcasts.filter(schedule_frequency='one-time')
+        self.assertEqual(broadcasts.count(), 1)
 
 
 class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
