@@ -15,7 +15,8 @@ function drawChart(response) {
 }
 function getChartData() {
     var url = $('#usage-chart').data('url');
-    $.getJSON(url, {}, drawChart);
+    var now = new Date().getTime();
+    $.getJSON(url, {timestamp: now}, drawChart);
 }
 $(document).ready(function() {
     $('.form-action input[type=submit]').button();
