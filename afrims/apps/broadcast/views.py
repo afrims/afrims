@@ -38,14 +38,10 @@ def send_message(request, broadcast_id=None):
             return HttpResponseRedirect(reverse('broadcast-schedule'))
     else:
         form = BroadcastForm(instance=broadcast)
-    broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True).order_by('date')
-    recent = broadcasts.exclude(
-        forward__isnull=False
-    ).order_by('-date').values_list('body', flat=True).distinct()[:10]
+    broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True)
     context = {
         'form': form,
         'broadcasts': broadcasts.order_by('date'),
-        'recent': recent
     }
     return render_to_response('broadcast/send_message.html', context,
                               RequestContext(request))
@@ -250,6 +246,16 @@ def report_graph_data(request):
         ).count()
         row = [end_date.isoformat(), incoming_count, outgoing_count]
         data.append(row)
+    return HttpResponse(json.dumps(data), mimetype='application/json')
+
+
+@login_required
+def last_messages(request):
+    recent = Broadcast.objects.exclude(
+        schedule_frequency__isnull=True,
+        forward__isnull=False
+    ).order_by('-date').values_list('body', flat=True).distinct()[:10]
+    data = list(recent)
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
 

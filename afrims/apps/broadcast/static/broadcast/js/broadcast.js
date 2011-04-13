@@ -64,13 +64,29 @@ $(document).ready(function() {
     $('#id_schedule_frequency').change(function() {
         refresh_broadcast_form();
     });
-    
-    $('.message-list a.copy').live('click', function(e) {
-        e.preventDefault();
-        var msg = $(this).closest('.message-item').attr('title');
-        $('#id_body').val(msg);
-        $('#id_body').keyup();
-    });
+
+    var messageUrl = $('#message-data').attr('href');
+    var now = new Date().getTime();
+    $.getJSON(messageUrl, {timestamp: now}, showMessages);
+
+    function showMessages(data) {
+        $('#message-data').remove();
+        var list = $('<ul>');
+        $.each(data, function(i, r) {
+            var item = $('<li>').addClass('message-item').attr('title', r).text(r + ' ');
+            var link = $('<a>').addClass('copy').attr('title', "Copy message body").text('Copy');
+            link.click(function(e) {
+                e.preventDefault();
+                var msg = $(this).closest('.message-item').attr('title');
+                $('#id_body').val(msg);
+                $('#id_body').keyup();
+            });
+            item.append(link);
+            list.append(item);
+        });
+        $('.message-list').append(list);
+    }
+
     $('#tabs li.app-sendamessage').addClass('active');
 });
 

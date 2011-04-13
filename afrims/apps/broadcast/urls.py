@@ -20,4 +20,6 @@ urlpatterns = patterns('',
         name='broadcast-forwarding-delete'),
     url('^usage-data/$', views.report_graph_data,
         name='broadcast-usage-graph-data'),
+    url('^message-data/$', views.last_messages,
+        name='broadcast-usage-recent-messages'),
 )
