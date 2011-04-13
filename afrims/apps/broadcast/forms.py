@@ -5,6 +5,7 @@ from django.forms.models import modelformset_factory
 from django.utils.dates import MONTHS
 
 from afrims.apps.broadcast.models import Broadcast, ForwardingRule
+from afrims.apps.broadcast.validators import validate_keyword
 
 
 class BroadcastForm(forms.ModelForm):
@@ -82,6 +83,12 @@ class ForwardingRuleForm(forms.ModelForm):
 
     class Meta(object):
         model = ForwardingRule
+
+    def __init__(self, *args, **kwargs):
+        super(ForwardingRuleForm, self).__init__(*args, **kwargs)
+        if validate_keyword not in self.fields['keyword'].validators:
+            self.fields['keyword'].validators.append(validate_keyword)
+        self.fields['keyword'].help_text = validate_keyword.help_text
 
 
 class ReportForm(forms.Form):
