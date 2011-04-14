@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 
 from rapidsms.models import Backend
 
+from afrims.apps.groups.utils import format_number
+
 
 class ContactExtra(models.Model):
     """ Abstract model to extend the RapidSMS Contact model """
@@ -20,3 +22,7 @@ class ContactExtra(models.Model):
 
     class Meta:
         abstract = True
+
+    @property
+    def formatted_phone(self):
+        return format_number(self.phone)
