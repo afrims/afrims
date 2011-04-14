@@ -8,7 +8,7 @@
     <h2>Manual Appointment Confirmation</h2>
     <form method="POST" action="#" class='buttons'>
         {% with reminder.recipient.patient_set.all.0 as patient %}
-        <p class='message'>Are you sure you want to manually confirm the {{ reminder.appt_date }} appointment for {{ patient.subject_number }} ({{ patient.mobile_number }})?</p>
+        <p class='message'>Are you sure you want to manually confirm the {{ reminder.appt_date }} appointment for {{ patient.subject_number }} ({{ patient.formatted_phone }})?</p>
         {% csrf_token %}
         <div class="hidden"><input type="hidden" name="next" value="{{ request.META.HTTP_REFERER }}"/></div>
         <div class='form-action'>

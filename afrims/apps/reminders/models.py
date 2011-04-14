@@ -5,6 +5,8 @@ from django.db.models import Q, Max
 
 from rapidsms import models as rapidsms
 
+from afrims.apps.groups.utils import format_number
+
 
 class Notification(models.Model):
     '''
@@ -100,7 +102,9 @@ class SentNotification(models.Model):
         self.status = 'manual'
         self.save()
 
-
+    @property
+    def formatted_phone(self):
+        return format_number(self.mobile_number)
 class PatientDataPayload(models.Model):
     ''' Dumping area for incoming patient data XML snippets '''
 
@@ -166,3 +170,7 @@ class Patient(models.Model):
         msg = u'Patient, Subject ID:{id}, Enrollment Date:{date_enrolled}'
         return msg.format(id=self.subject_number,
                           date_enrolled=self.date_enrolled)
+
+    @property
+    def formatted_phone(self):
+        return format_number(self.mobile_number)

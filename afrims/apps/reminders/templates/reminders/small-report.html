@@ -23,7 +23,7 @@
         {% for patient in patients %}
         <tr class="{% cycle 'odd' 'even' %}">
             <td>{{ patient.subject_number }}</td>
-            <td>{{ patient.mobile_number }}</td>
+            <td>{{ patient.formatted_phone }}</td>
             {% if status == 'confirmed' %}
                 <td>{{ patient.confirm_time }}</td>
             {% else %}
