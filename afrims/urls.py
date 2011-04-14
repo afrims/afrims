@@ -34,6 +34,7 @@ urlpatterns = patterns('',
     (r'^reminders/', include('afrims.apps.reminders.urls')),
     (r'^test-messager/', include('afrims.apps.test_messager.urls')),
     (r'^crm/', include('afrims.apps.groups.urls')),
+    (r'^rosetta/', include('rosetta.urls')),
 )
 
 if settings.DEBUG:

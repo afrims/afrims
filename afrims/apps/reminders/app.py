@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.template.loader import render_to_string
+from django.utils.translation import ugettext
 
 from rapidsms.apps.base import AppBase
 from rapidsms.contrib.scheduler.models import EventSchedule
@@ -47,7 +48,7 @@ def daily_email_callback(router, *args, **kwargs):
         'confirmed_patients': confirmed_patients,
         'unconfirmed_patients': unconfirmed_patients,
     }
-    subject_template = _(u'Confirmation Report For Appointments on {appt_date}')
+    subject_template = u'Confirmation Report For Appointments on {appt_date}'
     subject = subject_template.format(**context)
     body = render_to_string('reminders/emails/daily_report_message.html', context)
     group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
@@ -69,11 +70,12 @@ class RemindersApp(AppBase):
 
     pin_regex = re.compile(r'^\d{4,6}$')
     conf_keyword = '1'
-    
-    future_appt_msg = _('Hello, {name}. You have an upcoming appointment in '
+    date_format = '%B %d, %Y'
+
+    future_appt_msg = _('You have an upcoming appointment in '
                         '{days} days, on {date}. Please reply with '
                         '{confirm_response} to confirm.')
-    near_appt_msg = _('Hello, {name}. You have an appointment {day}, {date}. '
+    near_appt_msg = _('You have an appointment {day}, {date}. '
                        'Please reply with {confirm_response} to confirm.')
     not_registered = _('Sorry, your mobile number is not registered.')
     no_reminders = _('Sorry, I could not find any reminders awaiting '
@@ -117,6 +119,31 @@ class RemindersApp(AppBase):
         group_name = settings.DEFAULT_CONFIRMATIONS_GROUP_NAME
         group, _ = groups.Group.objects.get_or_create(name=group_name)
         self.info('started')
+
+    @classmethod
+    def _notification_msg(cls, appt_date, confirm_response=None):
+        """
+        Formats an appointment reminder message for the given notification,
+        appointment date, and confirm response (usually the confirm keyword or
+        'your PIN').
+        """
+        num_days = (appt_date - datetime.date.today()).days
+        if confirm_response is None:
+            confirm_response = cls.conf_keyword
+        msg_data = {
+            'days': num_days,
+            'date': appt_date.strftime(cls.date_format),
+            'confirm_response': confirm_response,
+        }
+        if num_days == 0:
+            msg_data['day'] = ugettext('today')
+            message = ugettext(cls.near_appt_msg)
+        elif num_days == 1:
+            msg_data['day'] = ugettext('tomorrow')
+            message = ugettext(cls.near_appt_msg)
+        else:
+            message = ugettext(cls.future_appt_msg)
+        return message.format(**msg_data)
 
     def handle(self, msg):
         """
@@ -189,26 +216,19 @@ class RemindersApp(AppBase):
                 patients = patients.filter(~confirmed)
             self.info('Queuing reminders for %s patients.' % patients.count())
             for patient in patients:
+                # _() is not an alias for gettext, since normally translation
+                # is done in the OutgoingMessage class.  In the code below, we
+                # force translation by calling ugettext directly, since the
+                # message gets queued in the database before being passed to
+                # OutgoingMessage.
                 self.debug('Creating notification for %s' % patient)
                 if patient.contact.pin:
-                    confirm_response = 'your PIN'
+                    confirm_response = ugettext('your PIN')
                 else:
                     confirm_response = self.conf_keyword
-                msg_data = {
-                    'days': notification.num_days,
-                    'date': appt_date.strftime('%B %d, %Y'),
-                    'name': patient.contact.name,
-                    'confirm_response': confirm_response,
-                }
-                if notification.num_days == 0:
-                    msg_data['day'] = 'today'
-                    message = self.near_appt_msg.format(**msg_data)
-                elif notification.num_days == 1:
-                    msg_data['day'] = 'tomorrow'
-                    message = self.near_appt_msg.format(**msg_data)
-                else:
-                    message = self.future_appt_msg.format(**msg_data)
-                date_to_send = datetime.datetime.combine(today, patient.reminder_time or notification.time_of_day)
+                message = self._notification_msg(appt_date, confirm_response)
+                time_of_day = patient.reminder_time or notification.time_of_day
+                date_to_send = datetime.datetime.combine(today, time_of_day)
                 notification.sent_notifications.create(
                                         recipient=patient.contact,
                                         appt_date=appt_date,

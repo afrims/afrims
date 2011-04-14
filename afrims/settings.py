@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django_sorting",
     "south",
 	"staticfiles",
+    "rosetta",
     # "gunicorn",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
@@ -139,6 +140,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 
     #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
     "rapidsms.context_processors.logo",
+    "afrims.apps.reminders.context_processors.messages",
 ]
 
 
@@ -179,7 +181,13 @@ TEST_EXCLUDED_APPS = [
 
 # the project-level url patterns
 
-LANGUAGE_CODE='en'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = (
+    ('en', 'English'),
+    ('th', 'Thai'),
+    ('tl', 'Filipino'),
+)
 
 TIME_INPUT_FORMATS = ['%H:%M', '%H:%M:%S']
 

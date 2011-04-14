@@ -78,6 +78,8 @@ def bootstrap():
     create_virtualenv()
     deploy()
     update_requirements()
+    setup_translation()
+    fix_locale_perms()
 
 
 def create_virtualenv():
@@ -104,9 +106,10 @@ def deploy():
         router_stop()
         if env.environment == 'production':
             servers_stop()
+    fix_locale_perms()
     with cd(env.code_root):
-        sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
         sudo('git pull', user=env.sudo_user)
+        sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
     migrate()
     collectstatic()
     touch()
@@ -265,3 +268,25 @@ def reset_local_db():
     host = '%s@%s' % (env.user, env.hosts[0])
     local('ssh -C %s sudo -u afrims pg_dump -Ox %s | psql %s' % (host, remote_db, local_db))
 
+
+def setup_translation():
+    """ Setup the git config for commiting .po files on the server """
+    run('sudo -H -u %s git config --global user.name "AFRIMS Translators"' % env.sudo_user)
+    run('sudo -H -u %s git config --global user.email "afrims-dev@dimagi.com"' % env.sudo_user)
+
+
+def fix_locale_perms():
+    """ Fix the permissions on the locale directory """
+    locale_dir = '%s/afrims/locale/' % env.code_root
+    run('sudo chown -R afrims %s' % locale_dir)
+    run('sudo chgrp -R www-data %s' % locale_dir)
+    run('sudo chmod -R g+w %s' % locale_dir)
+
+
+def commit_locale_changes():
+    """ Commit locale changes on the remote server and pull them in locally """
+    fix_locale_perms()
+    with cd(env.code_root):
+        run('sudo -H -u %s git add afrims/locale' % env.sudo_user)
+        run('sudo -H -u %s git commit -m "updating translation"' % env.sudo_user)
+    local('git pull ssh://%s%s' % (env.host, env.code_root))
