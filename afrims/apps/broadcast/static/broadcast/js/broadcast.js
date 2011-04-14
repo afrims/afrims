@@ -2,6 +2,7 @@
  * Javascript form functionality for afrims.apps.broadcast RapidSMS app
  */
 $(document).ready(function() {
+    jQuery.ajaxSettings.traditional = true;
     $('.datetimepicker').datetimepicker();
     $('.multiselect').multiselect({header: false});
     
@@ -66,12 +67,26 @@ $(document).ready(function() {
     });
 
     var messageUrl = $('#message-data').attr('href');
-    var now = new Date().getTime();
-    $.getJSON(messageUrl, {timestamp: now}, showMessages);
+    function queryMessages() {
+        var now = new Date().getTime();
+        var groups = getSelected();
+        $.getJSON(messageUrl, {groups: groups, timestamp: now}, showMessages);
+    }
+
+    function getSelected() {
+        return $('#id_groups').multiselect('getChecked').map(function(){
+            return this.value;	
+        }).get();
+    }
+
+    queryMessages();
+    
+    $('#id_groups').bind("multiselectclick", queryMessages);
 
     function showMessages(data) {
         $('#message-data').remove();
-        var list = $('<ul>');
+        $('.message-list ul.message-data').remove();
+        var list = $('<ul>').addClass('message-data');
         $.each(data, function(i, r) {
             var item = $('<li>').addClass('message-item').attr('title', r).text(r + ' ');
             var link = $('<a>').addClass('copy').attr('title', "Copy message body").text('Copy');
