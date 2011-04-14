@@ -262,7 +262,10 @@ def last_messages(request):
     if groups:
         recent = recent.filter(groups__in=groups)
     recent = recent.order_by('-date').values_list('body', flat=True).distinct()[:10]
-    data = list(recent)
+    data = {
+        'groups': u', '.join([group.name for group in groups]),
+        'messages': list(recent)
+    }
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
 

@@ -87,18 +87,29 @@ $(document).ready(function() {
         $('#message-data').remove();
         $('.message-list ul.message-data').remove();
         var list = $('<ul>').addClass('message-data');
-        $.each(data, function(i, r) {
-            var item = $('<li>').addClass('message-item').attr('title', r).text(r + ' ');
-            var link = $('<a>').addClass('copy').attr('title', "Copy message body").text('Copy');
-            link.click(function(e) {
-                e.preventDefault();
-                var msg = $(this).closest('.message-item').attr('title');
-                $('#id_body').val(msg);
-                $('#id_body').keyup();
+        var groups = data.groups;
+        $('.message-list .groups').remove();
+        if (groups) {            
+            $('.message-list').append($('<p>').addClass('groups').text('Sent to ' + groups));
+        }
+        var messages = data.messages;
+        if (messages.length) {
+            $.each(messages, function(i, r) {
+                var item = $('<li>').addClass('message-item').attr('title', r).text(r + ' ');
+                var link = $('<a>').addClass('copy').attr('title', "Copy message body").text('Copy');
+                link.click(function(e) {
+                    e.preventDefault();
+                    var msg = $(this).closest('.message-item').attr('title');
+                    $('#id_body').val(msg);
+                    $('#id_body').keyup();
+                });
+                item.append(link);
+                list.append(item);
             });
-            item.append(link);
+        } else {
+            var item = $('<li>').addClass('message-item').text('No recent messages');
             list.append(item);
-        });
+        }
         $('.message-list').append(list);
     }
 
