@@ -290,3 +290,19 @@ def commit_locale_changes():
         run('sudo -H -u %s git add afrims/locale' % env.sudo_user)
         run('sudo -H -u %s git commit -m "updating translation"' % env.sudo_user)
     local('git pull ssh://%s%s' % (env.host, env.code_root))
+
+
+def upload_supervisor_conf():
+    """Upload and link Supervisor configuration from the template."""
+    require('environment', provided_by=('staging', 'production'))
+    template = os.path.join(os.path.dirname(__file__), 'services', env.environment, 'supervisor', 'supervisor.conf')
+    destination = os.path.join(env.home, 'supervisor.conf')
+    files.upload_template(template, destination, context=env, use_sudo=True)
+    enabled = u'/etc/supervisor/conf.d/%(project)s.conf' % env
+    sudo('mv -f %s %s' % (destination, enabled), user=env.sudo_user)
+    _supervisor_command('update')
+
+
+def _supervisor_command(command):
+    require('hosts', provided_by=('staging', 'production'))
+    sudo('supervisorctl %s' % command, user=env.sudo_user)
