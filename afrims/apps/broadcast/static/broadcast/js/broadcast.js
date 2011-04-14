@@ -3,7 +3,7 @@
  */
 $(document).ready(function() {
     $('.datetimepicker').datetimepicker();
-    $('.multiselect').multiselect({header: false});
+    $('.multiselect').multiselect({header: false, selectedList: 3});
     
     var span1 = $('<span>').attr('id', 'count').text(0);
     var span2 = $('<span>').text(' characters remaining');
