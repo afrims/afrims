@@ -50,7 +50,7 @@ def setup_dirs():
 
 def staging():
     """ use staging environment on remote host"""
-    env.code_branch = 'feature/message-templates'
+    env.code_branch = 'develop'
     env.sudo_user = 'afrims'
     env.environment = 'staging'
     env.hosts = ['173.203.221.48']
