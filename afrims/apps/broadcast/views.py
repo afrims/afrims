@@ -3,6 +3,7 @@ import datetime
 
 from django.db import transaction
 from django.core.urlresolvers import reverse
+from django.conf import settings
 from django.template.context import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponseRedirect, HttpResponse
@@ -261,6 +262,11 @@ def last_messages(request):
     )
     if groups:
         recent = recent.filter(groups__in=groups)
+    confirmation_group = settings.DEFAULT_CONFIRMATIONS_GROUP_NAME
+    if not (groups and confirmation_group in [g.name for g in groups]):
+        # Don't include messages to the confirmation group unless
+        # explicitly included since it will include all the forwarded confirmations
+        recent = recent.exclude(groups__name=confirmation_group)
     recent = recent.order_by('-date').values_list('body', flat=True).distinct()[:10]
     data = {
         'groups': u', '.join([group.name for group in groups]),
