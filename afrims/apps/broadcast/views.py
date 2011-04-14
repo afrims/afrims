@@ -65,7 +65,7 @@ def delete_broadcast(request, broadcast_id):
 @login_required
 def schedule(request):
     broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True)
-    broadcasts = broadcasts.annotate(recipients=Count('groups__contacts'))
+    broadcasts = broadcasts.annotate(recipients=Count('groups__contacts', distinct=True))
     context = {
         'broadcasts': broadcasts.order_by('date'),
     }
