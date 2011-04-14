@@ -6,6 +6,7 @@ from django.utils.dates import MONTHS
 
 from afrims.apps.broadcast.models import Broadcast, ForwardingRule
 from afrims.apps.broadcast.validators import validate_keyword
+from afrims.apps.groups.models import Group
 
 
 class BroadcastForm(forms.ModelForm):
@@ -98,4 +99,8 @@ class ReportForm(forms.Form):
     report_year = forms.IntegerField(label='Report Year', required=False,
         min_value=1970, max_value=datetime.date.today().year
     )
+
+
+class RecentMessageForm(forms.Form):
+    groups = forms.ModelMultipleChoiceField(queryset=Group.objects.all())
 

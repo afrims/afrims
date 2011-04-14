@@ -14,7 +14,7 @@ from django.utils import simplejson as json
 
 from rapidsms.contrib.messagelog.models import Message
 
-from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm, ReportForm
+from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm, ReportForm, RecentMessageForm
 from afrims.apps.broadcast.models import Broadcast, BroadcastMessage, ForwardingRule
 from afrims.apps.reminders.models import SentNotification
 
@@ -246,6 +246,26 @@ def report_graph_data(request):
         ).count()
         row = [end_date.isoformat(), incoming_count, outgoing_count]
         data.append(row)
+    return HttpResponse(json.dumps(data), mimetype='application/json')
+
+
+@login_required
+def last_messages(request):
+    groups = []
+    if request.GET:
+        form = RecentMessageForm(request.GET)
+        if form.is_valid():
+            groups = form.cleaned_data.get('groups', [])
+    recent = Broadcast.objects.exclude(
+        Q(schedule_frequency__isnull=True) | Q(forward__isnull=False)
+    )
+    if groups:
+        recent = recent.filter(groups__in=groups)
+    recent = recent.order_by('-date').values_list('body', flat=True).distinct()[:10]
+    data = {
+        'groups': u', '.join([group.name for group in groups]),
+        'messages': list(recent)
+    }
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
 
