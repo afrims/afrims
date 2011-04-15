@@ -146,9 +146,12 @@ def update_services():
     rsync_project(remote_dir=remote_dir, local_dir="services/", delete=True)
     sudo("rsync -av --delete %s %s" %
          (remote_dir, _join(env.home, 'services')), user=env.sudo_user)
-    # copy the upstart script to /etc/init
-    run("sudo cp %s /etc/init" % _join(env.home, 'services', env.environment,
-                                       'upstart', 'afrims-router.conf'))
+    if env.environment == 'staging':
+        upload_supervisor_conf()
+    else:
+        # copy the upstart script to /etc/init
+        run("sudo cp %s /etc/init" % _join(env.home, 'services', env.environment,
+                                       'upstart', 'afrims-router.conf'))   
     apache_reload()
     router_start()
     netstat_plnt()
@@ -182,7 +185,7 @@ def router_start():
     """ start router on remote host """
     if env.environment == 'staging':
         require('root', provided_by=('staging', 'production'))
-        run('sudo start afrims-router')
+        _supervisor_command('start router')
     else:
         for i,j in enumerate(env.settings):
             require('root', provided_by=('staging', 'production'))
@@ -193,7 +196,7 @@ def router_stop():
     """ stop router on remote host """
     if env.environment == 'staging':
         require('root', provided_by=('staging', 'production'))
-        run('sudo stop afrims-router')
+        _supervisor_command('stop router')
     else:
         for i,j in enumerate(env.settings):
             require('root', provided_by=('staging', 'production'))
@@ -219,7 +222,6 @@ def servers_stop():
         run('sudo stop afrims')
 
 
-
 def migrate():
     """ run south migration on remote environment """
     require('project_root', provided_by=('production', 'staging'))
@@ -232,6 +234,7 @@ def migrate():
             with cd(env.project_root):
                 run('%s/bin/python manage.py syncdb --noinput --settings=%s' % (env.virtualenv_root,i))
                 run('%s/bin/python manage.py migrate --noinput --settings=%s' % (env.virtualenv_root,i))
+
 
 def collectstatic():
     """ run collectstatic on remote environment """
@@ -290,3 +293,19 @@ def commit_locale_changes():
         run('sudo -H -u %s git add afrims/locale' % env.sudo_user)
         run('sudo -H -u %s git commit -m "updating translation"' % env.sudo_user)
     local('git pull ssh://%s%s' % (env.host, env.code_root))
+
+
+def upload_supervisor_conf():
+    """Upload and link Supervisor configuration from the template."""
+    require('environment', provided_by=('staging', 'production'))
+    template = os.path.join(os.path.dirname(__file__), 'services', env.environment, 'supervisor', 'supervisor.conf')
+    destination = '/var/tmp/supervisor.conf'
+    files.upload_template(template, destination, context=env)
+    enabled = u'/etc/supervisor/conf.d/%(project)s.conf' % env
+    run('sudo mv -f %s %s' % (destination, enabled))
+    _supervisor_command('update')
+
+
+def _supervisor_command(command):
+    require('hosts', provided_by=('staging', 'production'))
+    run('sudo supervisorctl %s' % command)
