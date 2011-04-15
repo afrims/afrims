@@ -21,6 +21,14 @@ INSTALLED_BACKENDS = {
         'host': '173.203.221.48', 'port': '8081',
         'config': {'encoding': 'UTF-8'},
     },
+    "mach" : {
+        "ENGINE":  "rapidsms.backends.http",
+        "host": "0.0.0.0",
+        "port": 9090,
+        "gateway_url" : "http://gw1.promessaging.com/sms.php",
+        "params_outgoing": "user=my_username&snr=%2B&password=my_password&id=%(phone_number)s&text=%(message)s",
+        "params_incoming": "snr=%(phone_number)s&msg=%(message)s"
+    },
 }
 
 DATABASES = {
@@ -36,7 +44,7 @@ DATABASES = {
 
 #The default backend to be used when creating new patient contacts
 #on POST submission of patient data from their server
-DEFAULT_BACKEND_NAME = "txtnation"
+DEFAULT_BACKEND_NAME = "mach"
 
 DEBUG = True
 
