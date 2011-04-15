@@ -308,4 +308,4 @@ def upload_supervisor_conf():
 
 def _supervisor_command(command):
     require('hosts', provided_by=('staging', 'production'))
-    sudo('supervisorctl %s' % command)
+    run('sudo supervisorctl %s' % command)
