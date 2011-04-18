@@ -104,8 +104,7 @@ def deploy():
             utils.abort('Production deployment aborted.')
     with settings(warn_only=True):
         router_stop()
-        if env.environment == 'production':
-            servers_stop()
+        servers_stop()
     fix_locale_perms()
     with cd(env.code_root):
         sudo('git pull', user=env.sudo_user)
@@ -114,8 +113,7 @@ def deploy():
     collectstatic()
     touch()
     router_start()
-    if env.environment == 'production':
-        servers_start()
+    servers_start()
 
 
 def update_requirements():
@@ -183,8 +181,8 @@ def netstat_plnt():
 
 def router_start():  
     """ start router on remote host """
+    require('root', provided_by=('staging', 'production'))
     if env.environment == 'staging':
-        require('root', provided_by=('staging', 'production'))
         _supervisor_command('start router')
     else:
         for i,j in enumerate(env.settings):
@@ -194,13 +192,14 @@ def router_start():
 
 def router_stop():  
     """ stop router on remote host """
+    require('root', provided_by=('staging', 'production'))
     if env.environment == 'staging':
-        require('root', provided_by=('staging', 'production'))
         _supervisor_command('stop router')
     else:
         for i,j in enumerate(env.settings):
             require('root', provided_by=('staging', 'production'))
             run('sudo stop afrims-router-%s' % env.settings_files[i])
+
 
 def servers_start():
     ''' Start the gunicorn servers '''
@@ -209,7 +208,7 @@ def servers_start():
         for i in env.settings_files:
             run('sudo start afrims-%s' % i)
     else:
-        run('sudo start afrims')
+        _supervisor_command('start server')
 
 
 def servers_stop():
@@ -219,7 +218,7 @@ def servers_stop():
         for i in env.settings_files:
             run('sudo stop afrims-%s' % i)
     else:
-        run('sudo stop afrims')
+        _supervisor_command('stop server')
 
 
 def migrate():
