@@ -310,7 +310,7 @@ def upload_supervisor_conf():
     require('environment', provided_by=('staging', 'production'))
     template = os.path.join(os.path.dirname(__file__), 'services', env.environment, 'supervisor', 'supervisor.conf')
     destination = '/var/tmp/supervisor.conf'
-    if env.environment == 'staging':
+    if env.environment == 'production':
         env.name_0 = env.settings_files[0]
         env.settings_0 = env.settings[0]
         env.name_1 = env.settings_files[1]
