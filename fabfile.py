@@ -299,6 +299,11 @@ def upload_supervisor_conf():
     require('environment', provided_by=('staging', 'production'))
     template = os.path.join(os.path.dirname(__file__), 'services', env.environment, 'supervisor', 'supervisor.conf')
     destination = '/var/tmp/supervisor.conf'
+    if env.environment == 'staging':
+        env.name_0 = env.settings_files[0]
+        env.settings_0 = env.settings[0]
+        env.name_1 = env.settings_files[1]
+        env.settings_1 = env.settings[1]
     files.upload_template(template, destination, context=env)
     enabled = u'/etc/supervisor/conf.d/%(project)s.conf' % env
     run('sudo mv -f %s %s' % (destination, enabled))
