@@ -12,3 +12,4 @@ django-sorting==0.1
 psycopg2==2.4
 django-staticfiles==1.0
 django-rosetta==0.6.0
+-e git+https://github.com/dimagi/rapidsms-mach-backend.git#egg=rmach

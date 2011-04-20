@@ -21,13 +21,13 @@ INSTALLED_BACKENDS = {
         'host': '173.203.221.48', 'port': '8081',
         'config': {'encoding': 'UTF-8'},
     },
-    "mach" : {
-        "ENGINE":  "rapidsms.backends.http",
-        "host": "0.0.0.0",
-        "port": 9090,
-        "gateway_url" : "http://gw1.promessaging.com/sms.php",
-        "params_outgoing": "user=my_username&snr=%2B&password=my_password&id=%(phone_number)s&text=%(message)s",
-        "params_incoming": "snr=%(phone_number)s&msg=%(message)s"
+    "mach": {
+        "ENGINE": "rmach.backend",
+        'host': 'localhost', 'port': '9090', # used for spawned backend WSGI server
+        'config': {
+            'encoding': 'UTF-8', # optional message encoding
+            'encoding_errors': 'ignore', # optional encoding handling 
+        }
     },
 }
 
