@@ -45,6 +45,8 @@ DATABASES = {
 #The default backend to be used when creating new patient contacts
 #on POST submission of patient data from their server
 DEFAULT_BACKEND_NAME = "mach"
+# unless overridden, all outgoing messages will be sent using this backend
+PRIMARY_BACKEND = "mach"
 
 DEBUG = True
 
