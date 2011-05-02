@@ -2,6 +2,7 @@ import datetime
 import logging
 import urlparse
 
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.context import RequestContext
@@ -61,7 +62,8 @@ def receive_patient_record(request):
     try:
         parse_payload(payload)
     except Exception as e:
-        mail_admins(subject="Patient Import Failed", message=unicode(e))
+        if getattr(settings, 'NOTIFY_ON_PATIENT_IMPORT_ERROR', True):
+            mail_admins(subject="Patient Import Failed", message=unicode(e))
         return HttpResponseServerError(unicode(e))
     return HttpResponse("Data submitted succesfully.")
 

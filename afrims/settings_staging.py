@@ -57,3 +57,6 @@ LOG_SIZE = 33554432 # 2^25
 LOG_BACKUPS = 10 # number of logs to keep
 
 COUNTRY_CODE = '1'
+
+# Remove this line to restore the patient import error emails
+NOTIFY_ON_PATIENT_IMPORT_ERROR = False
