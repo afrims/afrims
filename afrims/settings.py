@@ -120,7 +120,7 @@ STATIC_ROOT = os.path.join(PROJECT_PATH, '..', 'static_files')
 # at top left for every tab
 LOGO_LEFT_URL = '%simages/trialconnect.png' % STATIC_URL
 LOGO_RIGHT_URL = '%simages/tatrc.png' % STATIC_URL
-SITE_TITLE = "RapidSMS"
+SITE_TITLE = " "
 BASE_TEMPLATE = "layout.html"
 
 # this is required for the django.contrib.sites tests to run, but also
