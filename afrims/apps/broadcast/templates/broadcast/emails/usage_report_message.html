@@ -5,7 +5,7 @@ Usage Totals
     Total Messages: {{ total_messages }}
 
 
-Fowarded Messages
+Forwarded Messages
 {% if rule_data %}{% for type, label_data in rule_data.items %}    {{ type }}
 {% for label, counts in label_data.items %}        {{ label }}: Incoming - {{ counts.0 }} Outgoing - {{ counts.1 }}
 {% endfor %}{% endfor %}{% else %}    No categorized forwarding rules.{% endif %}

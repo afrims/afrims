@@ -434,9 +434,9 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
         }
         return data
 
-    def test_fowarding_dashboard(self):
+    def test_forwarding_dashboard(self):
         """
-        Test that the fowarding rule dashboard loads properly.
+        Test that the forwarding rule dashboard loads properly.
         """
 
         response = self.client.get(self.dashboard_url)
@@ -444,7 +444,7 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
         
     def test_get_create_page(self):
         """
-        Test retriving the create fowarding rule form.
+        Test retriving the create forwarding rule form.
         """
 
         url = reverse('broadcast-forwarding-create')
@@ -453,7 +453,7 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
 
     def test_create_notification(self):
         """
-        Test creating fowarding rule via form.
+        Test creating forwarding rule via form.
         """
 
         start_count = ForwardingRule.objects.count()
@@ -466,7 +466,7 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
 
     def test_get_edit_page(self):
         """
-        Test retriving the edit fowarding rule form.
+        Test retriving the edit forwarding rule form.
         """
 
         data = self.get_valid_data()
@@ -477,7 +477,7 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
 
     def test_edit_notification(self):
         """
-        Test editing fowarding rule via form.
+        Test editing forwarding rule via form.
         """
 
         data = self.get_valid_data()
@@ -491,7 +491,7 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
 
     def test_get_delete_page(self):
         """
-        Test retriving the delete fowarding rule form.
+        Test retriving the delete forwarding rule form.
         """
 
         rule = self.create_forwarding_rule()  
@@ -501,7 +501,7 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
 
     def test_delete_notification(self):
         """
-        Test delete fowarding rule via form.
+        Test delete forwarding rule via form.
         """
 
         rule = self.create_forwarding_rule()
