@@ -45,7 +45,8 @@ def setup_dirs():
     # sudo('mkdir -p %(project_media)s' % env, user=env.sudo_user)
     # sudo('chmod a+w %(project_media)s' % env, user=env.sudo_user)
     # sudo('mkdir -p %(project_static)s' % env, user=env.sudo_user)
-    sudo('mkdir -p %(services)s' % env, user=env.sudo_user)
+    sudo('mkdir -p %(services)s/apache' % env, user=env.sudo_user)
+    sudo('mkdir -p %(services)s/supervisor' % env, user=env.sudo_user)
 
 
 def staging():
@@ -162,7 +163,7 @@ def update_requirements():
     requirements = _join(env.code_root, 'requirements')
     with cd(requirements):
         cmd = ['pip install']
-        cmd += ['-q -E %(virtualenv_root)s' % env]env.services
+        cmd += ['-q -E %(virtualenv_root)s' % env]
         cmd += ['--requirement %s' % _join(requirements, 'apps.txt')]
         sudo(' '.join(cmd), user=env.sudo_user)
 
@@ -209,16 +210,16 @@ def netstat_plnt():
     run('sudo netstat -plnt')
 
 
-def stop()
+def stop():
     """ stop server and router on remote host """
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('stop %(environment)s' % env)
+    _supervisor_command('stop %(environment)s:*' % env)
 
 
-def start()
+def start():
     """ start server and router on remote host """
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('start %(environment)s' % env)
+    _supervisor_command('start %(environment)s:*' % env)
 
 
 def router_start():  
@@ -228,7 +229,7 @@ def router_start():
 
 
 def router_stop():  
-    """ stop router on remote host """env.services
+    """ stop router on remote host """
     require('environment', provided_by=('staging', 'demo', 'production'))
     _supervisor_command('stop  %(environment)s-router' % env)
 
@@ -290,8 +291,9 @@ def setup_translation():
     run('sudo -H -u %s git config --global user.email "afrims-dev@dimagi.com"' % env.sudo_user)
 
 
-def fix_locale_perms():require('root', provided_by=('staging', 'production'))
+def fix_locale_perms():
     """ Fix the permissions on the locale directory """
+    require('root', provided_by=('staging', 'production'))
     locale_dir = '%s/afrims/locale/' % env.code_root
     run('sudo chown -R afrims %s' % locale_dir)
     run('sudo chgrp -R www-data %s' % locale_dir)
@@ -314,7 +316,7 @@ def upload_supervisor_conf():
     destination = '/var/tmp/supervisor.conf'
     files.upload_template(template, destination, context=env)
     enabled =  os.path.join(env.services, u'supervisor/%(environment)s.conf' % env)
-    run('sudo mv -f %s %s' % (destination, enabled))
+    sudo('mv -f %s %s' % (destination, enabled))
     _supervisor_command('update')
 
 
@@ -325,7 +327,7 @@ def upload_apache_conf():
     destination = '/var/tmp/apache.conf'
     files.upload_template(template, destination, context=env)
     enabled =  os.path.join(env.services, u'apache/%(environment)s.conf' % env)
-    run('sudo mv -f %s %s' % (destination, enabled))
+    sudo('mv -f %s %s' % (destination, enabled))
     apache_reload()
 
 
