@@ -1,3 +1,21 @@
+"""
+Server layout:
+    ~/services/
+        This contains two subfolders
+            /apache/
+            /supervisor/
+        which hold the configurations for these applications
+        for each environment (staging, demo, etc) running on the server.
+        Theses folders are included in the global /etc/apache2 and
+        /etc/supervisor configurations.
+
+    ~/www/
+        This folder contains the code, python environment, and logs
+        for each environment (staging, demo, etc) running on the server.
+        Each environment has its own subfolder named for its evironment
+        (i.e. ~/www/staging/logs and ~/www/demo/logs).
+"""
+
 import os, sys
 
 from fabric.api import *
