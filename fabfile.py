@@ -53,6 +53,22 @@ def staging():
     env.code_branch = 'develop'
     env.sudo_user = 'afrims'
     env.environment = 'staging'
+    env.router_port = '9090'
+    env.server_port = '9002'
+    env.server_name = 'noneset'
+    env.hosts = ['173.203.221.48']
+    env.settings = '%(project)s.localsettings' % env
+    _setup_path()
+
+
+def demo():
+    """ use demo environment on remote host"""
+    env.code_branch = 'develop'
+    env.sudo_user = 'afrims'
+    env.environment = 'demo'
+    env.router_port = '9091'
+    env.server_port = '9003'
+    env.server_name = 'demo-trialconnect.dimagi.com'
     env.hosts = ['173.203.221.48']
     env.settings = '%(project)s.localsettings' % env
     _setup_path()
