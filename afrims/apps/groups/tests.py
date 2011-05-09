@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.core.exceptions import ValidationError
@@ -72,6 +72,7 @@ class GroupViewTest(CreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.user_permissions.add(Permission.objects.get(codename='can_use_groups_tab'))
         self.client.login(username='test', password='abc')
 
     def test_editable_views(self):

@@ -159,6 +159,15 @@ class ViewsTest(RemindersCreateDataTest):
         }
         return data
 
+    def test_tab_permissions(self):
+        """
+        Test that the tab cannot be loaded without the proper Permission
+        """
+        self.user.user_permissions.remove(Permission.objects.get(codename='can_use_appointment_reminders_tab'))
+        self.user.save()
+        response = self.client.get(self.dashboard_url)
+        self.assertEqual(response.status_code, 302)
+
     def test_notification_schedule(self):
         """
         Test that the notification schedule loads properly.

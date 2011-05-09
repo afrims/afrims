@@ -5,7 +5,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil import rrule
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 
 from rapidsms.tests.harness import MockRouter, MockBackend
@@ -290,6 +290,7 @@ class BroadcastFormTest(BroadcastCreateDataTest):
 class BroadcastViewTest(BroadcastCreateDataTest):
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.user_permissions.add(Permission.objects.get(codename='can_use_send_a_message_tab'))
         self.user.save()
         self.client.login(username='test', password='abc')
 
@@ -421,6 +422,7 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
     def setUp(self):
         super(ForwardingViewsTest, self).setUp()
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.user_permissions.add(Permission.objects.get(codename='can_use_forwarding_tab'))
         self.user.save()
         self.client.login(username='test', password='abc')
         self.dashboard_url = reverse('broadcast-forwarding')
