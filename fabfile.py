@@ -85,7 +85,7 @@ def demo():
     env.code_branch = 'develop'
     env.sudo_user = 'afrims'
     env.environment = 'demo'
-    env.router_port = '9091'
+    env.router_port = '9081'
     env.server_port = '9003'
     env.server_name = 'demo-trialconnect.dimagi.com'
     env.hosts = ['173.203.221.48']
@@ -136,8 +136,8 @@ def bootstrap():
     sudo('mkdir -p %(root)s' % env, user=env.sudo_user)
     clone_repo()
     setup_dirs()
+    update_services()
     create_virtualenv()
-    deploy()
     update_requirements()
     setup_translation()
     fix_locale_perms()
