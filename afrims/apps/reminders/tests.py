@@ -146,6 +146,7 @@ class ViewsTest(RemindersCreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.user_permissions.add(Permission.objects.get(codename='can_use_appointment_reminders_tab'))
         self.user.save()
         self.client.login(username='test', password='abc')
         self.dashboard_url = reverse('reminders_dashboard')
@@ -749,6 +750,7 @@ class ManualConfirmationTest(RemindersCreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.user_permissions.add(Permission.objects.get(codename='can_use_appointment_reminders_tab'))
         self.user.save()
         self.client.login(username='test', password='abc')
         self.test_patient = self.create_patient()
