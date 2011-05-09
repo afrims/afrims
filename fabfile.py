@@ -74,7 +74,7 @@ def staging():
     env.environment = 'staging'
     env.router_port = '9090'
     env.server_port = '9002'
-    env.server_name = 'noneset'
+    env.server_name = '173.203.221.48'
     env.hosts = ['173.203.221.48']
     env.settings = '%(project)s.localsettings' % env
     _setup_path()
@@ -334,7 +334,10 @@ def upload_supervisor_conf():
     destination = '/var/tmp/supervisor.conf'
     files.upload_template(template, destination, context=env)
     enabled =  os.path.join(env.services, u'supervisor/%(environment)s.conf' % env)
-    sudo('mv -f %s %s' % (destination, enabled))
+    run('sudo chown -R afrims %s' % destination)
+    run('sudo chgrp -R www-data %s' % destination)
+    run('sudo chmod -R g+w %s' % destination)
+    run('sudo -u %s mv -f %s %s' % (env.sudo_user, destination, enabled))
     _supervisor_command('update')
 
 
@@ -345,7 +348,10 @@ def upload_apache_conf():
     destination = '/var/tmp/apache.conf'
     files.upload_template(template, destination, context=env)
     enabled =  os.path.join(env.services, u'apache/%(environment)s.conf' % env)
-    sudo('mv -f %s %s' % (destination, enabled))
+    run('sudo chown -R afrims %s' % destination)
+    run('sudo chgrp -R www-data %s' % destination)
+    run('sudo chmod -R g+w %s' % destination)
+    run('sudo -u %s mv -f %s %s' % (env.sudo_user, destination, enabled))
     apache_reload()
 
 
