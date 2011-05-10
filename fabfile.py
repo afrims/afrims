@@ -268,7 +268,7 @@ def migrate():
     """ run south migration on remote environment """
     require('project_root', provided_by=('production', 'demo', 'staging'))
     with cd(env.project_root):
-        run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % env)
+        run('%(virtualenv_root)s/bin/python manage.py syncdb --all --noinput --settings=%(settings)s' % env)
         run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
 
 
