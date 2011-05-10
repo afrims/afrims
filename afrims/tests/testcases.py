@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from django.test import TestCase
 from django.db import DEFAULT_DB_ALIAS
 from django.core.management import call_command
+from django.contrib.auth.models import User, Permission
 
 from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
@@ -78,6 +79,42 @@ class FlushTestScript(TestScript):
         call_command('flush', verbosity=0, interactive=False,
                      database=DEFAULT_DB_ALIAS)
 
+
+class TabPermissionsTest(TestCase):
+    """
+    Some common code for testing tab permissions.
+    """
+    def setUp(self):
+        super(TabPermissionsTest, self).setUp()
+        self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.client.login(username='test', password='abc')
+
+    def check_with_perms(self, url, permission_name, status=200, method='get'):
+        """ Test that when user has the specified permission, the
+            request gets the specified status """
+        perm = Permission.objects.get(codename=permission_name)
+        self.user.user_permissions.add(perm)
+        self.user.save()
+        if method == 'get':
+            response = self.client.get(url)
+        else:
+            response = self.client.post(url)
+        self.assertEquals(response.status_code, status)
+        if status == 302:
+            self.assertFalse('/access_denied/' in response['Location'])
+
+    def check_without_perms(self, url, permission_name, method='get'):
+        """ Test that when user does not have the specified permission,
+            the request gets redirected to the Access denied page """
+        perm = Permission.objects.get(codename=permission_name)
+        self.user.user_permissions.remove(perm)
+        self.user.save()
+        if method == 'get':
+            response = self.client.get(url)
+        else:
+            response = self.client.post(url)
+        self.assertEquals(response.status_code, 302)
+        self.assertTrue('/access_denied/' in response['Location'])
 
 class SettingDoesNotExist:
     pass

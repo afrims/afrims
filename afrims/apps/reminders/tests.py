@@ -22,7 +22,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from afrims.apps.groups.models import Group
 from afrims.apps.reminders import models as reminders
 from afrims.tests.testcases import (CreateDataTest, FlushTestScript,
-                                    patch_settings)
+                                    patch_settings, TabPermissionsTest)
 from afrims.apps.reminders.app import RemindersApp
 from afrims.apps.reminders.importer import parse_payload, parse_patient
 
@@ -142,11 +142,22 @@ class RemindersCreateDataTest(CreateDataTest):
         })
 
 
+class RemindersTabPermissionsTest(TabPermissionsTest):
+    """ Test tab permissions for reminders tabs """
+
+    def test_reminder_tab_without_perms(self):
+        """
+        Test that the tab cannot be loaded without the proper Permission
+        """
+        self.check_without_perms(reverse('reminders_dashboard'),
+                                 'can_use_appointment_reminders_tab')
+
 class ViewsTest(RemindersCreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
-        self.user.user_permissions.add(Permission.objects.get(codename='can_use_appointment_reminders_tab'))
+        perm = Permission.objects.get(codename='can_use_appointment_reminders_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
         self.dashboard_url = reverse('reminders_dashboard')
@@ -158,15 +169,6 @@ class ViewsTest(RemindersCreateDataTest):
             'recipients': random.choice(reminders.Notification.RECIPIENTS_CHOICES)[0],
         }
         return data
-
-    def test_tab_permissions(self):
-        """
-        Test that the tab cannot be loaded without the proper Permission
-        """
-        self.user.user_permissions.remove(Permission.objects.get(codename='can_use_appointment_reminders_tab'))
-        self.user.save()
-        response = self.client.get(self.dashboard_url)
-        self.assertEqual(response.status_code, 302)
 
     def test_notification_schedule(self):
         """
@@ -759,7 +761,8 @@ class ManualConfirmationTest(RemindersCreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
-        self.user.user_permissions.add(Permission.objects.get(codename='can_use_appointment_reminders_tab'))
+        perm = Permission.objects.get(codename='can_use_appointment_reminders_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
         self.test_patient = self.create_patient()
@@ -788,4 +791,3 @@ class ManualConfirmationTest(RemindersCreateDataTest):
         data = {'next': next_url}
         response = self.client.post(self.url, data)
         self.assertRedirects(response, next_url)
-

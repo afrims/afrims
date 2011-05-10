@@ -21,7 +21,7 @@ class Group(models.Model):
             ("can_use_forwarding_tab", "Can use Forwarding tab"),
             ("can_use_groups_tab", "Can use Groups tab"),
             ("can_use_people_tab", "Can use People tab"),
-            ("can_use_settings_tab", "Can use Settings tab"),
+            ("can_use_settings_tab", "Can use Settings tab"), # not implemented
         )
 
     def __unicode__(self):
