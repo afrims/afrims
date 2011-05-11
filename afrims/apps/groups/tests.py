@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.core.exceptions import ValidationError
@@ -7,7 +7,8 @@ from rapidsms.models import Contact, Backend, Connection
 from rapidsms.tests.harness import MockRouter
 from rapidsms.messages.incoming import IncomingMessage
 
-from afrims.tests.testcases import CreateDataTest, patch_settings
+from afrims.tests.testcases import CreateDataTest, patch_settings, \
+                                   TabPermissionsTest
 
 from afrims.apps.groups.models import Group
 from afrims.apps.groups import forms as group_forms
@@ -37,6 +38,21 @@ class GroupCreateDataTest(CreateDataTest):
         data.update(initial_data)
         return data
 
+
+class GroupTabsTest(TabPermissionsTest):
+    """ Test people and group tab permissions"""
+
+    def test_group_view_no_permissions(self):
+        """ Test group view tab without permission redirects """
+        self.check_without_perms(reverse('list-groups'), 'can_use_groups_tab')
+
+    def test_people_tab_with_perms(self):
+        """ Test people view tab with permission works """
+        self.check_with_perms(reverse('list-contacts'), 'can_use_people_tab')
+
+    def test_people_tab_without_perms(self):
+        """ Test people view tab without permission redirects """
+        self.check_without_perms(reverse('list-contacts'), 'can_use_people_tab')
 
 class GroupFormTest(GroupCreateDataTest):
 
@@ -72,6 +88,8 @@ class GroupViewTest(CreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_groups_tab')
+        self.user.user_permissions.add(perm)
         self.client.login(username='test', password='abc')
 
     def test_editable_views(self):

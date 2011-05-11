@@ -8,7 +8,7 @@ from django.template.context import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import simplejson as json
@@ -21,6 +21,7 @@ from afrims.apps.reminders.models import SentNotification
 
 
 @login_required
+@permission_required('groups.can_use_send_a_message_tab', login_url='/access_denied/')
 @transaction.commit_on_success
 def send_message(request, broadcast_id=None):
     if broadcast_id:
@@ -49,6 +50,7 @@ def send_message(request, broadcast_id=None):
 
 
 @login_required
+@permission_required('groups.can_use_send_a_message_tab', login_url='/access_denied/')
 @transaction.commit_on_success
 def delete_broadcast(request, broadcast_id):
     broadcast = get_object_or_404(Broadcast, pk=broadcast_id)
@@ -64,6 +66,7 @@ def delete_broadcast(request, broadcast_id):
 
 
 @login_required
+@permission_required('groups.can_use_send_a_message_tab', login_url='/access_denied/')
 def schedule(request):
     broadcasts = Broadcast.objects.exclude(schedule_frequency__isnull=True)
     broadcasts = broadcasts.annotate(recipients=Count('groups__contacts', distinct=True))
@@ -75,6 +78,7 @@ def schedule(request):
 
 
 @login_required
+@permission_required('groups.can_use_send_a_message_tab', login_url='/access_denied/')
 def list_messages(request):
     messages = BroadcastMessage.objects.select_related()
     context = {
@@ -85,6 +89,7 @@ def list_messages(request):
 
 
 @login_required
+@permission_required('groups.can_use_forwarding_tab', login_url='/access_denied/')
 def forwarding(request):
     context = {
         'rules': ForwardingRule.objects.all(),
@@ -94,6 +99,7 @@ def forwarding(request):
 
 
 @login_required
+@permission_required('groups.can_use_forwarding_tab', login_url='/access_denied/')
 def create_edit_rule(request, rule_id=None):
     rule = None
     if rule_id:
@@ -115,6 +121,7 @@ def create_edit_rule(request, rule_id=None):
 
 
 @login_required
+@permission_required('groups.can_use_forwarding_tab', login_url='/access_denied/')
 def delete_rule(request, rule_id):
     rule = get_object_or_404(ForwardingRule, pk=rule_id)
     if request.method == 'POST':
@@ -126,6 +133,7 @@ def delete_rule(request, rule_id):
                               RequestContext(request))
 
 @login_required
+@permission_required('groups.can_use_dashboard_tab',login_url='/access_denied/')
 def dashboard(request):
     today = datetime.date.today()
     report_date = today
@@ -205,6 +213,7 @@ def usage_report_context(start_date, end_date):
 
 
 @login_required
+@permission_required('groups.can_use_dashboard_tab', login_url='/access_denied/')
 def report_graph_data(request):
     today = datetime.date.today()
     report_date = today

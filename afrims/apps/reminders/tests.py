@@ -22,7 +22,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from afrims.apps.groups.models import Group
 from afrims.apps.reminders import models as reminders
 from afrims.tests.testcases import (CreateDataTest, FlushTestScript,
-                                    patch_settings)
+                                    patch_settings, TabPermissionsTest)
 from afrims.apps.reminders.app import RemindersApp
 from afrims.apps.reminders.importer import parse_payload, parse_patient
 
@@ -142,10 +142,22 @@ class RemindersCreateDataTest(CreateDataTest):
         })
 
 
+class RemindersTabPermissionsTest(TabPermissionsTest):
+    """ Test tab permissions for reminders tabs """
+
+    def test_reminder_tab_without_perms(self):
+        """
+        Test that the tab cannot be loaded without the proper Permission
+        """
+        self.check_without_perms(reverse('reminders_dashboard'),
+                                 'can_use_appointment_reminders_tab')
+
 class ViewsTest(RemindersCreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_appointment_reminders_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
         self.dashboard_url = reverse('reminders_dashboard')
@@ -749,6 +761,8 @@ class ManualConfirmationTest(RemindersCreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_appointment_reminders_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
         self.test_patient = self.create_patient()
@@ -777,4 +791,3 @@ class ManualConfirmationTest(RemindersCreateDataTest):
         data = {'next': next_url}
         response = self.client.post(self.url, data)
         self.assertRedirects(response, next_url)
-

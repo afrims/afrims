@@ -5,7 +5,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil import rrule
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 
 from rapidsms.tests.harness import MockRouter, MockBackend
@@ -13,12 +13,48 @@ from rapidsms.models import Connection, Contact, Backend
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.messages.incoming import IncomingMessage
 
-from afrims.tests.testcases import CreateDataTest, FlushTestScript
+from afrims.tests.testcases import CreateDataTest, FlushTestScript, \
+                                   TabPermissionsTest
 from afrims.apps.broadcast.models import Broadcast, DateAttribute,\
                                          ForwardingRule
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 from afrims.apps.broadcast.forms import BroadcastForm
 
+
+class DashboardTest(TabPermissionsTest):
+    """ Test class for broadcast tab permissions """
+
+    def test_dashboard_with_perms(self):
+        """ Test that we can access the dashboard tab if we have permission """
+        self.check_with_perms(reverse('rapidsms-dashboard'),
+                              'can_use_dashboard_tab')
+
+    def test_dashboard_without_perms(self):
+        """ Test that we cannot access the dashboard tab if we
+            don't have permission """
+        self.check_without_perms(reverse('rapidsms-dashboard'),
+                                 'can_use_dashboard_tab')
+
+    def test_send_tab_no_perms(self):
+        """ Test that accessing the Send a Message tab without
+            permission redirects """
+        self.check_without_perms(reverse('broadcast-messages'),
+                                 'can_use_send_a_message_tab')
+
+    def test_send_no_perms(self):
+        """ Test that trying to send a message without tab permission fails """
+        self.check_without_perms(reverse('edit-broadcast',args=(1,)),
+                                 'can_use_send_a_message_tab', method='post')
+
+    def test_schedule_no_perms(self):
+        """ Test that scheduling a broadcast without perms fails """
+        self.check_without_perms(reverse('broadcast-schedule'),
+                                 'can_use_send_a_message_tab')
+
+    def test_forwarding_tab_no_perms(self):
+        """ Test that accessing the Forwarding tab without permission fails """
+        self.check_without_perms(reverse('broadcast-forwarding'),
+                                 'can_use_forwarding_tab')
 
 class BroadcastCreateDataTest(CreateDataTest):
     """ Base test case that provides helper functions to create data """
@@ -290,8 +326,27 @@ class BroadcastFormTest(BroadcastCreateDataTest):
 class BroadcastViewTest(BroadcastCreateDataTest):
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_send_a_message_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
+
+    def test_delete_no_perms(self):
+        """ Test that trying to delete a broadcast without tab permission
+            fails """
+        perm = Permission.objects.get(codename='can_use_send_a_message_tab')
+        self.user.user_permissions.remove(perm)
+        self.user.save()
+        contact = self.create_contact()
+        group = self.create_group()
+        contact.groups.add(group)
+        before = self.create_broadcast(when='future',
+                                       data={'groups': [group.pk]})
+        url = reverse('delete-broadcast', args=[before.pk])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302,
+                         'should redirect on success')
+        self.assertTrue('/access_denied/' in response['Location'])
 
     def test_delete(self):
         """ Make sure broadcasts are disabled on 'delete' """
@@ -306,7 +361,6 @@ class BroadcastViewTest(BroadcastCreateDataTest):
                          'should redirect on success')
         after = Broadcast.objects.get(pk=before.pk)
         self.assertTrue(after.schedule_frequency is None)
-
 
 class BroadcastForwardingTest(BroadcastCreateDataTest):
 
@@ -421,6 +475,8 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
     def setUp(self):
         super(ForwardingViewsTest, self).setUp()
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_forwarding_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
         self.dashboard_url = reverse('broadcast-forwarding')

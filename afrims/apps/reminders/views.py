@@ -13,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import mail_admins
 
 from rapidsms.models import Contact, Connection, Backend
@@ -27,6 +27,7 @@ logger = logging.getLogger('afrims.apps.reminder')
 
 
 @login_required
+@permission_required('groups.can_use_appointment_reminders_tab',login_url='/access_denied/')
 def dashboard(request):
     today = datetime.date.today()
     appt_date = today + datetime.timedelta(weeks=1)
@@ -102,6 +103,7 @@ def delete_notification(request, notification_id):
 
 
 @login_required
+@permission_required('groups.can_use_appointment_reminders_tab',login_url='/access_denied/')
 def report(request):
     """
     Weekly appointment reminder report.
