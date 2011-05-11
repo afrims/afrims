@@ -17,7 +17,8 @@
                 <th>{% anchor date "Scheduled Date" %}</th>
                 <th>{% anchor schedule_frequency Frequency %}</th>
                 <th>{% anchor body Message %}</th>
-                <th>Groups</th>
+                <th>Groups (Recipient Count)</th>
+                <th>Actions</th>
             </tr>
         </thead>
         {% for broadcast in broadcasts %}
@@ -30,8 +31,8 @@
             <td><span title='{{ broadcast.body }}'>{{ broadcast.body|truncatewords:2 }}</span></td>
             <td>{{ broadcast.groups.all|join:", "|truncatewords:3 }} ({{ broadcast.recipients }})</td>
             <td class='actions'>
-                <a class='button' title='Edit broadcast #{{ broadcast.pk }}' href='{% url edit-broadcast broadcast.pk %}'><span class='ui-icon ui-icon-pencil' /></a>
-                <a class='button' title='Delete broadcast #{{ broadcast.pk }}' href='{% url delete-broadcast broadcast.pk %}'><span class='ui-icon ui-icon-closethick' /></a>    
+                <a class='button' title='Edit broadcast #{{ broadcast.pk }}' href='{% url edit-broadcast broadcast.pk %}'><span class='ui-icon ui-icon-pencil'></span></a>
+                <a class='button' title='Delete broadcast #{{ broadcast.pk }}' href='{% url delete-broadcast broadcast.pk %}'><span class='ui-icon ui-icon-closethick'></span></a>    
             </td>
         </tr>
         {% empty %}
@@ -40,11 +41,13 @@
         </tr>
         {% endfor %}
         <tfoot>
+            {% if paginator.count > paginator.per_page %}
             <tr>
                 <td colspan='6'>
                     {% paginate %}
                 </td>
             </tr>
+            {% endif %}
         </tfoot>
     </table>
 </div>

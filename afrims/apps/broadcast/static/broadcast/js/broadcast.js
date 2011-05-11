@@ -2,8 +2,9 @@
  * Javascript form functionality for afrims.apps.broadcast RapidSMS app
  */
 $(document).ready(function() {
+    jQuery.ajaxSettings.traditional = true;
     $('.datetimepicker').datetimepicker();
-    $('.multiselect').multiselect({header: false});
+    $('.multiselect').multiselect({header: false, selectedList: 3});
     
     var span1 = $('<span>').attr('id', 'count').text(0);
     var span2 = $('<span>').text(' characters remaining');
@@ -64,5 +65,54 @@ $(document).ready(function() {
     $('#id_schedule_frequency').change(function() {
         refresh_broadcast_form();
     });
+
+    var messageUrl = $('#message-data').attr('href');
+    function queryMessages() {
+        var now = new Date().getTime();
+        var groups = getSelected();
+        $.getJSON(messageUrl, {groups: groups, timestamp: now}, showMessages);
+    }
+
+    function getSelected() {
+        return $('#id_groups').multiselect('getChecked').map(function(){
+            return this.value;	
+        }).get();
+    }
+
+    queryMessages();
+    
+    $('#id_groups').bind("multiselectclick", queryMessages);
+
+    function showMessages(data) {
+        $('#message-data').remove();
+        $('.message-list ul.message-data').remove();
+        var list = $('<ul>').addClass('message-data');
+        var groups = data.groups;
+        $('.message-list .groups').remove();
+        if (groups) {            
+            $('.message-list').append($('<p>').addClass('groups').text('Sent to ' + groups));
+        }
+        var messages = data.messages;
+        if (messages.length) {
+            $.each(messages, function(i, r) {
+                var item = $('<li>').addClass('message-item').attr('title', r).text(r + ' ');
+                var link = $('<a>').addClass('copy').attr('title', "Copy message body").text('Copy');
+                link.click(function(e) {
+                    e.preventDefault();
+                    var msg = $(this).closest('.message-item').attr('title');
+                    $('#id_body').val(msg);
+                    $('#id_body').keyup();
+                });
+                item.append(link);
+                list.append(item);
+            });
+        } else {
+            var item = $('<li>').addClass('message-item').text('No recent messages');
+            list.append(item);
+        }
+        $('.message-list').append(list);
+    }
+
+    $('#tabs li.app-sendamessage').addClass('active');
 });
 

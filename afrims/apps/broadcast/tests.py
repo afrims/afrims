@@ -49,11 +49,12 @@ class BroadcastCreateDataTest(CreateDataTest):
             broadcast.months = months
         return broadcast
 
-    def create_forwarding_rule(self, data={}):
+    def create_forwarding_rule(self, data=None):
+        data = data or {}
         defaults = {
-            'keyword': 'forward-test',
-            'source': self.create_group(data={'name': 'source group'}),
-            'dest': self.create_group(data={'name': 'dest group'}),
+            'keyword': self.random_string(length=25),
+            'source': self.create_group(data={'name': self.random_string(length=25)}),
+            'dest': self.create_group(data={'name': self.random_string(length=25)}),
             'message': self.random_string(length=25),
         }
         defaults.update(data)
@@ -370,6 +371,20 @@ class BroadcastForwardingTest(BroadcastCreateDataTest):
         self.assertEqual(msg.responses[0].text,
                          self.app.thank_you)
 
+    def test_unicode_broadcast_body(self):
+        """ Make sure unicode strings can be broadcasted """
+        text = u'abc ' + self.random_unicode_string(2)
+        msg = self._send(self.source_conn, text)
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(Broadcast.objects.count(), 1)
+
+    def test_rule_tracking(self):
+        """Test the broadcast is correctly associated with the rule via FK."""
+        msg = self._send(self.source_conn, 'abc my-message')
+        self.assertEqual(Broadcast.objects.count(), 1)
+        bc = Broadcast.objects.get()
+        self.assertEqual(bc.forward, self.rule)
+
 
 class BroadcastScriptedTest(FlushTestScript, BroadcastCreateDataTest):
 
@@ -399,4 +414,101 @@ class BroadcastScriptedTest(FlushTestScript, BroadcastCreateDataTest):
         message = contact.broadcast_messages.filter(status='sent')[0]
         self.assertTrue(message.date_sent is not None)
         self.stopRouter()
+
+
+class ForwardingViewsTest(BroadcastCreateDataTest):
+
+    def setUp(self):
+        super(ForwardingViewsTest, self).setUp()
+        self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        self.user.save()
+        self.client.login(username='test', password='abc')
+        self.dashboard_url = reverse('broadcast-forwarding')
+
+    def get_valid_data(self):
+        data = {
+            'keyword': self.random_string(length=25),
+            'source': self.create_group(data={'name': self.random_string(length=25)}).pk,
+            'dest': self.create_group(data={'name': self.random_string(length=25)}).pk,
+            'message': self.random_string(length=25),
+        }
+        return data
+
+    def test_forwarding_dashboard(self):
+        """
+        Test that the forwarding rule dashboard loads properly.
+        """
+
+        response = self.client.get(self.dashboard_url)
+        self.assertEqual(response.status_code, 200)
+        
+    def test_get_create_page(self):
+        """
+        Test retriving the create forwarding rule form.
+        """
+
+        url = reverse('broadcast-forwarding-create')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_notification(self):
+        """
+        Test creating forwarding rule via form.
+        """
+
+        start_count = ForwardingRule.objects.count()
+        url = reverse('broadcast-forwarding-create')
+        data = self.get_valid_data()
+        response = self.client.post(url, data)
+        self.assertRedirects(response, self.dashboard_url)
+        end_count = ForwardingRule.objects.count()
+        self.assertEqual(end_count, start_count + 1)
+
+    def test_get_edit_page(self):
+        """
+        Test retriving the edit forwarding rule form.
+        """
+
+        data = self.get_valid_data()
+        rule = self.create_forwarding_rule()  
+        url = reverse('broadcast-forwarding-edit', args=[rule.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_edit_notification(self):
+        """
+        Test editing forwarding rule via form.
+        """
+
+        data = self.get_valid_data()
+        rule = self.create_forwarding_rule()       
+        start_count = ForwardingRule.objects.count()        
+        url = reverse('broadcast-forwarding-edit', args=[rule.pk])
+        response = self.client.post(url, data)
+        self.assertRedirects(response, self.dashboard_url)
+        end_count = ForwardingRule.objects.count()
+        self.assertEqual(end_count, start_count)
+
+    def test_get_delete_page(self):
+        """
+        Test retriving the delete forwarding rule form.
+        """
+
+        rule = self.create_forwarding_rule()  
+        url = reverse('broadcast-forwarding-delete', args=[rule.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_notification(self):
+        """
+        Test delete forwarding rule via form.
+        """
+
+        rule = self.create_forwarding_rule()
+        start_count = ForwardingRule.objects.count()
+        url = reverse('broadcast-forwarding-delete', args=[rule.pk])
+        response = self.client.post(url, {})
+        self.assertRedirects(response, self.dashboard_url)
+        end_count = ForwardingRule.objects.count()
+        self.assertEqual(end_count, start_count - 1)
 

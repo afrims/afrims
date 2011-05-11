@@ -23,6 +23,7 @@
                 <th>{% anchor name Name %}</th>
                 <th>{% anchor email Email %}</th>
                 <th>{% anchor phone Phone %}</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -31,20 +32,22 @@
                     <td>{{ contact.pk }}</td>
                     <td>{{ contact.name }}</td>
                     <td>{{ contact.email }}</td>
-                    <td>{{ contact.phone }}</td>
+                    <td>{{ contact.formatted_phone }}</td>
                     <td class='actions'>
-                        <a class='button' title='Edit {{ contact.name }}' href='{% url edit-contact contact.pk %}'><span class='ui-icon ui-icon-pencil' /></a>
-                        <a class='button' title='Delete {{ contact.name }}' href='{% url delete-contact contact.pk %}'><span class='ui-icon ui-icon-closethick' /></a>    
+                        <a class='button' title='Edit {{ contact.name }}' href='{% url edit-contact contact.pk %}'><span class='ui-icon ui-icon-pencil'></span></a>
+                        <a class='button' title='Delete {{ contact.name }}' href='{% url delete-contact contact.pk %}'><span class='ui-icon ui-icon-closethick'></span></a>    
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
         <tfoot>
+            {% if paginator.count > paginator.per_page %}
             <tr>
-                <td colspan='3'>
+                <td colspan='5'>
                     {% paginate %}
                 </td>
             </tr>
+            {% endif %}
         </tfoot>
     </table>
 </div>

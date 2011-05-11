@@ -1,0 +1,18 @@
+{% extends "reminders/base.html" %}
+{% load i18n %}
+
+{% block title %}Delete Notification Schedule{% endblock %}
+
+{% block right %}
+<div class="module">
+    <h2>Delete Notification Schedule</h2>
+    <form method="POST" action="#" class='buttons'>
+        <p class='message'>Are you sure you want to delete Notification Schedule #{{ notification.pk }}?</p>
+        {% csrf_token %}
+        <div class='form-action'>
+            <input type='button' name='cancel' value='Cancel' />
+            <input type='submit' name='submit' value="Delete" />
+        </div>
+    </form>
+</div>
+{% endblock %}

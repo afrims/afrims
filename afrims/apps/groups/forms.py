@@ -1,9 +1,12 @@
 import logging
+import re
 
 from django import forms
 
 from afrims.apps.groups.models import Group
+from afrims.apps.groups.utils import format_number
 from afrims.apps.groups.validators import validate_phone
+
 
 from rapidsms.models import Contact, Backend
 
@@ -12,6 +15,20 @@ __all__ = ('GroupForm', 'ContactForm', 'ForwardingRuleFormset',)
 
 
 logger = logging.getLogger('afrims.apps.groups.forms')
+
+
+class FancyPhoneInput(forms.TextInput):
+
+    def render(self, name, value, attrs=None):
+        if value:
+            value = format_number(value)
+        return super(FancyPhoneInput, self).render(name, value, attrs)
+
+    def value_from_datadict(self, data, files, name):
+        value = super(FancyPhoneInput, self).value_from_datadict(data, files, name)
+        if value:
+            value = re.sub(r'\D', '', value)
+        return value
 
 
 class GroupForm(forms.ModelForm):
@@ -32,7 +49,7 @@ class ContactForm(forms.ModelForm):
     """ Form for managing contacts """
 
     groups = forms.ModelMultipleChoiceField(queryset=Group.objects.none())
-    phone = forms.CharField(validators=[validate_phone], required=True)
+    phone = forms.CharField(validators=[validate_phone], required=True, widget=FancyPhoneInput)
 
     class Meta:
         model = Contact

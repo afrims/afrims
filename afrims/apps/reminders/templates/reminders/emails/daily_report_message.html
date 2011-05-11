@@ -1,0 +1,15 @@
+Daily Appointment Confirmation Report
+
+Report Generated: {% now "l n/j/Y P" %}
+For Appointments on: {{ appt_date|date:"l n/j/Y" }}
+
+{% spaceless %}
+{% with unconfirmed_patients.count as unconfirmed_count %}Pending Reminders ({{ unconfirmed_count }})
+{% if unconfirmed_count %}{{ "Study ID"|ljust:"25" }}{{ "Number"|ljust:"25" }}{{ "Time of Last Reminder" }}
+{% for patient in unconfirmed_patients %}{{ patient.subject_number|ljust:"25" }}{{ patient.formatted_phone|ljust:"25" }}{{ patient.last_reminder_time }}
+{% endfor %}{% endif %}{% endwith %}
+{% with confirmed_patients.count as confirmed_count %}Confirmed Reminders ({{ confirmed_count }})
+{% if confirmed_count %}{{ "Study ID"|ljust:"25" }}{{ "Number"|ljust:"25" }}{{ "Time Confirmed" }}
+{% for patient in confirmed_patients %}{{ patient.subject_number|ljust:"25" }}{{ patient.formatted_phone|ljust:"25" }}{{ patient.confirm_time }}
+{% endfor %}{% endif %}{% endwith %}
+{% endspaceless %}

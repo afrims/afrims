@@ -16,6 +16,15 @@ class Migration(DataMigration):
 
 
     models = {
+        'messagelog.message': {
+            'Meta': {'object_name': 'Message'},
+            'connection': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Connection']", 'null': 'True'}),
+            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']", 'null': 'True'}),
+            'date': ('django.db.models.fields.DateTimeField', [], {}),
+            'direction': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'text': ('django.db.models.fields.TextField', [], {})
+        },
         'groups.group': {
             'Meta': {'object_name': 'Group'},
             'contacts': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'groups'", 'blank': 'True', 'to': "orm['rapidsms.Contact']"}),
@@ -41,6 +50,13 @@ class Migration(DataMigration):
             'pin': ('django.db.models.fields.CharField', [], {'max_length': '20', 'blank': 'True'}),
             'primary_backend': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'contact_primary'", 'null': 'True', 'to': "orm['rapidsms.Backend']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '64', 'blank': 'True'})
+        },
+        'rapidsms.connection': {
+            'Meta': {'unique_together': "(('backend', 'identity'),)", 'object_name': 'Connection'},
+            'backend': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Backend']"}),
+            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']", 'null': 'True', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'identity': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         'reminders.notification': {
             'Meta': {'ordering': "('num_days',)", 'object_name': 'Notification'},

@@ -11,7 +11,7 @@
 
 $.widget("ui.messager", {
     options: {
-        'url': '/test-messager/form/',
+        'url': '/test-messager/form/'
     },
     _create: function() {
         var self = this;

@@ -2,8 +2,11 @@ import datetime
 
 from django import forms
 from django.forms.models import modelformset_factory
+from django.utils.dates import MONTHS
 
 from afrims.apps.broadcast.models import Broadcast, ForwardingRule
+from afrims.apps.broadcast.validators import validate_keyword
+from afrims.apps.groups.models import Group
 
 
 class BroadcastForm(forms.ModelForm):
@@ -75,3 +78,29 @@ class BroadcastForm(forms.ModelForm):
 
 
 ForwardingRuleFormset = modelformset_factory(ForwardingRule, can_delete=True)
+
+
+class ForwardingRuleForm(forms.ModelForm):
+
+    class Meta(object):
+        model = ForwardingRule
+
+    def __init__(self, *args, **kwargs):
+        super(ForwardingRuleForm, self).__init__(*args, **kwargs)
+        if validate_keyword not in self.fields['keyword'].validators:
+            self.fields['keyword'].validators.append(validate_keyword)
+        self.fields['keyword'].help_text = validate_keyword.help_text
+
+
+class ReportForm(forms.Form):
+    report_month = forms.TypedChoiceField(label='Report Month', required=False,
+        coerce=int, choices=MONTHS.items(), 
+    )
+    report_year = forms.IntegerField(label='Report Year', required=False,
+        min_value=1970, max_value=datetime.date.today().year
+    )
+
+
+class RecentMessageForm(forms.Form):
+    groups = forms.ModelMultipleChoiceField(queryset=Group.objects.all())
+

@@ -1,0 +1,61 @@
+{% extends "reminders/base.html" %}
+
+{% block right %}
+{% load pagination_tags sorting_tags %}
+{% autosort patients %}
+{% autopaginate patients 20 %}
+<h1>{{ status|capfirst }} Appointment Report</h1>
+<h2>For Appointments on {{ appt_date }}</h2>
+<div class="module">
+    <table class="pagination sortable patient-reminders">
+        <thead>
+            <tr>
+                <th>{% anchor subject_number "Study ID" %}</th>                
+                <th>{% anchor mobile_number "Number" %}</th>
+                {% if status == 'confirmed' %}
+                    <th>{% anchor confirm_time "Time Confirmed" %}</th>
+                {% else %}
+                    <th>{% anchor last_reminder_time "Time of Last Reminder" %}</th>
+                    <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+        {% for patient in patients %}
+        <tr class="{% cycle 'odd' 'even' %}">
+            <td>{{ patient.subject_number }}</td>
+            <td>{{ patient.formatted_phone }}</td>
+            {% if status == 'confirmed' %}
+                <td>{{ patient.confirm_time }}</td>
+            {% else %}
+                <td>{{ patient.last_reminder_time }}</td>
+                <td class='actions'>
+                    <a class='button' title='Manually confirm patient #{{ patient.subject_number}}' href='{% url manually-confirm-patient patient.reminder_id %}'><span class='ui-icon ui-icon-check'></span></a>
+                </td>
+            {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan='{% if status == 'confirmed' %}3{% else %}4{% endif %}'>No pending reminders</td>
+        </tr>
+        {% endfor %}
+        <tfoot>
+            {% if paginator.count > paginator.per_page %}
+            <tr>
+                <td colspan='{% if status == 'confirmed' %}3{% else %}4{% endif %}'>
+                    {% paginate %}
+                </td>
+            </tr>
+            {% endif %}
+        </tfoot>
+    </table>
+</div>
+<div class="module">
+    <form class="date-form buttons" action="{% url reminders-report %}" method="get">
+        <div class='form-action'>
+            {{ report_form }}
+            <input type='hidden' name="status" value="{{ status }}" />
+            <input type='submit' value="Change Report Date" />
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "reminders/base.html" %}
+
+{% block right %}
+<h1>Daily Appointment Confirmation Report</h1>
+<h2>For Appointments on {{ appt_date }}</h2>
+<div class="module">
+    {% with unconfirmed_patients.count as unconfirmed_count %}
+    <h2>Pending Reminders ({{ unconfirmed_count }})</h2>
+    <table class="pagination sortable patient-reminders">
+        <thead>
+            <tr>
+                <th>Study ID</th>                
+                <th>Number</th>
+                <th>Time of Last Reminder</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        {% for patient in unconfirmed_patients|slice:":20" %}
+        <tr class="{% cycle 'odd' 'even' %}">
+            <td>{{ patient.subject_number }}</td>
+            <td>{{ patient.formatted_phone }}</td>
+            <td>{{ patient.last_reminder_time }}</td>
+            <td class='actions'>
+                <a class='button' title='Manually confirm patient #{{ patient.subject_number}}' href='{% url manually-confirm-patient patient.reminder_id %}'><span class='ui-icon ui-icon-check'></span></a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan='4'>No pending reminders</td>
+        </tr>
+        {% endfor %}
+        <tfoot>
+            <tr>
+                <td colspan='4'>
+                    <a href="{% url reminders-report %}?status=unconfirmed{% if request.GET.date %}&date={{ request.GET.date|urlencode }}{% endif %}">See all unconfirmed appointments</a>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    {% endwith %}
+</div>
+<div class="module">
+    {% with confirmed_patients.count as confirmed_count %}
+    <h2>Confirmed Appointments ({{ confirmed_count }})</h2>
+    <table class="pagination sortable patient-reminders">
+        <thead>
+            <tr>
+                <th>Study ID</th>                
+                <th>Number</th>
+                <th>Time Confirmed</th>
+            </tr>
+        </thead>
+        {% for patient in confirmed_patients|slice:":20" %}
+        <tr class="{% cycle 'odd' 'even' %}">
+            <td>{{ patient.subject_number }}</td>
+            <td>{{ patient.formatted_phone }}</td>
+            <td>{{ patient.confirm_time }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan='3'>No confirmed appointments</td>
+        </tr>
+        {% endfor %}
+        <tfoot>
+            <tr>
+                <td colspan='3'>
+                    <a href="{% url reminders-report %}?status=confirmed{% if request.GET.date %}&date={{ request.GET.date|urlencode }}{% endif %}">See all confirmed appointments</a>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    {% endwith %}
+</div>
+<div class="module">
+    <form class="date-form buttons" action="{% url reminders-report %}" method="get">
+        <div class='form-action'>
+            {{ report_form }}
+            <input type='submit' value="Change Report Date" />
+        </div>
+    </form>
+</div>
+{% endblock %}

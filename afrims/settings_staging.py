@@ -21,6 +21,14 @@ INSTALLED_BACKENDS = {
         'host': '173.203.221.48', 'port': '8081',
         'config': {'encoding': 'UTF-8'},
     },
+    "mach": {
+        "ENGINE": "rmach.backend",
+        'host': 'localhost', 'port': '9090', # used for spawned backend WSGI server
+        'config': {
+            'encoding': 'UTF-8', # optional message encoding
+            'encoding_errors': 'ignore', # optional encoding handling 
+        }
+    },
 }
 
 DATABASES = {
@@ -36,7 +44,9 @@ DATABASES = {
 
 #The default backend to be used when creating new patient contacts
 #on POST submission of patient data from their server
-DEFAULT_BACKEND_NAME = "txtnation"
+DEFAULT_BACKEND_NAME = "mach"
+# unless overridden, all outgoing messages will be sent using this backend
+PRIMARY_BACKEND = "mach"
 
 DEBUG = True
 
@@ -46,3 +56,7 @@ LOG_FORMAT = "%(asctime)s %(levelname)-8s - %(name)-26s %(message)s"
 LOG_SIZE = 33554432 # 2^25
 LOG_BACKUPS = 10 # number of logs to keep
 
+COUNTRY_CODE = '1'
+
+# Remove this line to restore the patient import error emails
+NOTIFY_ON_PATIENT_IMPORT_ERROR = False

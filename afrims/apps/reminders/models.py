@@ -1,8 +1,11 @@
 import datetime
 
 from django.db import models
+from django.db.models import Q, Max
 
 from rapidsms import models as rapidsms
+
+from afrims.apps.groups.utils import format_number
 
 
 class Notification(models.Model):
@@ -29,6 +32,26 @@ class Notification(models.Model):
     def __unicode__(self):
         return u'{0} day'.format(self.num_days)
 
+    @property
+    def formatted_time(self):
+        return self.time_of_day.strftime('%I:%M %p')
+
+
+class SentNotificationManager(models.Manager):
+    # Should these be based on appointment dates or when they were sent?
+
+    def confirmed_for_range(self, start_date, end_date):
+        return self.filter(
+            appt_date__range=(start_date, end_date),
+            status__in=['confirmed', 'manual'],
+        ).distinct()
+
+    def unconfirmed_for_range(self, start_date, end_date):
+        return self.filter(
+            ~Q(status__in=['confirmed', 'manual']),
+            appt_date__range=(start_date, end_date),  
+        ).distinct()
+
 
 class SentNotification(models.Model):
     '''
@@ -39,6 +62,7 @@ class SentNotification(models.Model):
         ('sent', 'Sent'),
         ('error', 'Error'),
         ('confirmed', 'Confirmed'),
+        ('manual', 'Manually Confirmed'),
     )
     notification = models.ForeignKey(Notification,
                                     related_name='sent_notifications',
@@ -64,6 +88,8 @@ class SentNotification(models.Model):
                                           'from the recipient.')
     message = models.CharField(max_length=160, help_text='The actual message '
                                'that was sent to the user.')
+    
+    objects = SentNotificationManager()
 
     def __unicode__(self):
         return u'{notification} for {recipient} created on {date}'.format(
@@ -71,7 +97,14 @@ class SentNotification(models.Model):
                                         recipient=self.recipient,
                                         date=self.date_queued)
 
+    def manually_confirm(self):
+        self.date_confirmed = datetime.datetime.now()
+        self.status = 'manual'
+        self.save()
 
+    @property
+    def formatted_phone(self):
+        return format_number(self.mobile_number)
 class PatientDataPayload(models.Model):
     ''' Dumping area for incoming patient data XML snippets '''
 
@@ -97,6 +130,26 @@ class PatientDataPayload(models.Model):
         return msg.format(date=self.submit_date)
 
 
+class PatientManager(models.Manager):
+
+    def confirmed_for_date(self, appt_date):
+        return self.filter(
+            contact__sent_notifications__appt_date=appt_date,
+            contact__sent_notifications__status__in=['confirmed', 'manual']
+        ).annotate(
+            confirm_time=Max('contact__sent_notifications__date_confirmed')
+        ).distinct()
+
+    def unconfirmed_for_date(self, appt_date):
+        return self.filter(
+            ~Q(contact__sent_notifications__status__in=['confirmed', 'manual']),
+            contact__sent_notifications__appt_date=appt_date,        
+        ).annotate(
+            last_reminder_time=Max('contact__sent_notifications__date_sent'),
+            reminder_id=Max('contact__sent_notifications__id'),
+        ).distinct()
+
+
 class Patient(models.Model):
     # Patients may be manually created, so raw data can be null
     raw_data = models.ForeignKey(PatientDataPayload, null=True, blank=True,
@@ -109,8 +162,15 @@ class Patient(models.Model):
                            help_text="A 4-digit pin code for sms "
                                      "authentication workflows.")
     next_visit = models.DateField(blank=True, null=True)
+    reminder_time = models.TimeField(blank=True, null=True)
+
+    objects = PatientManager()
 
     def __unicode__(self):
         msg = u'Patient, Subject ID:{id}, Enrollment Date:{date_enrolled}'
         return msg.format(id=self.subject_number,
                           date_enrolled=self.date_enrolled)
+
+    @property
+    def formatted_phone(self):
+        return format_number(self.mobile_number)

@@ -16,7 +16,7 @@ urlpatterns = patterns('',
     
     # RapidSMS core URLs
     (r'^account/', include('rapidsms.urls.login_logout')),
-    url(r'^$', 'rapidsms.views.dashboard', name='rapidsms-dashboard'),
+    url(r'^$', 'afrims.apps.broadcast.views.dashboard', name='rapidsms-dashboard'),
 
     url(r'^settings/$', direct_to_template,
         {'template': 'afrims/not_implemented.html'}, name='settings'),
@@ -34,6 +34,7 @@ urlpatterns = patterns('',
     (r'^reminders/', include('afrims.apps.reminders.urls')),
     (r'^test-messager/', include('afrims.apps.test_messager.urls')),
     (r'^crm/', include('afrims.apps.groups.urls')),
+    (r'^rosetta/', include('rosetta.urls')),
 )
 
 if settings.DEBUG:

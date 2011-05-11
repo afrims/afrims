@@ -3,6 +3,8 @@
 # encoding=utf-8
 import os
 
+PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
+
 # -------------------------------------------------------------------- #
 #                          MAIN CONFIGURATION                          #
 # -------------------------------------------------------------------- #
@@ -37,6 +39,7 @@ INSTALLED_APPS = [
     "django_sorting",
     "south",
 	"staticfiles",
+    "rosetta",
     # "gunicorn",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
@@ -45,7 +48,7 @@ INSTALLED_APPS = [
     "afrims.apps.default_connection",
 
     # the rapidsms contrib apps.
-    "rapidsms.contrib.export",
+    # "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
     "rapidsms.contrib.locations",
     "rapidsms.contrib.messagelog",
@@ -63,6 +66,7 @@ INSTALLED_APPS = [
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
+    ("afrims.apps.broadcast.views.dashboard", "Dashboard"),    
     ("afrims.apps.broadcast.views.send_message", "Send a Message"),
     ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
     ("broadcast-forwarding", "Forwarding"),
@@ -109,14 +113,15 @@ TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 MEDIA_URL = "/media/"
 ADMIN_MEDIA_PREFIX = "/static/admin/"
 STATIC_URL = "/static/"
-STATIC_ROOT = "../static_files/"
+STATIC_ROOT = os.path.join(PROJECT_PATH, '..', 'static_files')
 
 
 # Specify a logo URL for the dashboard layout.html. This logo will show up
 # at top left for every tab
 LOGO_LEFT_URL = '%simages/trialconnect.png' % STATIC_URL
 LOGO_RIGHT_URL = '%simages/tatrc.png' % STATIC_URL
-
+SITE_TITLE = " "
+BASE_TEMPLATE = "layout.html"
 
 # this is required for the django.contrib.sites tests to run, but also
 # not included in global_settings.py, and is almost always ``1``.
@@ -136,6 +141,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 
     #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
     "rapidsms.context_processors.logo",
+    "afrims.apps.reminders.context_processors.messages",
 ]
 
 
@@ -157,8 +163,6 @@ MIDDLEWARE_CLASSES = [
 AJAX_PROXY_HOST = '127.0.0.1'
 AJAX_PROXY_PORT = 9988
 
-PROJECT_PATH = os.path.abspath('%s' % os.path.dirname(__file__))
-
 MEDIA_ROOT = os.path.join(PROJECT_PATH, 'static')
 
 TEMPLATE_DIRS = [
@@ -178,7 +182,13 @@ TEST_EXCLUDED_APPS = [
 
 # the project-level url patterns
 
-LANGUAGE_CODE='en'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = (
+    ('en', 'English'),
+    ('th', 'Thai'),
+    ('tl', 'Filipino'),
+)
 
 TIME_INPUT_FORMATS = ['%H:%M', '%H:%M:%S']
 
@@ -196,6 +206,9 @@ SOUTH_MIGRATION_MODULES = {
 #The default group subjects are added to when their information
 #is POSTed to us
 DEFAULT_SUBJECT_GROUP_NAME = 'Subjects'
+DEFAULT_DAILY_REPORT_GROUP_NAME = 'Daily Report Recipients'
+DEFAULT_MONTHLY_REPORT_GROUP_NAME = 'Monthly Report Recipients'
+DEFAULT_CONFIRMATIONS_GROUP_NAME = 'Confirmation Recipients'
 
 #The default backend to be used when creating new patient contacts
 #on POST submission of patient data from their server
@@ -205,10 +218,8 @@ PRIMARY_BACKEND = 'twilio'
 # if set, the message tester app will always use this backend
 TEST_MESSAGER_BACKEND = 'twilio'
 
-STATICFILES_DIRS = (
-                    'static/',
-                    'templates/'
-)
+STATICFILES_DIRS = (os.path.join(PROJECT_PATH, 'static'),
+                    os.path.join(PROJECT_PATH, 'templates'))
 
 #STATICFILES_EXCLUDED_APPS = (
 #    'django.contrib.admin',

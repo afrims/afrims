@@ -1,0 +1,21 @@
+{% extends "reminders/base.html" %}
+{% load i18n %}
+
+{% block title %}Manual Appointment Confirmation{% endblock %}
+
+{% block right %}
+<div class="module">
+    <h2>Manual Appointment Confirmation</h2>
+    <form method="POST" action="#" class='buttons'>
+        {% with reminder.recipient.patient_set.all.0 as patient %}
+        <p class='message'>Are you sure you want to manually confirm the {{ reminder.appt_date }} appointment for {{ patient.subject_number }} ({{ patient.formatted_phone }})?</p>
+        {% csrf_token %}
+        <div class="hidden"><input type="hidden" name="next" value="{{ request.META.HTTP_REFERER }}"/></div>
+        <div class='form-action'>
+            <input type='button' name='cancel' value='Cancel' />
+            <input type='submit' name='submit' value="Confirm" />
+        </div>
+        {% endwith %}
+    </form>
+</div>
+{% endblock %}
