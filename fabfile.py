@@ -74,7 +74,7 @@ def staging():
     env.environment = 'staging'
     env.router_port = '9090'
     env.server_port = '9002'
-    env.server_name = '173.203.221.48'
+    env.server_name = 'staging-trialconnect.dimagi.com'
     env.hosts = ['173.203.221.48']
     env.settings = '%(project)s.localsettings' % env
     _setup_path()
