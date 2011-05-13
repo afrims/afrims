@@ -72,7 +72,7 @@ RAPIDSMS_TABS = [
     ("broadcast-forwarding", "Forwarding"),
     ("afrims.apps.groups.views.list_groups", "Groups"),
     ("afrims.apps.groups.views.list_contacts","People"),
-    ("settings", "Settings"),
+#    ("settings", "Settings"),
 #    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
 
 #    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
