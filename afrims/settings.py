@@ -18,7 +18,6 @@ BROADCAST_SENDER_BACKEND='message_tester'
 INSTALLED_APPS = [
 
     # the essentials.
-    "django_nose",
     "djtables",
     "rapidsms",
 
@@ -38,6 +37,7 @@ INSTALLED_APPS = [
     "pagination",
     "django_sorting",
     "south",
+    "django_nose",
 	"staticfiles",
     "rosetta",
     # "gunicorn",
