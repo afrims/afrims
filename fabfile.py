@@ -169,6 +169,7 @@ def deploy():
     with cd(env.code_root):
         sudo('git pull', user=env.sudo_user)
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
+        sudo('git rev-parse HEAD >GIT_LAST_COMMIT', user=env.sudo_user)
     migrate()
     collectstatic()
     touch()

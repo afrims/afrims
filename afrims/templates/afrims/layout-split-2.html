@@ -1,4 +1,5 @@
 {% extends "layout-split-2.html" %}
+{% load setting %}
 
 {% block javascripts %}
     {{ block.super }}
@@ -8,4 +9,9 @@
 {% block stylesheets %}
     {{ block.super }}
     {% include 'afrims/_css.html' %}
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+Last commit: {% setting "GIT_LAST_COMMIT" %}
 {% endblock %}
