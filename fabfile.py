@@ -98,6 +98,9 @@ def production():
     env.code_branch = 'master'
     env.sudo_user = 'afrims'
     env.environment = 'production'
+    env.router_port = '9089'
+    env.server_port = '9002'
+    env.server_name = 'kpp-trialconnect.dimagi.com'
     env.hosts = ['10.84.168.245']
     env.settings_files=['kpp','cebu']
     env.settings = ['afrims.localsettings_production_%s' % (env.settings_files[0]), 'afrims.localsettings_production_%s' % env.settings_files[1]]
@@ -109,8 +112,8 @@ def production_kpp():
     env.code_branch = 'master'
     env.sudo_user = 'afrims'
     env.environment = 'production-kpp'
-    env.router_port = '9091'
-    env.server_port = '9089'
+    env.router_port = '9089'
+    env.server_port = '9002'
     env.server_name = 'kpp-trialconnect.dimagi.com'
     env.hosts = ['10.84.168.245']
     env.settings = '%(project)s.localsettings' % env
@@ -122,8 +125,8 @@ def production_cebu():
     env.code_branch = 'master'
     env.sudo_user = 'afrims'
     env.environment = 'production-cebu'
-    env.router_port = '9091'
-    env.server_port = '9088'
+    env.router_port = '9088'
+    env.server_port = '9001'
     env.server_name = 'cebu-trialconnect.dimagi.com'
     env.hosts = ['10.84.168.245']
     env.settings = '%(project)s.localsettings' % env
@@ -133,6 +136,8 @@ def production_cebu():
 def bootstrap():
     """ initialize remote host environment (virtualenv, deploy, update) """
     require('root', provided_by=('staging', 'production'))
+    if env.environment == 'production':
+        utils.abort("Bootstrap to production aborted! Bootstrap scripts not fully functional/tested for production env!")
     sudo('mkdir -p %(root)s' % env, user=env.sudo_user)
     clone_repo()
     setup_dirs()
@@ -169,7 +174,12 @@ def deploy():
     with cd(env.code_root):
         sudo('git pull', user=env.sudo_user)
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
-    migrate()
+
+    if env.environment == 'production':
+        migrate_production()
+    else:
+        migrate()
+
     collectstatic()
     touch()
     start()
@@ -231,14 +241,21 @@ def netstat_plnt():
 def stop():
     """ stop server and router on remote host """
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('stop %(environment)s:*' % env)
+    if env.environment == 'production':
+        production_routers_stop()
+        production_servers_stop()
+    else:
+        _supervisor_command('stop %(environment)s:*' % env)
 
 
 def start():
     """ start server and router on remote host """
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('start %(environment)s:*' % env)
-
+    if env.environment == 'production':
+        production_routers_start()
+        production_servers_start()
+    else:
+        _supervisor_command('start %(environment)s:*' % env)
 
 def router_start():  
     """ start router on remote host """
@@ -272,11 +289,23 @@ def migrate():
         run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
 
 
+def migrate_production():
+    ''' run south migration on remote production environment '''
+    require('project_root', provided_by=('production'))
+    with cd(env.project_root):
+        for i,settings_path in enumerate(env.settings_files):
+            run('%s/bin/python manage.py syncdb --noinput --settings=%s' % (env.virtualenv_root, env.settings[i]))
+            run('%s/bin/python manage.py migrate --noinput --settings=%s' % (env.virtualenv_root, env.settings[i]))
+
 def collectstatic():
     """ run collectstatic on remote environment """
     require('project_root', provided_by=('production', 'demo', 'staging'))
     with cd(env.project_root):
-        sudo('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env, user=env.sudo_user)
+        if env.environment == 'production':
+            for i,settings_path in enumerate(env.settings_files):
+                sudo('%s/bin/python manage.py collectstatic --noinput --settings=%s' % (env.virtualenv_root,env.settings[i]), user=env.sudo_user)
+        else:
+            sudo('%(virtualenv_root)s/bin/python manage.py collectstatic --noinput --settings=%(settings)s' % env, user=env.sudo_user)
 
 
 def reset_local_db():
@@ -313,9 +342,9 @@ def fix_locale_perms():
     """ Fix the permissions on the locale directory """
     require('root', provided_by=('staging', 'production'))
     locale_dir = '%s/afrims/locale/' % env.code_root
-    run('sudo chown -R afrims %s' % locale_dir)
-    run('sudo chgrp -R www-data %s' % locale_dir)
-    run('sudo chmod -R g+w %s' % locale_dir)
+    sudo('chown -R afrims %s' % locale_dir)
+    sudo('chgrp -R www-data %s' % locale_dir)
+    sudo('chmod -R g+w %s' % locale_dir)
 
 
 def commit_locale_changes():
@@ -354,7 +383,36 @@ def upload_apache_conf():
     run('sudo -u %s mv -f %s %s' % (env.sudo_user, destination, enabled))
     apache_reload()
 
+def production_servers_stop():
+    require('environment', provided_by=('production'))
+    _supervisor_command('stop production-cebu:production-server-cebu')
+    _supervisor_command('stop production-kpp:production-server-kpp')
+
+def production_servers_start():
+    require('environment', provided_by=('production'))
+    _supervisor_command('start production-cebu:production-server-cebu')
+    _supervisor_command('start production-kpp:production-server-kpp')
+
+def production_servers_restart():
+    require('environment', provided_by=('production'))
+    _supervisor_command('restart production-cebu:production-server-cebu')
+    _supervisor_command('restart production-kpp:production-server-kpp')
+
+def production_routers_stop():
+    require('environment', provided_by=('production'))
+    _supervisor_command('stop production-cebu:production-router-cebu')
+    _supervisor_command('stop production-kpp:production-router-kpp')
+
+def production_routers_start():
+    require('environment', provided_by=('production'))
+    _supervisor_command('start production-cebu:production-router-cebu')
+    _supervisor_command('start production-kpp:production-router-kpp')
+
+def production_routers_restart():
+    require('environment', provided_by=('production'))
+    _supervisor_command('restart production-cebu:production-router-cebu')
+    _supervisor_command('restart production-kpp:production-router-kpp')
 
 def _supervisor_command(command):
     require('hosts', provided_by=('staging', 'production'))
-    run('sudo supervisorctl %s' % command)
+    sudo('supervisorctl %s' % command)
