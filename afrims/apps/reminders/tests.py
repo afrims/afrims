@@ -517,10 +517,10 @@ class ImportTest(RemindersCreateDataTest):
         """ Test patients missing country code are still inserted """
         node = self.create_xml_patient({'Mobile_Number': '2223334444'})
         payload = self.create_payload([node])
-        with patch_settings(COUNTRY_CODE='66'):
+        with patch_settings(COUNTRY_CODE='66', INTERNATIONAL_DIALLING_CODE='+'):
             parse_patient(node, payload)
             patients = reminders.Patient.objects.all()
-            self.assertEqual(patients[0].mobile_number, '662223334444')
+            self.assertEqual(patients[0].mobile_number, '+662223334444')
 
     def test_invalid_patient_field(self):
         """ Invalid patient data should return a 500 status code """

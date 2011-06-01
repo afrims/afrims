@@ -225,7 +225,8 @@ STATICFILES_DIRS = (os.path.join(PROJECT_PATH, 'static'),
 #    'django.contrib.admin',
 #)
 
-
 # Note the last GIT commit if known
 if os.path.exists(os.path.join(PROJECT_PATH,"GIT_LAST_COMMIT")):
     GIT_LAST_COMMIT = open(os.path.join(PROJECT_PATH,"GIT_LAST_COMMIT")).read()
+
+INTERNATIONAL_DIALLING_CODE = '+'

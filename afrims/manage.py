@@ -5,6 +5,7 @@ import sys, os
 from os.path import exists, join
 from django.core.management import execute_manager
 
+
 # use a default settings module if none was specified on the command line
 DEFAULT_SETTINGS = 'afrims.localsettings'
 DEFAULT_TEST_SETTINGS = 'afrims.test_localsettings'
@@ -14,9 +15,10 @@ if not settings_specified and len(sys.argv) >= 2:
         settings = DEFAULT_TEST_SETTINGS
     else:
         settings = DEFAULT_SETTINGS
-    print "NOTICE: using default settings module '%s'" % settings    
+    if 'RAPIDSMS_SETTINGS' in os.environ:
+        settings = os.environ['RAPIDSMS_SETTINGS']
     sys.argv.append('--settings=%s' % settings)
-
+    print "NOTICE: using default settings module '%s'" % settings    
 
 if __name__ == "__main__":
     # all imports should begin with the full Python package ('afrims.'):
@@ -25,6 +27,7 @@ if __name__ == "__main__":
     # if project_root in sys.path:
     #     sys.path.remove(project_root)
     sys.path.insert(0, os.path.dirname(project_root))
+    sys.path.append(os.path.abspath(os.path.join(project_root,'..','submodules','rapidsms','lib')))
 
     from afrims import settings
     execute_manager(settings)
