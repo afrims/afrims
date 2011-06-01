@@ -225,3 +225,4 @@ STATICFILES_DIRS = (os.path.join(PROJECT_PATH, 'static'),
 #    'django.contrib.admin',
 #)
 
+INTERNATIONAL_DIALLING_CODE = '+'
