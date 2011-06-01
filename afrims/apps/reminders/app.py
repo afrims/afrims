@@ -48,14 +48,17 @@ def daily_email_callback(router, *args, **kwargs):
         'confirmed_patients': confirmed_patients,
         'unconfirmed_patients': unconfirmed_patients,
     }
-    subject_template = u'Confirmation Report For Appointments on {appt_date}'
-    subject = subject_template.format(**context)
-    body = render_to_string('reminders/emails/daily_report_message.html', context)
-    group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
-    group, created = groups.Group.objects.get_or_create(name=group_name)
-    if not created:
-        emails = [c.email for c in group.contacts.all() if c.email]
-        send_mail(subject, body, None, emails, fail_silently=True)
+    patients_exist = confirmed_patients or unconfirmed_patients
+    if patients_exist:
+        subject_template = u'Confirmation Report For Appointments on {appt_date}'
+        subject = subject_template.format(**context)
+        body = render_to_string('reminders/emails/daily_report_message.html', context)
+        group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
+        group, created = groups.Group.objects.get_or_create(name=group_name)
+        if not created:
+            emails = [c.email for c in group.contacts.all() if c.email]
+            if emails:
+                send_mail(subject, body, None, emails, fail_silently=True)
 
 
 class RemindersApp(AppBase):
