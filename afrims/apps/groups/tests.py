@@ -32,7 +32,7 @@ class GroupCreateDataTest(CreateDataTest):
                 'first_name': self.random_string(8),
                 'last_name': self.random_string(8),
                 'email': 'test@abc.com',
-                'phone': '31112223333',
+                'phone': '+31112223333',
             }
         data.update(initial_data)
         return data
@@ -116,8 +116,8 @@ class PhoneTest(GroupCreateDataTest):
         self.assertEqual(self.app._normalize_number(number), normalized)
         number = '1 (222) 333-4444'
         self.assertEqual(self.app._normalize_number(number), normalized)
-        with patch_settings(COUNTRY_CODE='66'):
-            normalized = '662223334444'
+        with patch_settings(COUNTRY_CODE='66', INTERNATIONAL_DIALLING_CODE='+'):
+            normalized = '+662223334444'
             number = '22-23334444'
             self.assertEqual(self.app._normalize_number(number), normalized)
         with patch_settings(COUNTRY_CODE=None):
