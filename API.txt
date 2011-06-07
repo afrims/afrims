@@ -1,0 +1,46 @@
+The XML API for receiving information from the study db looks like:
+
+Required Fields
+-------
+Subject_Number (any specific requirements here?)
+Mobile_Number (validated so that it contains only 0-9)
+
+Optional Fields
+-------
+Next_Visit
+Pin_Code
+Date_Enrolled
+
+
+Example
+-------
+
+<?xml version="1.0" standalone="yes"?>
+<NewDataSet>
+  <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true">
+      <xs:complexType>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="Table">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="Subject_Number" type="xs:string" minOccurs="0" />
+                <xs:element name="Date_Enrolled" type="xs:string" minOccurs="0" />
+                <xs:element name="Mobile_Number" type="xs:string" minOccurs="0" />
+                <xs:element name="Pin_Code" type="xs:string" minOccurs="0" />
+                <xs:element name="Next_Visit" type="xs:string" minOccurs="0" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <Table>
+    <Subject_Number>321-33333</Subject_Number>
+    <Date_Enrolled>Jun  3 2011 </Date_Enrolled>
+    <Mobile_Number>123456789</Mobile_Number>
+    <Pin_Code>7777</Pin_Code>
+    <Next_Visit>Jul 17 2012 </Next_Visit>
+  </Table>
+</NewDataSet>
