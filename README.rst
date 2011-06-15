@@ -80,3 +80,15 @@ Developer Setup
 #. Open http://localhost:8000 in your web browser and you should see an
    **Installation Successful!** screen.
 
+
+Production Setup
+================
+
+#. Sync the production server with network (or otherwise correct) time e.g. using NTP.
+
+#. Set the TIME_ZONE setting in Django to reflect the right time zone.
+
+#. Specify the default language for SMS (where?)
+
+#. Update the django EMAIL settings so that email reports don't get sent from webmaster@localhost
+

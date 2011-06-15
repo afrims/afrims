@@ -15,9 +15,10 @@ def normalize_number(number):
         if (hasattr(settings, 'COUNTRY_CODE') and settings.COUNTRY_CODE):
             normalized_number = '{0}{1}'.format(settings.COUNTRY_CODE,
                                                 normalized_number)
-            if (hasattr(settings, 'INTERNATIONAL_DIALLING_CODE') and settings.INTERNATIONAL_DIALLING_CODE):
-                normalized_number = '{0}{1}'.format(settings.INTERNATIONAL_DIALLING_CODE,
-                                                    normalized_number)
+    if len(normalized_number) >= 11 and len(normalized_number) <= 12: # pretty country-specific, innit?
+        if (hasattr(settings, 'INTERNATIONAL_DIALLING_CODE') and settings.INTERNATIONAL_DIALLING_CODE):
+            normalized_number = '{0}{1}'.format(settings.INTERNATIONAL_DIALLING_CODE,
+                                                normalized_number)
     return normalized_number
 
 

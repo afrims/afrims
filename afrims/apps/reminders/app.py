@@ -257,7 +257,7 @@ class RemindersApp(AppBase):
             except Exception, e:
                 self.exception(e)
                 success = False
-            if success and msg.sent:
+            if success and (msg.sent or msg.sent is None):
                 self.debug('notification sent successfully')
                 notification.status = 'sent'
                 notification.date_sent = datetime.datetime.now()
