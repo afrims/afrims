@@ -160,6 +160,9 @@ class Broadcast(models.Model):
         self.date_last_notified = now
         if next_date:
             self.date = next_date
+        else:
+            # Disable broadcast if there is no next_date
+            self.schedule_frequency = None
         logger.debug('set_next_date end - {0}'.format(self))
 
     def queue_outgoing_messages(self):

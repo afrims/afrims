@@ -150,6 +150,10 @@ class BroadcastDateTest(BroadcastCreateDataTest):
         broadcast = self.create_broadcast(when='ready')
         broadcast.schedule_end_date = datetime.datetime.now()
         self.assertEqual(broadcast.get_next_date(), None)
+        broadcast.set_next_date()
+        broadcast.save()
+        ready = Broadcast.ready.all()
+        self.assertFalse(broadcast in ready)
 
     def test_month_recurrence(self):
         """ Test monthly recurrence for past month """
