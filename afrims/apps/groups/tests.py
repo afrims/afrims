@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
@@ -54,6 +55,7 @@ class GroupFormTest(GroupCreateDataTest):
         self.assertFalse(contact.groups.filter(pk=group2.pk).exists())
 
     def test_edit_contact(self):
+
         """ Test contact edit functionality with form """
         group1 = self.create_group()
         group2 = self.create_group()
@@ -66,6 +68,14 @@ class GroupFormTest(GroupCreateDataTest):
         self.assertEqual(contact.groups.count(), 1)
         self.assertFalse(contact.groups.filter(pk=group1.pk).exists())
         self.assertTrue(contact.groups.filter(pk=group2.pk).exists())
+
+    def test_no_subjects(self):
+        """New contacts cannot be added to the subjects group"""
+
+        subjects_group, _ = Group.objects.get_or_create(name=settings.DEFAULT_SUBJECT_GROUP_NAME)
+        data = self._data({'groups': [subjects_group.pk]})
+        form = group_forms.ContactForm(data)
+        self.assertFalse(form.is_valid())
 
 
 class GroupViewTest(CreateDataTest):
