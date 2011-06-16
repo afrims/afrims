@@ -21,6 +21,7 @@ from afrims.apps.groups import models as groups
 # finds our text.
 _ = lambda s: s
 
+JUNK = [':', '\'', '\"', '`', '(', ')',' ']
 
 def scheduler_callback(router):
     """
@@ -101,7 +102,7 @@ class BroadcastApp(AppBase):
     def _forwarding_rules(self):
         """ Returns a dictionary mapping rule keywords to rule objects """
         rules = ForwardingRule.objects.all()
-        return dict([(rule.keyword.lower(), rule) for rule in rules])
+        return dict([(self._clean_keyword(rule.keyword.lower()), rule) for rule in rules])
 
     def handle(self, msg):
         """
@@ -111,7 +112,7 @@ class BroadcastApp(AppBase):
         rules = self._forwarding_rules()
         if not msg_parts:
             return False
-        keyword = msg_parts[0].lower()
+        keyword = self._clean_keyword(msg_parts[0].lower())
         if keyword not in rules:
             self.debug(u'{0} keyword not found in rules'.format(keyword))
             return False
@@ -133,6 +134,11 @@ class BroadcastApp(AppBase):
                                              body=full_msg, forward=rule)
         broadcast.groups.add(rule.dest)
         msg.respond(self.thank_you)
+        
+    def _clean_keyword(self, keyword):
+        for j in JUNK:
+            keyword = keyword.strip(j)
+        return keyword
 
     def queue_outgoing_messages(self):
         """ generate queued messages for scheduled broadcasts """

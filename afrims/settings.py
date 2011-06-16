@@ -50,12 +50,10 @@ INSTALLED_APPS = [
     # the rapidsms contrib apps.
     # "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
-    "rapidsms.contrib.locations",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
     "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
-    "rapidsms.contrib.echo",
 
     # this app should be last, as it will always reply with a help message
     "afrims.apps.catch_all",

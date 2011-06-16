@@ -509,7 +509,7 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(payload.status, 'success')
         patients = reminders.Patient.objects.all()
         self.assertEqual(patients.count(), 1)
-        self.assertEqual(patients[0].mobile_number, '12223334444')
+        self.assertEqual(patients[0].mobile_number, '+12223334444')
         self.assertEqual(patients[0].raw_data.pk, payload.pk)
         self.assertTrue(patients[0].contact is not None)
 
@@ -538,7 +538,7 @@ class ImportTest(RemindersCreateDataTest):
         parse_patient(node, payload)
         patient = payload.patients.all()[0]
         self.assertTrue(patient.contact is not None)
-        self.assertEqual(patient.contact.phone, '12223334444')
+        self.assertEqual(patient.contact.phone, '+12223334444')
         self.assertEqual(patient.contact.pin, '4444')
 
     def test_update_contact_association(self):
@@ -555,8 +555,8 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(patient.pk, patient1.pk)
         self.assertNotEqual(patient.contact.pk, patient2.contact.pk)
         self.assertEqual(patient.contact.pk, patient1.contact.pk)
-        self.assertEqual(patient.mobile_number, '43332221111')
-        self.assertEqual(patient.contact.phone, '43332221111')
+        self.assertEqual(patient.mobile_number, '+43332221111')
+        self.assertEqual(patient.contact.phone, '+43332221111')
 
     def test_multi_patient_creation(self):
         """ Test that multiple patients are inserted properly """
@@ -575,7 +575,7 @@ class ImportTest(RemindersCreateDataTest):
         payload = self.create_payload([node])
         parse_patient(node, payload)
         patient = payload.patients.all()[0]
-        self.assertEqual(patient.contact.phone, '330001112222')
+        self.assertEqual(patient.contact.phone, '+330001112222')
 
     def test_next_visit_not_required(self):
         """ Next_Visit shoudn't be required """

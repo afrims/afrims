@@ -429,6 +429,28 @@ class BroadcastForwardingTest(BroadcastCreateDataTest):
         self.assertEqual(msg.responses[0].text,
                          self.app.thank_you)
 
+    def test_creates_crufty_broadcast(self):
+        """ tests the response from a user in non-source group """
+        msg = self._send(self.source_conn, 'abc: my-message')
+        bc = Broadcast.objects.get()
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)
+
+    def test_creates_spacy_broadcast(self):
+        """ tests the response from a user in non-source group """
+        rule = self.create_forwarding_rule(data={'keyword': 'def '})
+        rule.source.contacts.add(self.source_contact)
+        msg = self._send(self.source_conn, 'def: my-message')
+        bc = Broadcast.objects.get()
+        expected_msg = u'From {name} ({number}): {msg} my-message'\
+                       .format(name=self.source_contact.name,
+                               number=self.source_conn.identity,
+                               msg=rule.message)
+        self.assertEqual(bc.body, expected_msg)
+        self.assertEqual(list(bc.groups.all()), [rule.dest])
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)        
+
     def test_unicode_broadcast_body(self):
         """ Make sure unicode strings can be broadcasted """
         text = u'abc ' + self.random_unicode_string(2)

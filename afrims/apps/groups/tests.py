@@ -129,7 +129,7 @@ class PhoneTest(GroupCreateDataTest):
         All numbers should be stripped of non-numeric characters and, if
         defined, should be prepended with the COUNTRY_CODE
         """
-        normalized = '12223334444'
+        normalized = '+12223334444'
         number = '1-222-333-4444'
         self.assertEqual(self.app._normalize_number(number), normalized)
         number = '1 (222) 333-4444'
