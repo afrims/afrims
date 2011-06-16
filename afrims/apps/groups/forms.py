@@ -63,7 +63,7 @@ class ContactForm(forms.ModelForm):
             kwargs['initial'] = {'groups': list(pks)}
         super(ContactForm, self).__init__(*args, **kwargs)
         self.fields['groups'].widget = forms.CheckboxSelectMultiple()
-        self.fields['groups'].queryset = Group.objects.order_by('name')
+        self.fields['groups'].queryset = Group.objects.exclude(name=settings.DEFAULT_SUBJECT_GROUP_NAME).order_by('name')
         self.fields['groups'].required = False
         for name in ('first_name', 'last_name', 'phone'):
             self.fields[name].required = True
