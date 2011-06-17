@@ -72,7 +72,7 @@ def staging():
     env.code_branch = 'develop'
     env.sudo_user = 'afrims'
     env.environment = 'staging'
-    env.router_port = '9090'
+    env.router_port = '9191' # Mega mobile
     env.server_port = '9002'
     env.server_name = 'staging-trialconnect.dimagi.com'
     env.hosts = ['173.203.221.48']
