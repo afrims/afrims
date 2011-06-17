@@ -72,7 +72,8 @@ def staging():
     env.code_branch = 'develop'
     env.sudo_user = 'afrims'
     env.environment = 'staging'
-    env.router_port = '9191' # Mega mobile
+    env.thb_router_port = '9087' # TxtNation
+    env.php_router_port = '9191' # Mega mobile
     env.server_port = '9002'
     env.server_name = 'staging-trialconnect.dimagi.com'
     env.hosts = ['173.203.221.48']
@@ -85,7 +86,8 @@ def demo():
     env.code_branch = 'develop'
     env.sudo_user = 'afrims'
     env.environment = 'demo'
-    env.router_port = '9081'
+    env.thb_router_port = '9081'
+    env.php_router_port = '9081'
     env.server_port = '9003'
     env.server_name = 'demo-trialconnect.dimagi.com'
     env.hosts = ['173.203.221.48']
