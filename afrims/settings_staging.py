@@ -48,6 +48,8 @@ DEFAULT_BACKEND_NAME = "mach"
 # unless overridden, all outgoing messages will be sent using this backend
 PRIMARY_BACKEND = "mach"
 
+AJAX_PROXY_PORT = 9999
+
 DEBUG = True
 
 LOG_LEVEL = "DEBUG"
@@ -64,3 +66,5 @@ NOTIFY_ON_PATIENT_IMPORT_ERROR = False
 # Note the last GIT commit if known
 if os.path.exists(os.path.join(PROJECT_PATH,"GIT_LAST_COMMIT")):
     GIT_LAST_COMMIT = open(os.path.join(PROJECT_PATH,"GIT_LAST_COMMIT")).read()
+
+
