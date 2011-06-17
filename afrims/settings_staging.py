@@ -31,7 +31,7 @@ INSTALLED_BACKENDS = {
     },
     "megamobile": {
         "ENGINE": "afrims.backends.megamobile",
-        "gateway_url": "http://125.5.124.146/dimagi"
+        "gateway_url": "http://125.5.124.146/dimagi",
         "port": "9191"
     },
 }
