@@ -29,6 +29,11 @@ INSTALLED_BACKENDS = {
             'encoding_errors': 'ignore', # optional encoding handling 
         }
     },
+    "megamobile": {
+        "ENGINE": "afrims.backends.megamobile",
+        "gateway_url": "http://125.5.124.146/dimagi"
+        "port": "9191"
+    },
 }
 
 DATABASES = {
