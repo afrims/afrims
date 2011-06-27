@@ -403,6 +403,16 @@ class BroadcastForwardingTest(BroadcastCreateDataTest):
         self.assertEqual(msg.responses[0].text,
                          self.app.not_registered)
 
+    def test_rule_with_no_source(self):
+        """ like test_unregistered, but a rule with no source sends
+            everybody the unregistered response """
+        self.rule.source = None
+        self.rule.save()
+        msg = self._send(self.unreg_conn, 'abc')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.not_registered)
+
     def test_wrong_group(self):
         """ tests the response from a user in non-source group """
         msg = self._send(self.dest_conn, 'abc')

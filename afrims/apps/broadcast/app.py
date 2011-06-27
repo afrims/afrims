@@ -119,7 +119,7 @@ class BroadcastApp(AppBase):
         rule = rules[keyword]
         contact = msg.connection.contact
         if not contact or \
-          not rule.source.contacts.filter(pk=contact.pk).exists():
+          (rule.source and not rule.source.contacts.filter(pk=contact.pk).exists()):
             msg.respond(self.not_registered)
             return True
         now = datetime.datetime.now()
