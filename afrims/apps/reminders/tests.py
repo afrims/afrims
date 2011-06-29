@@ -261,6 +261,7 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
                                                 'backend': self.backend})
         self.router = MockRouter()
         self.app = RemindersApp(router=self.router)
+        self.patient = self.create_patient(data={'contact': self.contact})
 
     def _send(self, conn, text):
         msg = IncomingMessage(conn, text)
@@ -360,7 +361,9 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         group = Group.objects.get(name=settings.DEFAULT_CONFIRMATIONS_GROUP_NAME)
         broadcasts = group.broadcasts.filter(schedule_frequency='one-time')
         self.assertEqual(broadcasts.count(), 1)
-
+        expected_msg_re = re.compile(r'From %s \(%s\): Appointment on \d{4}-\d{2}-\d{2} confirmed.' % (self.reg_conn.identity, self.patient.subject_number))
+        logging.debug('Broadcast="%s"' % broadcasts[0].body)
+        self.assertTrue(expected_msg_re.match(broadcasts[0].body))
 
 class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
 

@@ -182,9 +182,14 @@ class RemindersApp(AppBase):
         sent_notification.status = 'confirmed'
         sent_notification.date_confirmed = now
         sent_notification.save()
+
+        contact = msg.connection.contact
+        patient = reminders.Patient.objects.get(contact=contact)
+        study_id = patient.subject_number
         msg_text = u'Appointment on %s confirmed.' % sent_notification.appt_date
-        full_msg = u'From {number}: {body}'.format(
-            number=msg.connection.identity, body=msg_text
+        full_msg = u'From {number} ({study_id}): {body}'.format(
+            number=msg.connection.identity, body=msg_text,
+            study_id=study_id,
         )
         broadcast = Broadcast.objects.create(
             date_created=now, date=now,
