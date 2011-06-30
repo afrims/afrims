@@ -15,8 +15,10 @@ class CatchAllApp(AppBase):
 
     # Which message we send when we don't recognize the message
     # depends on who sent it.
+    # Translators: This message is sent to patients
     patient_template = _("""Thank you for contacting us. Please reply with 2 to be """ \
                          """called back within 2 days.""")
+    # Translators: This message is sent to non-patients (staff)
     non_patient_template = _("""Sorry, that message was not recognized""")
 
     def default(self, msg):
