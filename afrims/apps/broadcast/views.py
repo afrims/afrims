@@ -172,7 +172,7 @@ def usage_report_context(start_date, end_date):
         date_created__gte=start_date,
         date_created__lt=day_after_end,
         # After a one-time is sent, frequency is changed to null
-        schedule_frequency__in=('one-time',None),
+        schedule_frequency__in=('one-time','',None),
         forward__in=named_rules
     ).select_related('rule').annotate(message_count=Count('messages'))
     rule_data = {}
