@@ -19,6 +19,7 @@ from afrims.apps.broadcast.forms import BroadcastForm, ForwardingRuleForm, Repor
 from afrims.apps.broadcast.models import Broadcast, BroadcastMessage, ForwardingRule
 from afrims.apps.reminders.models import SentNotification
 
+one_day = datetime.timedelta(days=1)
 
 @login_required
 @permission_required('groups.can_use_send_a_message_tab', login_url='/access_denied/')
@@ -160,9 +161,16 @@ def usage_report_context(start_date, end_date):
         ~Q(Q(label__isnull=True) | Q(label=u"")),
         ~Q(Q(rule_type__isnull=True) | Q(rule_type=u"")),
     )
+
+    # Use the day *after* the end date and look for dates before that,
+    # otherwise we miss messages on the end date, because the message
+    # 'date' field is a datetime
+    day_after_end = end_date + one_day
+
     # This count includes all queued, sent and error messages from this broadcast
     broadcasts = Broadcast.objects.filter(
-        date_created__range=(start_date, end_date),
+        date_created__gte=start_date,
+        date_created__lt=day_after_end,
         schedule_frequency='one-time',
         forward__in=named_rules
     ).select_related('rule').annotate(message_count=Count('messages'))
@@ -183,18 +191,21 @@ def usage_report_context(start_date, end_date):
 
     # Get patient reminder data
     confirmed_count = SentNotification.objects.confirmed_for_range(
-        start_date, end_date).count()
+        start_date, day_after_end).count()
     unconfirmed_count = SentNotification.objects.unconfirmed_for_range(
-        start_date, end_date).count()
+        start_date, day_after_end).count()
     total_reminders = confirmed_count + unconfirmed_count
 
     # Get total incoming/outgoing data
-    incoming_count = Message.objects.filter(
-        date__range=(start_date, end_date),
+    incoming_messages = Message.objects.filter(
+        date__gte=start_date,
+        date__lt=day_after_end,
         direction='I'
-    ).count()
+    )
+    incoming_count = incoming_messages.count()
     outgoing_count = Message.objects.filter(
-        date__range=(start_date, end_date),
+        date__gte=start_date,
+        date__lt=day_after_end,
         direction='O'
     ).count()
     total_messages = incoming_count + outgoing_count
@@ -206,8 +217,11 @@ def usage_report_context(start_date, end_date):
         'total_reminders': total_reminders,
         'confirm_percent': confirmed_count * 100.0 / total_reminders if total_reminders else 100.0,
         'incoming_count': incoming_count,
+        'incoming_messages': incoming_messages,
         'outgoing_count': outgoing_count,
         'total_messages': total_messages,
+        'start_date': start_date,
+        'end_date': end_date,
     }
     return context
 
@@ -228,11 +242,13 @@ def report_graph_data(request):
     start_date = datetime.date(report_date.year, report_date.month, 1)
     end_date = report_date
     incoming_count = Message.objects.filter(
-        date__range=(start_date, end_date),
+        date__gte=start_date,
+        date__lt=end_date+one_day,
         direction='I'
     ).count()
     outgoing_count = Message.objects.filter(
-        date__range=(start_date, end_date),
+        date__gte=start_date,
+        date__lt=end_date+one_day,
         direction='O'
     ).count()
     row = [end_date.isoformat(), incoming_count, outgoing_count]
@@ -247,11 +263,13 @@ def report_graph_data(request):
         start_date = datetime.date(year, month, 1)
         end_date = datetime.date(year, month, last_day)
         incoming_count = Message.objects.filter(
-            date__range=(start_date, end_date),
+            date__gte=start_date,
+            date__lt=end_date+one_day,
             direction='I'
         ).count()
         outgoing_count = Message.objects.filter(
-            date__range=(start_date, end_date),
+            date__gte=start_date,
+            date__lt=end_date+one_day,
             direction='O'
         ).count()
         row = [end_date.isoformat(), incoming_count, outgoing_count]
