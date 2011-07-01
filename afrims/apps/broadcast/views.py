@@ -172,7 +172,7 @@ def usage_report_context(start_date, end_date):
         date_created__gte=start_date,
         date_created__lt=day_after_end,
         # After a one-time is sent, frequency is changed to null
-        schedule_frequency__in=('one-time','',None),
+        schedule_frequency__isnull=True,
         forward__in=named_rules
     ).select_related('rule').annotate(message_count=Count('messages'))
     rule_data = {}
@@ -185,8 +185,8 @@ def usage_report_context(start_date, end_date):
         rule = broadcast.forward
         data = rule_data.get(rule.rule_type, {})
         label_data = data.get(rule.label, [0, 0])
-        label_data[0] += 1
-        label_data[1] += broadcast.message_count
+        label_data[0] += 1                          # Incoming
+        label_data[1] += broadcast.message_count    # Outgoing
         data[rule.label] = label_data   
         rule_data[rule.rule_type] = data
 
