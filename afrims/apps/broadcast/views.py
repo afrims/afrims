@@ -171,7 +171,8 @@ def usage_report_context(start_date, end_date):
     broadcasts = Broadcast.objects.filter(
         date_created__gte=start_date,
         date_created__lt=day_after_end,
-        schedule_frequency='one-time',
+        # After a one-time is sent, frequency is changed to null
+        schedule_frequency__in=('one-time',None),
         forward__in=named_rules
     ).select_related('rule').annotate(message_count=Count('messages'))
     rule_data = {}
@@ -197,12 +198,11 @@ def usage_report_context(start_date, end_date):
     total_reminders = confirmed_count + unconfirmed_count
 
     # Get total incoming/outgoing data
-    incoming_messages = Message.objects.filter(
+    incoming_count = Message.objects.filter(
         date__gte=start_date,
         date__lt=day_after_end,
         direction='I'
-    )
-    incoming_count = incoming_messages.count()
+    ).count()
     outgoing_count = Message.objects.filter(
         date__gte=start_date,
         date__lt=day_after_end,
@@ -217,11 +217,8 @@ def usage_report_context(start_date, end_date):
         'total_reminders': total_reminders,
         'confirm_percent': confirmed_count * 100.0 / total_reminders if total_reminders else 100.0,
         'incoming_count': incoming_count,
-        'incoming_messages': incoming_messages,
         'outgoing_count': outgoing_count,
         'total_messages': total_messages,
-        'start_date': start_date,
-        'end_date': end_date,
     }
     return context
 
