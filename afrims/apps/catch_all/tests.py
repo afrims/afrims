@@ -38,7 +38,8 @@ class CatchAllDefaultTest(CreateDataTest):
 
     def test_unhandled_incoming_message(self):
         """ The catch_all app should always reply """
-        connection = self.create_connection()
+        contact = None #self.create_contact()
+        connection = self.create_connection(data={'contact':contact})
         msg = self._send(connection, 'uncaught-message-test')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text, self.app.non_patient_template)

@@ -27,13 +27,14 @@ class CatchAllApp(AppBase):
         """ If we reach the default phase here, respond with an appropriate
         message"""
 
+        identity = msg.connection.identity
         contact = msg.connection.contact
 
-        logging.debug("In catch_all.default(msg=%r, contact=%r)" % (msg,contact))
+        logging.debug("In catch_all.default(msg=%r, identity=%r)" % (msg,identity))
 
         # Have we sent them several catchalls recently?
         five_minutes_ago = datetime.datetime.now() - datetime.timedelta(minutes=5)
-        recent_message_count = CatchallMessage.objects.filter(contact=contact,
+        recent_message_count = CatchallMessage.objects.filter(identity=identity,
                                                               timestamp__gte=five_minutes_ago).count()
         if recent_message_count >= 3:
             # Just ignore
@@ -41,24 +42,24 @@ class CatchAllApp(AppBase):
             return True
 
         # are they a patient?
-        try:
-            patient = Patient.objects.get(contact=contact)
-            # yes
-            msg.respond(self.patient_template)
-            logging.debug("Sent patient do not understand message")
-        except ObjectDoesNotExist, e:
-            # no
+        patient = None
+        if contact is not None:
+            try:
+                patient = Patient.objects.get(contact=contact)
+            except ObjectDoesNotExist, e:
+                pass
+
+        if patient is None:
             msg.respond(self.non_patient_template)
             logging.debug("Sent non-patient do not understand message")
-        except e:
-            # should not happen, would probably mean multiple
-            # patients with the same contact
-            logging.error(e)
-            return False
+        else:
+            msg.respond(self.patient_template)
+            logging.debug("Sent patient do not understand message")
 
+        # Remember that we sent a message
         logging.debug("Create CatchallMessage")
         try:
-            CatchallMessage.objects.create(contact=contact)
+            CatchallMessage.objects.create(identity=identity)
         except e:
             logging.error(e)
 
