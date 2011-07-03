@@ -1,15 +1,18 @@
 import datetime
+import logging
 import re
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import Q
+from django.db.models import Q, signals
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext
 
 from rapidsms.apps.base import AppBase
+from rapidsms.contrib.messaging.utils import send_message
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages.outgoing import OutgoingMessage
+from rapidsms.models import Contact
 
 from afrims.apps.broadcast.models import Broadcast
 from afrims.apps.groups import models as groups
@@ -280,3 +283,23 @@ class RemindersApp(AppBase):
         self.queue_outgoing_notifications()
         # send queued notifications
         self.send_notifications()
+
+# When a new contact is created, send a welcome message
+def new_contact_created(sender, **kwargs):
+    created = kwargs['created']
+    if created:
+        contact = kwargs['instance']
+        connection = contact.default_connection
+        if not connection:
+            logging.debug('no connection found for recipient {0}, unable '
+                       'to send'.format(contact))
+            return
+        text = _("You have been registered for TrialConnect.")
+        try:
+            send_message(connection, text)
+            logging.debug("Sent welcome message to %s", contact)
+        except Exception, e:
+            logging.exception(e)
+
+signals.post_save.connect(new_contact_created, sender=Contact,
+               dispatch_uid='just once per new contact created')
