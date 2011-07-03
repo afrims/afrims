@@ -9,7 +9,6 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext
 
 from rapidsms.apps.base import AppBase
-from rapidsms.contrib.messaging.utils import send_message
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
@@ -284,8 +283,17 @@ class RemindersApp(AppBase):
         # send queued notifications
         self.send_notifications()
 
-# When a new contact is created, send a welcome message
+def queue_message_to_contact(contact, text):
+    """Just queue a single message to a contact"""
+    now = datetime.datetime.now()
+    broadcast = Broadcast(schedule_frequency='one-time',
+                          date=now,
+                          body=text)
+    broadcast.save()
+    broadcast.messages.create(recipient=contact)
+
 def new_contact_created(sender, **kwargs):
+    """When a new contact is created, send a welcome message"""
     created = kwargs['created']
     if created:
         contact = kwargs['instance']
@@ -296,8 +304,8 @@ def new_contact_created(sender, **kwargs):
             return
         text = _("You have been registered for TrialConnect.")
         try:
-            send_message(connection, text)
-            logging.debug("Sent welcome message to %s", contact)
+            queue_message_to_contact(contact, text)
+            logging.debug("Queued welcome message to %s", contact)
         except Exception, e:
             logging.exception(e)
 
