@@ -215,7 +215,7 @@ def usage_report_context(start_date, end_date):
         'confirmed_count': confirmed_count,
         'unconfirmed_count': unconfirmed_count,
         'total_reminders': total_reminders,
-        'confirm_percent': confirmed_count * 100.0 / total_reminders if total_reminders else 100.0,
+        'confirm_percent': confirmed_count * 100.0 / total_reminders if total_reminders else 0.0,
         'incoming_count': incoming_count,
         'outgoing_count': outgoing_count,
         'total_messages': total_messages,
