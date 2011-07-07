@@ -15,7 +15,7 @@ admin.site.register(reminders.Notification, NotificationAdmin)
 
 class SentNotificationAdmin(admin.ModelAdmin):
     list_display = ('date_queued', 'status', 'recipient', 'notification',
-                    'date_sent', 'date_confirmed', 'message')
+                    'date_sent', 'appt_date', 'date_confirmed', 'message')
     search_fields = ('date_queued', 'status', 'recipient', 'notification',
                      'message')
     list_filter = ('status', 'notification', 'date_queued', 'date_sent',

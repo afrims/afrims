@@ -1,7 +1,7 @@
 import datetime
 
 from django.db import models
-from django.db.models import Q, Max
+from django.db.models import F, Q, Max
 
 from rapidsms import models as rapidsms
 
@@ -38,6 +38,12 @@ class Notification(models.Model):
 
 
 class SentNotificationManager(models.Manager):
+
+    def for_current_appointment(self):
+        """SentNotifications for the patient's current next
+        appointment date"""
+        return self.filter(appt_date = F('recipient__patient__next_visit'))
+
     # Should these be based on appointment dates or when they were sent?
 
     def confirmed_for_range(self, start_date, end_date):
@@ -47,7 +53,7 @@ class SentNotificationManager(models.Manager):
         ).distinct()
 
     def unconfirmed_for_range(self, start_date, end_date):
-        return self.filter(
+        return self.for_current_appointment().filter(
             ~Q(status__in=['confirmed', 'manual']),
             appt_date__range=(start_date, end_date),  
         ).distinct()
@@ -143,7 +149,8 @@ class PatientManager(models.Manager):
     def unconfirmed_for_date(self, appt_date):
         return self.filter(
             ~Q(contact__sent_notifications__status__in=['confirmed', 'manual']),
-            contact__sent_notifications__appt_date=appt_date,        
+            contact__sent_notifications__appt_date=appt_date,
+            next_visit=appt_date,
         ).annotate(
             last_reminder_time=Max('contact__sent_notifications__date_sent'),
             reminder_id=Max('contact__sent_notifications__id'),
