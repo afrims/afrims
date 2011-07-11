@@ -18,7 +18,6 @@ BROADCAST_SENDER_BACKEND='message_tester'
 INSTALLED_APPS = [
 
     # the essentials.
-    "django_nose",
     "djtables",
     "rapidsms",
 
@@ -38,6 +37,7 @@ INSTALLED_APPS = [
     "pagination",
     "django_sorting",
     "south",
+    "django_nose",
 	"staticfiles",
     "rosetta",
     # "gunicorn",
@@ -70,7 +70,7 @@ RAPIDSMS_TABS = [
     ("broadcast-forwarding", "Forwarding"),
     ("afrims.apps.groups.views.list_groups", "Groups"),
     ("afrims.apps.groups.views.list_contacts","People"),
-    ("settings", "Settings"),
+#    ("settings", "Settings"),
 #    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
 
 #    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
@@ -223,4 +223,11 @@ STATICFILES_DIRS = (os.path.join(PROJECT_PATH, 'static'),
 #    'django.contrib.admin',
 #)
 
+# Note the last GIT commit if known
+if os.path.exists(os.path.join(PROJECT_PATH,"GIT_LAST_COMMIT")):
+    GIT_LAST_COMMIT = open(os.path.join(PROJECT_PATH,"GIT_LAST_COMMIT")).read()
+
 INTERNATIONAL_DIALLING_CODE = '+'
+
+# RapidSMS wants this to be set
+RAPIDSMS_HANDLERS_EXCLUDE_APPS = []

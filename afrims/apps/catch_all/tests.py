@@ -2,6 +2,7 @@
 Tests for the Catch All app.
 """
 
+import datetime
 import logging
 
 from rapidsms.tests.harness import MockRouter
@@ -11,7 +12,8 @@ from rapidsms.apps.base import AppBase
 from afrims.tests.testcases import CreateDataTest, FlushTestScript
 
 from afrims.apps.catch_all.app import CatchAllApp
-
+from afrims.apps.reminders import models as reminders
+from afrims.apps.reminders.tests import RemindersCreateDataTest
 
 class OtherApp(AppBase):
 
@@ -36,10 +38,11 @@ class CatchAllDefaultTest(CreateDataTest):
 
     def test_unhandled_incoming_message(self):
         """ The catch_all app should always reply """
-        connection = self.create_connection()
+        contact = None #self.create_contact()
+        connection = self.create_connection(data={'contact':contact})
         msg = self._send(connection, 'uncaught-message-test')
         self.assertEqual(len(msg.responses), 1)
-        self.assertEqual(msg.responses[0].text, self.app.template)
+        self.assertEqual(msg.responses[0].text, self.app.non_patient_template)
 
 
 class CatchAllTest(FlushTestScript):
@@ -52,6 +55,27 @@ class CatchAllTest(FlushTestScript):
         self.runScript("""1112223333 > other-app-should-catch
                           1112223333 < caught
                           1112223333 > uncaught-message-test
-                          1112223333 > %s""" % CatchAllApp.template)
+                          1112223333 < %s""" % CatchAllApp.non_patient_template)
         self.stopRouter()
 
+class PatientStrangeMessageTest(FlushTestScript, RemindersCreateDataTest):
+
+    def test_patient_bad_message_response(self):
+        app = CatchAllApp(self.router)
+        contact = self.create_contact({'pin': '1234'})
+        backend = self.create_backend(data={'name': 'mockbackend'})
+        connection = self.create_connection({'contact': contact,
+                                             'backend': backend})
+        tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+        reminders.Patient.objects.create(contact=contact,
+                                         date_enrolled=datetime.date.today(),
+                                         subject_number='1234',
+                                         mobile_number='tester',
+                                         next_visit=tomorrow)
+
+        text = "Strange message"
+        msg = IncomingMessage(connection, text)
+
+        app.default(msg)
+        self.assertEquals(len(msg.responses), 1)
+        self.assertEquals(msg.responses[0].text, CatchAllApp.patient_template)

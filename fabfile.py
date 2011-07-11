@@ -54,7 +54,7 @@ def _setup_path():
     env.virtualenv_root = _join(env.root, 'python_env')
     env.services = _join(env.home, 'services')
 
-
+ 
 
 def setup_dirs():
     """ create (if necessary) and make writable uploaded media, log, etc. directories """
@@ -72,9 +72,10 @@ def staging():
     env.code_branch = 'develop'
     env.sudo_user = 'afrims'
     env.environment = 'staging'
-    env.router_port = '9090'
+    env.thb_router_port = '9087' # TxtNation
+    env.php_router_port = '9191' # Mega mobile
     env.server_port = '9002'
-    env.server_name = '173.203.221.48'
+    env.server_name = 'staging-trialconnect.dimagi.com'
     env.hosts = ['173.203.221.48']
     env.settings = '%(project)s.localsettings' % env
     _setup_path()
@@ -85,7 +86,8 @@ def demo():
     env.code_branch = 'develop'
     env.sudo_user = 'afrims'
     env.environment = 'demo'
-    env.router_port = '9081'
+    env.thb_router_port = '9081'
+    env.php_router_port = '9081'
     env.server_port = '9003'
     env.server_name = 'demo-trialconnect.dimagi.com'
     env.hosts = ['173.203.221.48']
@@ -174,12 +176,11 @@ def deploy():
     with cd(env.code_root):
         sudo('git pull', user=env.sudo_user)
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
-
+        sudo('git rev-parse HEAD >%(project_root)s/GIT_LAST_COMMIT' % env, user=env.sudo_user)
     if env.environment == 'production':
         migrate_production()
     else:
         migrate()
-
     collectstatic()
     touch()
     start()
@@ -285,7 +286,7 @@ def migrate():
     """ run south migration on remote environment """
     require('project_root', provided_by=('production', 'demo', 'staging'))
     with cd(env.project_root):
-        run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % env)
+        run('%(virtualenv_root)s/bin/python manage.py syncdb --all --noinput --settings=%(settings)s' % env)
         run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
 
 

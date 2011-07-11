@@ -9,6 +9,8 @@ class Migration(DataMigration):
     def forwards(self, orm):
         "Write your forwards methods here."
         group, _ = orm['groups.Group'].objects.get_or_create(name='Subjects')
+        group.is_editable = False
+        group.save()
         for patient in orm.Patient.objects.all():
             patient.contact.name = patient.subject_number
             patient.contact.phone = patient.mobile_number

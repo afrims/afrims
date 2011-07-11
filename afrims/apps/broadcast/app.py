@@ -3,6 +3,7 @@
 import datetime
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
@@ -14,6 +15,7 @@ from afrims.apps.broadcast.models import Broadcast, BroadcastMessage,\
                                          ForwardingRule
 from afrims.apps.broadcast.views import usage_report_context
 from afrims.apps.groups import models as groups
+from afrims.apps.reminders.models import Patient
 
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -119,15 +121,21 @@ class BroadcastApp(AppBase):
         rule = rules[keyword]
         contact = msg.connection.contact
         if not contact or \
-          not rule.source.contacts.filter(pk=contact.pk).exists():
+          (rule.source and not rule.source.contacts.filter(pk=contact.pk).exists()):
             msg.respond(self.not_registered)
             return True
         now = datetime.datetime.now()
         msg_text = [rule.message, u' '.join(msg_parts[1:])]
         msg_text = [m for m in msg_text if m]
         msg_text = u' '.join(msg_text)
+        identifier = contact.name
+        try:
+            patient = Patient.objects.get(contact=contact)
+            identifier = patient.subject_number
+        except ObjectDoesNotExist:
+            pass
         full_msg = u'From {name} ({number}): {body}'\
-                   .format(name=contact.name, number=msg.connection.identity,
+                   .format(name=identifier, number=msg.connection.identity,
                            body=msg_text)
         broadcast = Broadcast.objects.create(date_created=now, date=now,
                                              schedule_frequency='one-time',
