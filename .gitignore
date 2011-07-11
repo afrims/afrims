@@ -9,3 +9,5 @@
 localsettings.py
 test_localsettings.py
 static_files/
+localsettings*
+settings_*.py
