@@ -5,7 +5,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from dateutil import rrule
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 
 from rapidsms.tests.harness import MockRouter, MockBackend
@@ -13,12 +13,48 @@ from rapidsms.models import Connection, Contact, Backend
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.messages.incoming import IncomingMessage
 
-from afrims.tests.testcases import CreateDataTest, FlushTestScript
+from afrims.tests.testcases import CreateDataTest, FlushTestScript, \
+                                   TabPermissionsTest
 from afrims.apps.broadcast.models import Broadcast, DateAttribute,\
                                          ForwardingRule
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 from afrims.apps.broadcast.forms import BroadcastForm
+from afrims.apps.reminders.tests import RemindersCreateDataTest
 
+class DashboardTest(TabPermissionsTest):
+    """ Test class for broadcast tab permissions """
+
+    def test_dashboard_with_perms(self):
+        """ Test that we can access the dashboard tab if we have permission """
+        self.check_with_perms(reverse('rapidsms-dashboard'),
+                              'can_use_dashboard_tab')
+
+    def test_dashboard_without_perms(self):
+        """ Test that we cannot access the dashboard tab if we
+            don't have permission """
+        self.check_without_perms(reverse('rapidsms-dashboard'),
+                                 'can_use_dashboard_tab')
+
+    def test_send_tab_no_perms(self):
+        """ Test that accessing the Send a Message tab without
+            permission redirects """
+        self.check_without_perms(reverse('broadcast-messages'),
+                                 'can_use_send_a_message_tab')
+
+    def test_send_no_perms(self):
+        """ Test that trying to send a message without tab permission fails """
+        self.check_without_perms(reverse('edit-broadcast',args=(1,)),
+                                 'can_use_send_a_message_tab', method='post')
+
+    def test_schedule_no_perms(self):
+        """ Test that scheduling a broadcast without perms fails """
+        self.check_without_perms(reverse('broadcast-schedule'),
+                                 'can_use_send_a_message_tab')
+
+    def test_forwarding_tab_no_perms(self):
+        """ Test that accessing the Forwarding tab without permission fails """
+        self.check_without_perms(reverse('broadcast-forwarding'),
+                                 'can_use_forwarding_tab')
 
 class BroadcastCreateDataTest(CreateDataTest):
     """ Base test case that provides helper functions to create data """
@@ -150,6 +186,10 @@ class BroadcastDateTest(BroadcastCreateDataTest):
         broadcast = self.create_broadcast(when='ready')
         broadcast.schedule_end_date = datetime.datetime.now()
         self.assertEqual(broadcast.get_next_date(), None)
+        broadcast.set_next_date()
+        broadcast.save()
+        ready = Broadcast.ready.all()
+        self.assertFalse(broadcast in ready)
 
     def test_month_recurrence(self):
         """ Test monthly recurrence for past month """
@@ -290,8 +330,27 @@ class BroadcastFormTest(BroadcastCreateDataTest):
 class BroadcastViewTest(BroadcastCreateDataTest):
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_send_a_message_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
+
+    def test_delete_no_perms(self):
+        """ Test that trying to delete a broadcast without tab permission
+            fails """
+        perm = Permission.objects.get(codename='can_use_send_a_message_tab')
+        self.user.user_permissions.remove(perm)
+        self.user.save()
+        contact = self.create_contact()
+        group = self.create_group()
+        contact.groups.add(group)
+        before = self.create_broadcast(when='future',
+                                       data={'groups': [group.pk]})
+        url = reverse('delete-broadcast', args=[before.pk])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302,
+                         'should redirect on success')
+        self.assertTrue('/access_denied/' in response['Location'])
 
     def test_delete(self):
         """ Make sure broadcasts are disabled on 'delete' """
@@ -307,8 +366,7 @@ class BroadcastViewTest(BroadcastCreateDataTest):
         after = Broadcast.objects.get(pk=before.pk)
         self.assertTrue(after.schedule_frequency is None)
 
-
-class BroadcastForwardingTest(BroadcastCreateDataTest):
+class BroadcastForwardingTest(BroadcastCreateDataTest, RemindersCreateDataTest):
 
     def setUp(self):
         self.source_contact = self.create_contact(data={'first_name': 'John',
@@ -345,12 +403,38 @@ class BroadcastForwardingTest(BroadcastCreateDataTest):
         self.assertEqual(msg.responses[0].text,
                          self.app.not_registered)
 
+    def test_rule_with_no_source(self):
+        """ like test_unregistered, but a rule with no source sends
+            everybody the unregistered response """
+        self.rule.source = None
+        self.rule.save()
+        msg = self._send(self.unreg_conn, 'abc')
+        self.assertEqual(len(msg.responses), 1)
+        self.assertEqual(msg.responses[0].text,
+                         self.app.not_registered)
+
     def test_wrong_group(self):
         """ tests the response from a user in non-source group """
         msg = self._send(self.dest_conn, 'abc')
         self.assertEqual(len(msg.responses), 1)
         self.assertEqual(msg.responses[0].text,
                          self.app.not_registered)
+
+    def test_patient_identifier(self):
+        """ Test that when we forward a message from a patient,
+        we insert the patient's subject identifier"""
+
+        patient = self.create_patient(data={'contact': self.source_contact})
+
+        msg = self._send(self.source_conn, 'abc my-message')
+        self.assertEqual(Broadcast.objects.count(), 1)
+        bc = Broadcast.objects.get()
+        identifier = patient.subject_number
+        expected_msg = 'From {name} ({number}): {msg} my-message'\
+                       .format(name=identifier,
+                               number=self.source_conn.identity,
+                               msg=self.rule.message)
+        self.assertEqual(bc.body, expected_msg)
 
     def test_creates_broadcast(self):
         """ tests the response from a user in non-source group """
@@ -370,6 +454,28 @@ class BroadcastForwardingTest(BroadcastCreateDataTest):
         self.assertEqual(list(bc.groups.all()), [self.rule.dest])
         self.assertEqual(msg.responses[0].text,
                          self.app.thank_you)
+
+    def test_creates_crufty_broadcast(self):
+        """ tests the response from a user in non-source group """
+        msg = self._send(self.source_conn, 'abc: my-message')
+        bc = Broadcast.objects.get()
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)
+
+    def test_creates_spacy_broadcast(self):
+        """ tests the response from a user in non-source group """
+        rule = self.create_forwarding_rule(data={'keyword': 'def '})
+        rule.source.contacts.add(self.source_contact)
+        msg = self._send(self.source_conn, 'def: my-message')
+        bc = Broadcast.objects.get()
+        expected_msg = u'From {name} ({number}): {msg} my-message'\
+                       .format(name=self.source_contact.name,
+                               number=self.source_conn.identity,
+                               msg=rule.message)
+        self.assertEqual(bc.body, expected_msg)
+        self.assertEqual(list(bc.groups.all()), [rule.dest])
+        self.assertEqual(msg.responses[0].text,
+                         self.app.thank_you)        
 
     def test_unicode_broadcast_body(self):
         """ Make sure unicode strings can be broadcasted """
@@ -421,6 +527,8 @@ class ForwardingViewsTest(BroadcastCreateDataTest):
     def setUp(self):
         super(ForwardingViewsTest, self).setUp()
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_forwarding_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
         self.dashboard_url = reverse('broadcast-forwarding')

@@ -22,7 +22,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from afrims.apps.groups.models import Group
 from afrims.apps.reminders import models as reminders
 from afrims.tests.testcases import (CreateDataTest, FlushTestScript,
-                                    patch_settings)
+                                    patch_settings, TabPermissionsTest)
 from afrims.apps.reminders.app import RemindersApp
 from afrims.apps.reminders.importer import parse_payload, parse_patient
 
@@ -142,10 +142,22 @@ class RemindersCreateDataTest(CreateDataTest):
         })
 
 
+class RemindersTabPermissionsTest(TabPermissionsTest):
+    """ Test tab permissions for reminders tabs """
+
+    def test_reminder_tab_without_perms(self):
+        """
+        Test that the tab cannot be loaded without the proper Permission
+        """
+        self.check_without_perms(reverse('reminders_dashboard'),
+                                 'can_use_appointment_reminders_tab')
+
 class ViewsTest(RemindersCreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_appointment_reminders_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
         self.dashboard_url = reverse('reminders_dashboard')
@@ -249,6 +261,7 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
                                                 'backend': self.backend})
         self.router = MockRouter()
         self.app = RemindersApp(router=self.router)
+        self.patient = self.create_patient(data={'contact': self.contact})
 
     def _send(self, conn, text):
         msg = IncomingMessage(conn, text)
@@ -348,7 +361,9 @@ class RemindersConfirmHandlerTest(RemindersCreateDataTest):
         group = Group.objects.get(name=settings.DEFAULT_CONFIRMATIONS_GROUP_NAME)
         broadcasts = group.broadcasts.filter(schedule_frequency='one-time')
         self.assertEqual(broadcasts.count(), 1)
-
+        expected_msg_re = re.compile(r'From %s \(%s\): Appointment on \d{4}-\d{2}-\d{2} confirmed.' % (self.reg_conn.identity, self.patient.subject_number))
+        logging.debug('Broadcast="%s"' % broadcasts[0].body)
+        self.assertTrue(expected_msg_re.match(broadcasts[0].body))
 
 class RemindersScriptedTest(FlushTestScript, RemindersCreateDataTest):
 
@@ -497,7 +512,7 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(payload.status, 'success')
         patients = reminders.Patient.objects.all()
         self.assertEqual(patients.count(), 1)
-        self.assertEqual(patients[0].mobile_number, '12223334444')
+        self.assertEqual(patients[0].mobile_number, '+12223334444')
         self.assertEqual(patients[0].raw_data.pk, payload.pk)
         self.assertTrue(patients[0].contact is not None)
 
@@ -505,10 +520,10 @@ class ImportTest(RemindersCreateDataTest):
         """ Test patients missing country code are still inserted """
         node = self.create_xml_patient({'Mobile_Number': '2223334444'})
         payload = self.create_payload([node])
-        with patch_settings(COUNTRY_CODE='66'):
+        with patch_settings(COUNTRY_CODE='66', INTERNATIONAL_DIALLING_CODE='+'):
             parse_patient(node, payload)
             patients = reminders.Patient.objects.all()
-            self.assertEqual(patients[0].mobile_number, '662223334444')
+            self.assertEqual(patients[0].mobile_number, '+662223334444')
 
     def test_invalid_patient_field(self):
         """ Invalid patient data should return a 500 status code """
@@ -526,7 +541,7 @@ class ImportTest(RemindersCreateDataTest):
         parse_patient(node, payload)
         patient = payload.patients.all()[0]
         self.assertTrue(patient.contact is not None)
-        self.assertEqual(patient.contact.phone, '12223334444')
+        self.assertEqual(patient.contact.phone, '+12223334444')
         self.assertEqual(patient.contact.pin, '4444')
 
     def test_update_contact_association(self):
@@ -543,8 +558,8 @@ class ImportTest(RemindersCreateDataTest):
         self.assertEqual(patient.pk, patient1.pk)
         self.assertNotEqual(patient.contact.pk, patient2.contact.pk)
         self.assertEqual(patient.contact.pk, patient1.contact.pk)
-        self.assertEqual(patient.mobile_number, '43332221111')
-        self.assertEqual(patient.contact.phone, '43332221111')
+        self.assertEqual(patient.mobile_number, '+43332221111')
+        self.assertEqual(patient.contact.phone, '+43332221111')
 
     def test_multi_patient_creation(self):
         """ Test that multiple patients are inserted properly """
@@ -563,7 +578,7 @@ class ImportTest(RemindersCreateDataTest):
         payload = self.create_payload([node])
         parse_patient(node, payload)
         patient = payload.patients.all()[0]
-        self.assertEqual(patient.contact.phone, '330001112222')
+        self.assertEqual(patient.contact.phone, '+330001112222')
 
     def test_next_visit_not_required(self):
         """ Next_Visit shoudn't be required """
@@ -675,6 +690,10 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
 
     def test_sending_mail(self):
         """Test email goes out the contacts in the daily report group."""
+
+        appt_date = datetime.date.today() + datetime.timedelta(days=7) # Default for email
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
+
         self.startRouter()
         self.router.logger.setLevel(logging.DEBUG)
 
@@ -686,6 +705,7 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         message = mail.outbox[0]
         self.assertTrue(self.test_contact.email in message.to)
         self.stopRouter()
+
 
     def test_appointment_date(self):
         """Test email contains info for the appointment date."""
@@ -730,11 +750,15 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
 
     def test_skip_blank_emails(self):
         """Test handling contacts with blank/null email addresses."""
+        appt_date = datetime.date.today() + datetime.timedelta(days=7) # Default for email
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         blank_contact = self.create_contact(data={'email': ''})
         null_contact = self.create_contact(data={'email': None})
         self.group.contacts.add(blank_contact)
         self.group.contacts.add(null_contact)
 
+        self.startRouter()
+        self.router.logger.setLevel(logging.DEBUG)
         # run email job
         from afrims.apps.reminders.app import daily_email_callback
         daily_email_callback(self.router)
@@ -744,11 +768,28 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         self.assertEqual(len(message.to), 1)
         self.stopRouter()
 
+    def test_skip_if_no_patients(self):
+        """Skip sending the email if there are not patients for this date."""
+
+        appt_date = datetime.date.today() + datetime.timedelta(days=5)
+        confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
+
+        self.startRouter()
+        self.router.logger.setLevel(logging.DEBUG)
+        # run email job
+        from afrims.apps.reminders.app import daily_email_callback
+        daily_email_callback(self.router)
+
+        self.assertEqual(len(mail.outbox), 0)
+        self.stopRouter()
+
 
 class ManualConfirmationTest(RemindersCreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_appointment_reminders_tab')
+        self.user.user_permissions.add(perm)
         self.user.save()
         self.client.login(username='test', password='abc')
         self.test_patient = self.create_patient()
@@ -777,4 +818,3 @@ class ManualConfirmationTest(RemindersCreateDataTest):
         data = {'next': next_url}
         response = self.client.post(self.url, data)
         self.assertRedirects(response, next_url)
-

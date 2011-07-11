@@ -160,6 +160,9 @@ class Broadcast(models.Model):
         self.date_last_notified = now
         if next_date:
             self.date = next_date
+        else:
+            # Disable broadcast if there is no next_date
+            self.schedule_frequency = None
         logger.debug('set_next_date end - {0}'.format(self))
 
     def queue_outgoing_messages(self):
@@ -201,7 +204,8 @@ class ForwardingRule(models.Model):
     """ Rule for forwarding SMSes from a user in one group to a 2nd group """
 
     keyword = models.CharField(max_length=160, unique=True)
-    source = models.ForeignKey(Group, related_name='source_rules')
+    source = models.ForeignKey(Group, related_name='source_rules',
+                               blank=True, null=True)
     dest = models.ForeignKey(Group, related_name='dest_rules')
     message = models.CharField(max_length=160, blank=True)
     rule_type = models.CharField(verbose_name='type', max_length=100,

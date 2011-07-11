@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+from django.conf import settings
+from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 from django.forms.models import model_to_dict
 from django.core.exceptions import ValidationError
@@ -7,7 +8,8 @@ from rapidsms.models import Contact, Backend, Connection
 from rapidsms.tests.harness import MockRouter
 from rapidsms.messages.incoming import IncomingMessage
 
-from afrims.tests.testcases import CreateDataTest, patch_settings
+from afrims.tests.testcases import CreateDataTest, patch_settings, \
+                                   TabPermissionsTest
 
 from afrims.apps.groups.models import Group
 from afrims.apps.groups import forms as group_forms
@@ -32,11 +34,26 @@ class GroupCreateDataTest(CreateDataTest):
                 'first_name': self.random_string(8),
                 'last_name': self.random_string(8),
                 'email': 'test@abc.com',
-                'phone': '31112223333',
+                'phone': '+31112223333',
             }
         data.update(initial_data)
         return data
 
+
+class GroupTabsTest(TabPermissionsTest):
+    """ Test people and group tab permissions"""
+
+    def test_group_view_no_permissions(self):
+        """ Test group view tab without permission redirects """
+        self.check_without_perms(reverse('list-groups'), 'can_use_groups_tab')
+
+    def test_people_tab_with_perms(self):
+        """ Test people view tab with permission works """
+        self.check_with_perms(reverse('list-contacts'), 'can_use_people_tab')
+
+    def test_people_tab_without_perms(self):
+        """ Test people view tab without permission redirects """
+        self.check_without_perms(reverse('list-contacts'), 'can_use_people_tab')
 
 class GroupFormTest(GroupCreateDataTest):
 
@@ -54,6 +71,7 @@ class GroupFormTest(GroupCreateDataTest):
         self.assertFalse(contact.groups.filter(pk=group2.pk).exists())
 
     def test_edit_contact(self):
+
         """ Test contact edit functionality with form """
         group1 = self.create_group()
         group2 = self.create_group()
@@ -67,11 +85,21 @@ class GroupFormTest(GroupCreateDataTest):
         self.assertFalse(contact.groups.filter(pk=group1.pk).exists())
         self.assertTrue(contact.groups.filter(pk=group2.pk).exists())
 
+    def test_no_subjects(self):
+        """New contacts cannot be added to the subjects group"""
+
+        subjects_group, _ = Group.objects.get_or_create(name=settings.DEFAULT_SUBJECT_GROUP_NAME)
+        data = self._data({'groups': [subjects_group.pk]})
+        form = group_forms.ContactForm(data)
+        self.assertFalse(form.is_valid())
+
 
 class GroupViewTest(CreateDataTest):
 
     def setUp(self):
         self.user = User.objects.create_user('test', 'a@b.com', 'abc')
+        perm = Permission.objects.get(codename='can_use_groups_tab')
+        self.user.user_permissions.add(perm)
         self.client.login(username='test', password='abc')
 
     def test_editable_views(self):
@@ -111,13 +139,13 @@ class PhoneTest(GroupCreateDataTest):
         All numbers should be stripped of non-numeric characters and, if
         defined, should be prepended with the COUNTRY_CODE
         """
-        normalized = '12223334444'
+        normalized = '+12223334444'
         number = '1-222-333-4444'
         self.assertEqual(self.app._normalize_number(number), normalized)
         number = '1 (222) 333-4444'
         self.assertEqual(self.app._normalize_number(number), normalized)
-        with patch_settings(COUNTRY_CODE='66'):
-            normalized = '662223334444'
+        with patch_settings(COUNTRY_CODE='66', INTERNATIONAL_DIALLING_CODE='+'):
+            normalized = '+662223334444'
             number = '22-23334444'
             self.assertEqual(self.app._normalize_number(number), normalized)
         with patch_settings(COUNTRY_CODE=None):

@@ -10,10 +10,14 @@ NUMBER_PATTERN = r'[^0-9]'
 def normalize_number(number):
     """ Strip all non-numeric characters from phone numbers """
     normalized_number = re.sub(NUMBER_PATTERN, '', number)
-    if len(normalized_number) == 10:
+    if len(normalized_number) == 10: # pretty country-specific, innit?
         # missing country code
         if (hasattr(settings, 'COUNTRY_CODE') and settings.COUNTRY_CODE):
             normalized_number = '{0}{1}'.format(settings.COUNTRY_CODE,
+                                                normalized_number)
+    if len(normalized_number) >= 11 and len(normalized_number) <= 12: # pretty country-specific, innit?
+        if (hasattr(settings, 'INTERNATIONAL_DIALLING_CODE') and settings.INTERNATIONAL_DIALLING_CODE):
+            normalized_number = '{0}{1}'.format(settings.INTERNATIONAL_DIALLING_CODE,
                                                 normalized_number)
     return normalized_number
 

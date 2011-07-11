@@ -1,15 +1,17 @@
 import datetime
+import logging
 import re
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import Q
+from django.db.models import Q, signals
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext
 
 from rapidsms.apps.base import AppBase
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages.outgoing import OutgoingMessage
+from rapidsms.models import Contact
 
 from afrims.apps.broadcast.models import Broadcast
 from afrims.apps.groups import models as groups
@@ -48,14 +50,17 @@ def daily_email_callback(router, *args, **kwargs):
         'confirmed_patients': confirmed_patients,
         'unconfirmed_patients': unconfirmed_patients,
     }
-    subject_template = u'Confirmation Report For Appointments on {appt_date}'
-    subject = subject_template.format(**context)
-    body = render_to_string('reminders/emails/daily_report_message.html', context)
-    group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
-    group, created = groups.Group.objects.get_or_create(name=group_name)
-    if not created:
-        emails = [c.email for c in group.contacts.all() if c.email]
-        send_mail(subject, body, None, emails, fail_silently=True)
+    patients_exist = confirmed_patients or unconfirmed_patients
+    if patients_exist:
+        subject_template = u'Confirmation Report For Appointments on {appt_date}'
+        subject = subject_template.format(**context)
+        body = render_to_string('reminders/emails/daily_report_message.html', context)
+        group_name = settings.DEFAULT_DAILY_REPORT_GROUP_NAME
+        group, created = groups.Group.objects.get_or_create(name=group_name)
+        if not created:
+            emails = [c.email for c in group.contacts.all() if c.email]
+            if emails:
+                send_mail(subject, body, None, emails, fail_silently=True)
 
 
 class RemindersApp(AppBase):
@@ -179,9 +184,14 @@ class RemindersApp(AppBase):
         sent_notification.status = 'confirmed'
         sent_notification.date_confirmed = now
         sent_notification.save()
+
+        contact = msg.connection.contact
+        patient = reminders.Patient.objects.get(contact=contact)
+        study_id = patient.subject_number
         msg_text = u'Appointment on %s confirmed.' % sent_notification.appt_date
-        full_msg = u'From {number}: {body}'.format(
-            number=msg.connection.identity, body=msg_text
+        full_msg = u'From {number} ({study_id}): {body}'.format(
+            number=msg.connection.identity, body=msg_text,
+            study_id=study_id,
         )
         broadcast = Broadcast.objects.create(
             date_created=now, date=now,
@@ -257,7 +267,7 @@ class RemindersApp(AppBase):
             except Exception, e:
                 self.exception(e)
                 success = False
-            if success and msg.sent:
+            if success and (msg.sent or msg.sent is None):
                 self.debug('notification sent successfully')
                 notification.status = 'sent'
                 notification.date_sent = datetime.datetime.now()
@@ -272,3 +282,32 @@ class RemindersApp(AppBase):
         self.queue_outgoing_notifications()
         # send queued notifications
         self.send_notifications()
+
+def queue_message_to_contact(contact, text):
+    """Just queue a single message to a contact"""
+    now = datetime.datetime.now()
+    broadcast = Broadcast(schedule_frequency='one-time',
+                          date=now,
+                          body=text)
+    broadcast.save()
+    broadcast.messages.create(recipient=contact)
+
+def new_contact_created(sender, **kwargs):
+    """When a new contact is created, send a welcome message"""
+    created = kwargs['created']
+    if created:
+        contact = kwargs['instance']
+        connection = contact.default_connection
+        if not connection:
+            logging.debug('no connection found for recipient {0}, unable '
+                       'to send'.format(contact))
+            return
+        text = _("You have been registered for TrialConnect.")
+        try:
+            queue_message_to_contact(contact, text)
+            logging.debug("Queued welcome message to %s", contact)
+        except Exception, e:
+            logging.exception(e)
+
+signals.post_save.connect(new_contact_created, sender=Contact,
+               dispatch_uid='just once per new contact created')

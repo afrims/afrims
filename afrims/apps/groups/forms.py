@@ -2,9 +2,10 @@ import logging
 import re
 
 from django import forms
+from rapidsms.conf import settings
 
 from afrims.apps.groups.models import Group
-from afrims.apps.groups.utils import format_number
+from afrims.apps.groups.utils import format_number, normalize_number
 from afrims.apps.groups.validators import validate_phone
 
 
@@ -27,7 +28,7 @@ class FancyPhoneInput(forms.TextInput):
     def value_from_datadict(self, data, files, name):
         value = super(FancyPhoneInput, self).value_from_datadict(data, files, name)
         if value:
-            value = re.sub(r'\D', '', value)
+            value = normalize_number(value)
         return value
 
 
@@ -62,7 +63,7 @@ class ContactForm(forms.ModelForm):
             kwargs['initial'] = {'groups': list(pks)}
         super(ContactForm, self).__init__(*args, **kwargs)
         self.fields['groups'].widget = forms.CheckboxSelectMultiple()
-        self.fields['groups'].queryset = Group.objects.order_by('name')
+        self.fields['groups'].queryset = Group.objects.exclude(name=settings.DEFAULT_SUBJECT_GROUP_NAME).order_by('name')
         self.fields['groups'].required = False
         for name in ('first_name', 'last_name', 'phone'):
             self.fields[name].required = True

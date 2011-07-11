@@ -20,6 +20,8 @@ urlpatterns = patterns('',
 
     url(r'^settings/$', direct_to_template,
         {'template': 'afrims/not_implemented.html'}, name='settings'),
+    url(r'^access_denied/$', direct_to_template,
+        {'template': 'afrims/access_denied.html'}, name='access-denied'),
 
     # RapidSMS contrib app URLs
     (r'^ajax/', include('rapidsms.contrib.ajax.urls')),
