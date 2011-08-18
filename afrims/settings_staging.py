@@ -40,8 +40,12 @@ INSTALLED_BACKENDS = {
     },
     "megamobile": {
         "ENGINE": "afrims.backends.megamobile",
-        "gateway_url": "http://125.5.124.146/dimagi",
-        "port": "9191"
+        "params_outgoing": "cel=%(phone_number)s&msg=%(message)s&pid=%(pid)s&src=dimagi",
+        "gateway_url": "http://api.mymegamobile.com/dimagi",
+        "port": "9191",
+        'config': {
+            'default_pid': '0-156-11884', # for dimagi initiated messages
+        }
     },
     "kannel-cebu" : {
         "ENGINE":  "rapidsms.backends.kannel",
