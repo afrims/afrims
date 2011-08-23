@@ -35,7 +35,7 @@ class MegaMobileBackend(RapidHttpBackend):
         if "gateway_url" not in kwargs:
             kwargs["gateway_url"] = "http://api.mymegamobile.com/api.php"
         super(MegaMobileBackend, self).configure(host, port, **kwargs)
-        self.config = config
+        self.config = config or {}
 
     def message(self, identity, text, received_at=None):
         # import the models here, rather than at the top, to give the
@@ -89,7 +89,8 @@ class MegaMobileBackend(RapidHttpBackend):
         non_digit = re.compile(r'\D')
         identity = non_digit.sub('', identity)
         http_params_outgoing = http_params_outgoing.replace('%(phone_number)s', urllib2.quote(identity))
-        pid = getattr(message, 'pid', 0)
+        default_pid = self.config.get('default_pid', 0)
+        pid = getattr(message, 'pid', default_pid)
         http_params_outgoing = http_params_outgoing.replace('%(pid)s', urllib2.quote(str(pid)))
         url = "%s?%s" % (self.gateway_url, http_params_outgoing)
         try:

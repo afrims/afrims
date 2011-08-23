@@ -40,9 +40,26 @@ INSTALLED_BACKENDS = {
     },
     "megamobile": {
         "ENGINE": "afrims.backends.megamobile",
-        "gateway_url": "http://125.5.124.146/dimagi",
-        "port": "9191"
+        "params_outgoing": "cel=%(phone_number)s&msg=%(message)s&pid=%(pid)s&src=dimagi",
+        "gateway_url": "http://api.mymegamobile.com/dimagi",
+        "port": "9191",
+        'config': {
+            'default_pid': '0-156-11884', # for dimagi initiated messages
+        }
     },
+    "kannel-cebu" : {
+        "ENGINE":  "rapidsms.backends.kannel",
+        "host": "173.203.221.48",
+        "port": 8080,
+        "sendsms_url": "http://119.93.159.212:13013/cgi-bin/sendsms",
+        "sendsms_params": {"smsc": "usb0-modem",
+                           "from": "+639164787841", # not set automatically by SMSC
+                           "username": "rapidsms",
+                           "password": ""}, # set in localsettings.py
+        "coding": 0,
+        "charset": "ascii",
+        "encode_errors": "ignore", # strip out unknown (unicode) characters
+    }
 }
 
 DATABASES = {
@@ -58,9 +75,11 @@ DATABASES = {
 
 #The default backend to be used when creating new patient contacts
 #on POST submission of patient data from their server
-DEFAULT_BACKEND_NAME = "mach"
+DEFAULT_BACKEND_NAME = "kannel-cebu"
 # unless overridden, all outgoing messages will be sent using this backend
-PRIMARY_BACKEND = "mach"
+PRIMARY_BACKEND = 'kannel-cebu'
+# if set, the message tester app will always use this backend
+TEST_MESSAGER_BACKEND = 'kannel-cebu'
 
 AJAX_PROXY_PORT = 9999
 
