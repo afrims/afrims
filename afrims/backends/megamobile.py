@@ -65,7 +65,7 @@ class MegaMobileBackend(RapidHttpBackend):
             self.error(error_msg)
             return HttpResponseBadRequest(error_msg)
         # Megamobile doesn't include our country code on the incoming phone number, apparently
-        country_code = settings.COUNTRYCODE
+        country_code = getattr(settings, 'COUNTRY_CODE', '63')
         if not sender.startswith(country_code) and not sender.startswith("+" + country_code):
             sender = "+%s%s" % (country_code, sender)
         pid = request.GET.get('pid', None)
