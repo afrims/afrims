@@ -624,6 +624,9 @@ class PatientManagerTest(RemindersCreateDataTest):
     def test_simple_confirmed(self):
         """Basic confirmed query test."""
         appt_date = datetime.date.today()
+        reminders.Patient.objects.filter(
+            pk__in=[self.test_patient.pk, self.other_patient.pk]
+        ).update(next_visit=appt_date)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
         qs = reminders.Patient.objects.confirmed_for_date(appt_date)
@@ -634,6 +637,9 @@ class PatientManagerTest(RemindersCreateDataTest):
     def test_simple_unconfirmed(self):
         """Basic unconfirmed query test."""
         appt_date = datetime.date.today()
+        reminders.Patient.objects.filter(
+            pk__in=[self.test_patient.pk, self.other_patient.pk]
+        ).update(next_visit=appt_date)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
         qs = reminders.Patient.objects.unconfirmed_for_date(appt_date)
@@ -644,6 +650,8 @@ class PatientManagerTest(RemindersCreateDataTest):
     def test_multiple_notifications_confirmed(self):
         """Confirmed patients returned should be distinct."""
         appt_date = datetime.date.today()
+        self.test_patient.next_visit = appt_date
+        self.test_patient.save()
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         confirmed_again = self.create_confirmed_notification(self.test_patient, appt_date)
         qs = reminders.Patient.objects.confirmed_for_date(appt_date)
@@ -653,15 +661,20 @@ class PatientManagerTest(RemindersCreateDataTest):
     def test_multiple_notifications_unconfirmed(self):
         """Unconfirmed patients returned should be distinct."""
         appt_date = datetime.date.today()
+        self.test_patient.next_visit = appt_date
+        self.test_patient.save()
         notified = self.create_unconfirmed_notification(self.test_patient, appt_date)
         notified_again = self.create_unconfirmed_notification(self.test_patient, appt_date)
         qs = reminders.Patient.objects.unconfirmed_for_date(appt_date)
+        logging.debug(qs)
         self.assertTrue(self.test_patient in qs)
         self.assertTrue(qs.count(), 1)
 
     def test_mixed_messages_confirmed(self):
         """Only need to confirm once to be considered confirmed."""
         appt_date = datetime.date.today()
+        self.test_patient.next_visit = appt_date
+        self.test_patient.save()
         notified = self.create_unconfirmed_notification(self.test_patient, appt_date)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         notified_again = self.create_unconfirmed_notification(self.test_patient, appt_date)
@@ -692,6 +705,9 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         """Test email goes out the contacts in the daily report group."""
 
         appt_date = datetime.date.today() + datetime.timedelta(days=7) # Default for email
+        reminders.Patient.objects.filter(
+            pk__in=[self.test_patient.pk, self.other_patient.pk]
+        ).update(next_visit=appt_date)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
 
         self.startRouter()
@@ -710,6 +726,9 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
     def test_appointment_date(self):
         """Test email contains info for the appointment date."""
         appt_date = datetime.date.today() + datetime.timedelta(days=7) # Default for email
+        reminders.Patient.objects.filter(
+            pk__in=[self.test_patient.pk, self.other_patient.pk]
+        ).update(next_visit=appt_date)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
 
@@ -731,6 +750,9 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         """Test changing appointment date via callback kwarg."""
         days = 2
         appt_date = datetime.date.today() + datetime.timedelta(days=days)
+        reminders.Patient.objects.filter(
+            pk__in=[self.test_patient.pk, self.other_patient.pk]
+        ).update(next_visit=appt_date)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         unconfirmed = self.create_unconfirmed_notification(self.other_patient, appt_date)
 
@@ -751,6 +773,9 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
     def test_skip_blank_emails(self):
         """Test handling contacts with blank/null email addresses."""
         appt_date = datetime.date.today() + datetime.timedelta(days=7) # Default for email
+        reminders.Patient.objects.filter(
+            pk__in=[self.test_patient.pk, self.other_patient.pk]
+        ).update(next_visit=appt_date)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
         blank_contact = self.create_contact(data={'email': ''})
         null_contact = self.create_contact(data={'email': None})
@@ -772,6 +797,9 @@ class DailyReportTest(FlushTestScript, RemindersCreateDataTest):
         """Skip sending the email if there are not patients for this date."""
 
         appt_date = datetime.date.today() + datetime.timedelta(days=5)
+        reminders.Patient.objects.filter(
+            pk__in=[self.test_patient.pk, self.other_patient.pk]
+        ).update(next_visit=appt_date)
         confirmed = self.create_confirmed_notification(self.test_patient, appt_date)
 
         self.startRouter()
