@@ -2,6 +2,7 @@ from datetime import datetime
 import re
 import urllib2
 
+from django.conf import settings
 from django.http import HttpResponse, HttpResponseBadRequest
 
 from rapidsms.backends.http import RapidHttpBackend
@@ -63,6 +64,10 @@ class MegaMobileBackend(RapidHttpBackend):
                          }
             self.error(error_msg)
             return HttpResponseBadRequest(error_msg)
+        # Megamobile doesn't include our country code on the incoming phone number, apparently
+        country_code = settings.COUNTRYCODE
+        if not sender.startswith(country_code) and not sender.startswith("+" + country_code):
+            sender = "+%s%s" % (country_code, sender)
         pid = request.GET.get('pid', None)
         now = datetime.utcnow()
         try:
