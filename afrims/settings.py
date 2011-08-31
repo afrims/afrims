@@ -117,7 +117,7 @@ STATIC_ROOT = os.path.join(PROJECT_PATH, '..', 'static_files')
 # Specify a logo URL for the dashboard layout.html. This logo will show up
 # at top left for every tab
 LOGO_LEFT_URL = '%simages/trialconnect.png' % STATIC_URL
-LOGO_RIGHT_URL = '%simages/tatrc.png' % STATIC_URL
+LOGO_RIGHT_URL = '%simages/tatrc_logo.png' % STATIC_URL
 SITE_TITLE = " "
 BASE_TEMPLATE = "layout.html"
 
