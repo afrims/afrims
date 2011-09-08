@@ -208,6 +208,27 @@ SOUTH_MIGRATION_MODULES = {
 }
 
 
+
+AUDIT_VIEWS = [
+    'afrims.apps.groups.views.list_groups',
+    'afrims.apps.groups.views.create_edit_group',
+    'afrims.apps.groups.views.delete_group',
+    'afrims.apps.groups.views.list_contacts',
+    'afrims.apps.groups.views.create_edit_contact',
+    'afrims.apps.groups.views.delete_contact',
+    'afrims.apps.broadcast.views.send_message',
+    'afrims.apps.broadcast.views.list_messages',
+    'afrims.apps.broadcast.views.create_edit_rule',
+    'afrims.apps.broadcast.views.delete_rule',
+    'afrims.apps.broadcast.views.report_graph_data',
+    'afrims.apps.reminders.views.create_edit_notification',
+    'afrims.apps.reminders.views.delete_notification',
+    'afrims.apps.reminders.views.manually_confirm',
+    'afrims.apps.reminders.views.dashboard',
+    'afrims.apps.reminders.views.report',
+    'afrims.apps.reminders.views.receive_patient_record',
+    ]
+
 #The default group subjects are added to when their information
 #is POSTed to us
 DEFAULT_SUBJECT_GROUP_NAME = 'Subjects'
