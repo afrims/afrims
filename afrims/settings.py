@@ -25,6 +25,9 @@ INSTALLED_APPS = [
     "rapidsms.contrib.handlers",
     "rapidsms.contrib.ajax",
 
+    #audit utils
+    "auditcare",
+
     # enable the django admin using a little shim app (which includes
     # the required urlpatterns), and a bunch of undocumented apps that
     # the AdminSite seems to explode without.
@@ -54,6 +57,8 @@ INSTALLED_APPS = [
     "rapidsms.contrib.messaging",
     "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
+
+    "couchlog",
 
     # this app should be last, as it will always reply with a help message
     "afrims.apps.catch_all",
@@ -140,6 +145,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
     "rapidsms.context_processors.logo",
     "afrims.apps.reminders.context_processors.messages",
+    "couchlog.context_processors.static_workaround"
 ]
 
 
@@ -151,6 +157,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'pagination.middleware.PaginationMiddleware',
     'django_sorting.middleware.SortingMiddleware',
+    'auditcare.middleware.AuditMiddleware',
 ]
     
 # -------------------------------------------------------------------- #

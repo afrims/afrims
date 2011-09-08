@@ -18,7 +18,12 @@ if not settings_specified and len(sys.argv) >= 2:
     if 'RAPIDSMS_SETTINGS' in os.environ:
         settings = os.environ['RAPIDSMS_SETTINGS']
     sys.argv.append('--settings=%s' % settings)
-    print "NOTICE: using default settings module '%s'" % settings    
+    print "NOTICE: using default settings module '%s'" % settings
+
+filedir = os.path.dirname(__file__)
+sys.path.append(os.path.join(filedir,'..','submodules','auditcare'))
+sys.path.append(os.path.join(filedir,'..','submodules','dimagi-utils'))
+sys.path.append(os.path.join(filedir,'..','submodules','couchlog'))
 
 if __name__ == "__main__":
     # all imports should begin with the full Python package ('afrims.'):
