@@ -16,3 +16,6 @@ django-rosetta==0.6.0
 -e git+https://github.com/dimagi/rapidsms-mach-backend.git#egg=rmach
 couchdbkit
 pytz
+-e git+https://github.com/dimagi/couchlog.git#egg=couchlog
+-e git+https://github.com/dimagi/auditcare.git#egg=auditcare
+-e git+https://github.com/dimagi/dimagi-utils.git#egg=dimagi_utils

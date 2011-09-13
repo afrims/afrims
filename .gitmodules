@@ -1,9 +1,0 @@
-[submodule "submodules/auditcare"]
-	path = submodules/auditcare
-	url = git@github.com:dimagi/auditcare.git
-[submodule "submodules/couchlog"]
-	path = submodules/couchlog
-	url = git@github.com:dimagi/couchlog.git
-[submodule "submodules/dimagi-utils"]
-	path = submodules/dimagi-utils
-	url = git@github.com:dimagi/dimagi-utils.git

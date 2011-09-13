@@ -228,6 +228,16 @@ AUDIT_VIEWS = [
     'afrims.apps.reminders.views.report',
     'afrims.apps.reminders.views.receive_patient_record',
     ]
+	
+AUDIT_MODEL_SAVE = [
+	'afrims.apps.groups.models.Group',
+	'afrims.apps.reminders.models.Patient',
+	'afrims.apps.reminders.models.PatientDataPayload',
+	'afrims.apps.reminders.models.Notification',
+	'afrims.apps.broadcast.models.BroadcastMessage',
+	'afrims.apps.broadcast.models.Broadcast',
+	'afrims.apps.broadcast.models.ForwardingRule',
+	]
 
 #The default group subjects are added to when their information
 #is POSTed to us
