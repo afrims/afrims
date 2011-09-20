@@ -25,6 +25,9 @@ INSTALLED_APPS = [
     "rapidsms.contrib.handlers",
     "rapidsms.contrib.ajax",
 
+    #audit utils
+    "auditcare",
+
     # enable the django admin using a little shim app (which includes
     # the required urlpatterns), and a bunch of undocumented apps that
     # the AdminSite seems to explode without.
@@ -54,6 +57,8 @@ INSTALLED_APPS = [
     "rapidsms.contrib.messaging",
     "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
+
+    "couchlog",
 
     # this app should be last, as it will always reply with a help message
     "afrims.apps.catch_all",
@@ -140,6 +145,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     #this is for a custom logo on the dashboard (see LOGO_*_URL in settings, above)
     "rapidsms.context_processors.logo",
     "afrims.apps.reminders.context_processors.messages",
+    "couchlog.context_processors.static_workaround"
 ]
 
 
@@ -151,6 +157,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'pagination.middleware.PaginationMiddleware',
     'django_sorting.middleware.SortingMiddleware',
+    'auditcare.middleware.AuditMiddleware',
 ]
     
 # -------------------------------------------------------------------- #
@@ -200,6 +207,37 @@ SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'afrims.migrations.rapidsms',
 }
 
+
+
+AUDIT_VIEWS = [
+    'afrims.apps.groups.views.list_groups',
+    'afrims.apps.groups.views.create_edit_group',
+    'afrims.apps.groups.views.delete_group',
+    'afrims.apps.groups.views.list_contacts',
+    'afrims.apps.groups.views.create_edit_contact',
+    'afrims.apps.groups.views.delete_contact',
+    'afrims.apps.broadcast.views.send_message',
+    'afrims.apps.broadcast.views.list_messages',
+    'afrims.apps.broadcast.views.create_edit_rule',
+    'afrims.apps.broadcast.views.delete_rule',
+    'afrims.apps.broadcast.views.report_graph_data',
+    'afrims.apps.reminders.views.create_edit_notification',
+    'afrims.apps.reminders.views.delete_notification',
+    'afrims.apps.reminders.views.manually_confirm',
+    'afrims.apps.reminders.views.dashboard',
+    'afrims.apps.reminders.views.report',
+    'afrims.apps.reminders.views.receive_patient_record',
+    ]
+	
+AUDIT_MODEL_SAVE = [
+	'afrims.apps.groups.models.Group',
+	'afrims.apps.reminders.models.Patient',
+	'afrims.apps.reminders.models.PatientDataPayload',
+	'afrims.apps.reminders.models.Notification',
+	'afrims.apps.broadcast.models.BroadcastMessage',
+	'afrims.apps.broadcast.models.Broadcast',
+	'afrims.apps.broadcast.models.ForwardingRule',
+	]
 
 #The default group subjects are added to when their information
 #is POSTed to us
