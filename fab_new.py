@@ -70,7 +70,7 @@ def staging():
     env.server_port = '9002'
     env.server_name = 'afrims.dimagi.com'
     env.hosts = ['192.168.101.16']
-    env.settings = '%(project)s.settings' % env
+    env.settings = '%(project)s.localsettings' % env
     env.db = '%s_%s' % (env.project, env.environment)
     env.thb_router_port = '9011'
     env.php_router_port = '9012'
