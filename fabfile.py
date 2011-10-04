@@ -177,6 +177,8 @@ def deploy():
         sudo('git pull', user=env.sudo_user)
         sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
         sudo('git rev-parse HEAD >%(project_root)s/GIT_LAST_COMMIT' % env, user=env.sudo_user)
+        sudo('git submodule init')
+        sudo('git submodule update')
     if env.environment == 'production':
         migrate_production()
     else:
