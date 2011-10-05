@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     (r'^admin/', include(admin.site.urls)),
+    (r'^', include('auditcare.urls')),
     
     # RapidSMS core URLs
     (r'^account/', include('rapidsms.urls.login_logout')),
@@ -37,6 +38,7 @@ urlpatterns = patterns('',
     (r'^test-messager/', include('afrims.apps.test_messager.urls')),
     (r'^crm/', include('afrims.apps.groups.urls')),
     (r'^rosetta/', include('rosetta.urls')),
+    (r'^couchlog/', include('couchlog.urls')),
 )
 
 if settings.DEBUG:
