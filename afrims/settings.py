@@ -180,7 +180,7 @@ TEST_EXCLUDED_APPS = [
 
 # the project-level url patterns
 
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'tl'
 
 LANGUAGES = (
     ('en', 'English'),
