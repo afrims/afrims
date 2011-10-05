@@ -84,7 +84,7 @@ def production():
     env.environment = 'production'
     env.server_port = '9010'
     env.server_name = 'project-production.dimagi.com'
-    env.hosts = ['10.84.168.98']
+    env.hosts = ['10.84.168.245']
     env.settings = '%(project)s.localsettings' % env
     env.db = '%s_%s' % (env.project, env.environment)
     _setup_path()
