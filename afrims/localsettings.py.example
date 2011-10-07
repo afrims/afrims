@@ -45,7 +45,7 @@ COUCH_USERNAME='db_user'
 COUCH_PASSWORD='SECRET'
 COUCH_DATABASE_NAME='aremind'
 
-COUCHDB_APPS=['auditcare',]
+COUCHDB_APPS=['auditcare','couchlog']
 
 ####### Couch Forms & Couch DB Kit Settings #######
 def get_server_url(server_root, username, password):

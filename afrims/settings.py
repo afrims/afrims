@@ -187,7 +187,7 @@ TEST_EXCLUDED_APPS = [
 
 # the project-level url patterns
 
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'tl'
 
 LANGUAGES = (
     ('en', 'English'),
@@ -268,4 +268,4 @@ if os.path.exists(os.path.join(PROJECT_PATH,"GIT_LAST_COMMIT")):
 INTERNATIONAL_DIALLING_CODE = '+'
 
 # RapidSMS wants this to be set
-RAPIDSMS_HANDLERS_EXCLUDE_APPS = []
+RAPIDSMS_HANDLERS_EXCLUDE_APPS = ['staticfiles.handlers']

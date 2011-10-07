@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-30 16:32-0400\n"
+"POT-Creation-Date: 2011-08-26 08:15-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,56 +30,60 @@ msgstr ""
 msgid "Thank you, your message has been queued for delivery."
 msgstr ""
 
-#: apps/catch_all/app.py:19
+#: apps/catch_all/app.py:21
 msgid ""
 "Thank you for contacting us. Please reply with 2 to be called back within 2 "
 "days."
 msgstr ""
 
-#: apps/catch_all/app.py:22
+#: apps/catch_all/app.py:24
 msgid "Sorry, that message was not recognized"
 msgstr ""
 
-#: apps/reminders/app.py:78
+#: apps/reminders/app.py:80
 msgid ""
 "You have an upcoming appointment in {days} days, on {date}. Please reply "
 "with {confirm_response} to confirm."
 msgstr ""
 
-#: apps/reminders/app.py:81
+#: apps/reminders/app.py:83
 msgid ""
 "You have an appointment {day}, {date}. Please reply with {confirm_response} "
 "to confirm."
 msgstr ""
 
-#: apps/reminders/app.py:83
+#: apps/reminders/app.py:85
 msgid "Sorry, your mobile number is not registered."
 msgstr ""
 
-#: apps/reminders/app.py:84
+#: apps/reminders/app.py:86
 msgid "Sorry, I could not find any reminders awaiting confirmation."
 msgstr ""
 
-#: apps/reminders/app.py:86
+#: apps/reminders/app.py:88
 msgid "That is not your PIN code. Please reply with the correct PIN code."
 msgstr ""
 
-#: apps/reminders/app.py:88
+#: apps/reminders/app.py:90
 msgid "Please confirm appointments by sending your PIN code."
 msgstr ""
 
-#: apps/reminders/app.py:89
+#: apps/reminders/app.py:91
 msgid "Thank you for confirming your upcoming appointment."
 msgstr ""
 
-#: apps/reminders/app.py:142
+#: apps/reminders/app.py:144
 msgid "today"
 msgstr ""
 
-#: apps/reminders/app.py:145
+#: apps/reminders/app.py:147
 msgid "tomorrow"
 msgstr ""
 
-#: apps/reminders/app.py:234
+#: apps/reminders/app.py:236
 msgid "your PIN"
+msgstr ""
+
+#: apps/reminders/app.py:305
+msgid "You have been registered for TrialConnect."
 msgstr ""

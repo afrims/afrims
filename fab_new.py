@@ -79,12 +79,12 @@ def staging():
 
 def production():
     """ use production environment on remote host"""
-    env.code_branch = 'prod-master'
-    env.sudo_user = 'user_project'
+    env.code_branch = 'master'
+    env.sudo_user = 'afrims'
     env.environment = 'production'
     env.server_port = '9010'
     env.server_name = 'project-production.dimagi.com'
-    env.hosts = ['10.84.168.98']
+    env.hosts = ['10.84.168.245']
     env.settings = '%(project)s.localsettings' % env
     env.db = '%s_%s' % (env.project, env.environment)
     _setup_path()
