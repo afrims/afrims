@@ -40,6 +40,7 @@ def daily_email_callback(router, *args, **kwargs):
     try:
         days = int(days)
     except ValueError:
+        logging.debug('ValueError for specified days in daily_email_callback. Value used was %s. Using default value:7' % days)
         days = 7
     today = datetime.date.today()
     appt_date = today + datetime.timedelta(days=days)

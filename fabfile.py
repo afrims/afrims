@@ -194,7 +194,7 @@ def update_requirements():
     requirements = _join(env.code_root, 'requirements')
     with cd(requirements):
         cmd = ['pip install']
-        cmd += ['-q -E %(virtualenv_root)s' % env]
+        cmd += ['-E %(virtualenv_root)s' % env]
         cmd += ['--requirement %s' % _join(requirements, 'apps.txt')]
         sudo(' '.join(cmd), user=env.sudo_user)
 
