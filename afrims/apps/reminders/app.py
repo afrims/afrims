@@ -305,8 +305,8 @@ def new_contact_created(sender, **kwargs):
             return
         text = _("You have been registered for TrialConnect.")
         try:
-            #queue_message_to_contact(contact, text)
-            logging.debug("Welcome message to %s NOT QUEUED.  Welcome message currently disabled.", contact)
+            queue_message_to_contact(contact, text)
+            logging.debug("Sending wecome message '%s' to '%s'." % (text, contact))
         except Exception, e:
             logging.exception(e)
 
