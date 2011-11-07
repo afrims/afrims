@@ -6,6 +6,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from rapidsms.apps.base import AppBase
 from afrims.apps.reminders.models import Patient
 from models import CatchallMessage
+from django.utils.translation.trans_real import translation
+from django.conf import settings
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that ./manage.py makemessages
@@ -50,10 +52,12 @@ class CatchAllApp(AppBase):
                 pass
 
         if patient is None:
+#            t = translation(settings.LANGUAGE_CODE)
+#            msg.respond(t.gettext(self.non_patient_template).decode('utf-8'))
             msg.respond(self.non_patient_template)
             logging.debug("Sent non-patient do not understand message")
         else:
-            msg.respond(self.patient_template)
+            msg.respond(self.patient_template.decode('utf-8'))
             logging.debug("Sent patient do not understand message")
 
         # Remember that we sent a message
