@@ -253,7 +253,8 @@ class RemindersApp(AppBase):
                                     status='queued',
                                     date_to_send__lt=datetime.datetime.now())
         count = notifications.count()
-        self.info('found {0} notification(s) to send'.format(count))
+        if count > 0:
+            self.info('found {0} notification(s) to send'.format(count))
         for notification in notifications:
             connection = notification.recipient.default_connection
             if not connection:
