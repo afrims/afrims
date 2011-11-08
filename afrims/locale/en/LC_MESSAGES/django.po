@@ -2,19 +2,20 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-08-26 08:15-0700\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2011-10-12 09:54\n"
+"Last-Translator:   <adewinter@dimagi.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Translated-Using: django-rosetta 0.6.0\n"
 
 #: apps/broadcast/app.py:49
 msgid "TrialConnect Monthly Report - {report_month} {report_year}"
@@ -22,8 +23,8 @@ msgstr ""
 
 #: apps/broadcast/app.py:66
 msgid ""
-"Sorry, your mobile number is not registered in the required group for this "
-"keyword."
+"Sorry, your mobile number is not registered in the required group for "
+"this keyword."
 msgstr ""
 
 #: apps/broadcast/app.py:68
@@ -32,24 +33,26 @@ msgstr ""
 
 #: apps/catch_all/app.py:21
 msgid ""
-"Thank you for contacting us. Please reply with 2 to be called back within 2 "
-"days."
+"Thank you for contacting us. Please reply with 2 to be called back "
+"within 2 days."
 msgstr ""
+"This message needs to be translated (Thanks for contacting callback "
+"2days)"
 
 #: apps/catch_all/app.py:24
 msgid "Sorry, that message was not recognized"
-msgstr ""
+msgstr "This message needs to be translated (sorry not recognized)"
 
 #: apps/reminders/app.py:80
 msgid ""
-"You have an upcoming appointment in {days} days, on {date}. Please reply "
-"with {confirm_response} to confirm."
+"You have an upcoming appointment in {days} days, on {date}. Please "
+"reply with {confirm_response} to confirm."
 msgstr ""
 
 #: apps/reminders/app.py:83
 msgid ""
-"You have an appointment {day}, {date}. Please reply with {confirm_response} "
-"to confirm."
+"You have an appointment {day}, {date}. Please reply with "
+"{confirm_response} to confirm."
 msgstr ""
 
 #: apps/reminders/app.py:85
