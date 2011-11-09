@@ -183,6 +183,9 @@ TEST_EXCLUDED_APPS = [
     "rapidsms",
     "rapidsms.contrib.ajax",
     "rapidsms.contrib.httptester",
+    "auditcare",
+    "couchlog",
+    "south"
 ]
 
 # the project-level url patterns
