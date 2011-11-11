@@ -272,3 +272,5 @@ INTERNATIONAL_DIALLING_CODE = '+'
 
 # RapidSMS wants this to be set
 RAPIDSMS_HANDLERS_EXCLUDE_APPS = ['staticfiles']
+
+SERVER_EMAIL = "afrims-dev@dimagi.com"

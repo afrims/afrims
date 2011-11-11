@@ -123,5 +123,5 @@ class TxtNationBackend(RapidHttpBackend):
             self.exception(e)
             return False
         self.info('SENT')
-        self.debug(response.read())
+        self.debug("Response from TxTNation: %s" % response.read())
         return True
