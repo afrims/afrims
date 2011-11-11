@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-08-26 08:15-0700\n"
-"PO-Revision-Date: 2011-11-08 07:50\n"
+"PO-Revision-Date: 2011-11-10 18:05\n"
 "Last-Translator: Sam duPont <sdupont@dimagi.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -52,7 +52,7 @@ msgstr "นัดครั้งต่อไป{date} กด 1 ยืนยั�
 msgid ""
 "You have an appointment {day}, {date}. Please reply with "
 "{confirm_response} to confirm."
-msgstr "นัดครั้งต่อไป{date} กด 1 ยืนยันนัดเดิม กด 3 ให้เจ้าหน้าที่ติดต่อกลับ"
+msgstr "นัดครั้งต่อไป{day}."
 
 #: apps/reminders/app.py:85
 msgid "Sorry, your mobile number is not registered."
