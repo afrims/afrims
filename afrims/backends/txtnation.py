@@ -16,7 +16,7 @@ class TxtNationImproperlyConfigured(ImproperlyConfigured):
 
 class TxtNationBackend(RapidHttpBackend):
     default_timeout = 8
-    encoding = 'UTF-16'
+    encoding = 'UTF-8'
 
     def configure(self, host="localhost", port=8080, config=None, **kwargs):
         if "params_incoming" not in kwargs:
@@ -123,5 +123,5 @@ class TxtNationBackend(RapidHttpBackend):
             self.exception(e)
             return False
         self.info('SENT')
-        self.debug(response.read())
+        self.debug("Response from TxTNation: %s" % response.read())
         return True

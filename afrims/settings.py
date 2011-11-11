@@ -183,6 +183,9 @@ TEST_EXCLUDED_APPS = [
     "rapidsms",
     "rapidsms.contrib.ajax",
     "rapidsms.contrib.httptester",
+    "auditcare",
+    "couchlog",
+    "south"
 ]
 
 # the project-level url patterns
@@ -248,11 +251,11 @@ DEFAULT_CONFIRMATIONS_GROUP_NAME = 'Confirmation Recipients'
 
 #The default backend to be used when creating new patient contacts
 #on POST submission of patient data from their server
-DEFAULT_BACKEND_NAME = "twilio"
+DEFAULT_BACKEND_NAME = "message_tester"
 # unless overridden, all outgoing messages will be sent using this backend
-PRIMARY_BACKEND = 'twilio'
+PRIMARY_BACKEND = 'message_tester'
 # if set, the message tester app will always use this backend
-TEST_MESSAGER_BACKEND = 'twilio'
+TEST_MESSAGER_BACKEND = 'message_tester'
 
 STATICFILES_DIRS = (os.path.join(PROJECT_PATH, 'static'),
                     os.path.join(PROJECT_PATH, 'templates'))

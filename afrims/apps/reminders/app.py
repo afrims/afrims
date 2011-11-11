@@ -76,7 +76,6 @@ class RemindersApp(AppBase):
 
     pin_regex = re.compile(r'^\d{4,6}$')
     conf_keyword = '1'
-    date_format = '%B %d, %Y'
 
     future_appt_msg = _('You have an upcoming appointment in '
                         '{days} days, on {date}. Please reply with '
@@ -136,9 +135,11 @@ class RemindersApp(AppBase):
         num_days = (appt_date - datetime.date.today()).days
         if confirm_response is None:
             confirm_response = cls.conf_keyword
+        month_for_translate = appt_date.strftime('%B')
+        month_for_translate = ugettext(month_for_translate)
         msg_data = {
             'days': num_days,
-            'date': appt_date.strftime(cls.date_format),
+            'date': '%s %s' % (month_for_translate ,appt_date.strftime('%d, %Y')),
             'confirm_response': confirm_response,
         }
         if num_days == 0:
@@ -162,6 +163,7 @@ class RemindersApp(AppBase):
         msg_parts = msg.text.split()
         if not msg_parts:
             return False
+
         response = msg_parts[0]
         if response != self.conf_keyword and not self.pin_regex.match(response):
             return False
@@ -253,7 +255,8 @@ class RemindersApp(AppBase):
                                     status='queued',
                                     date_to_send__lt=datetime.datetime.now())
         count = notifications.count()
-        self.info('found {0} notification(s) to send'.format(count))
+        if count > 0:
+            self.info('found {0} notification(s) to send'.format(count))
         for notification in notifications:
             connection = notification.recipient.default_connection
             if not connection:

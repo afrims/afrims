@@ -151,7 +151,8 @@ class BroadcastApp(AppBase):
     def queue_outgoing_messages(self):
         """ generate queued messages for scheduled broadcasts """
         broadcasts = Broadcast.ready.all()
-        self.info('found {0} ready broadcast(s)'.format(broadcasts.count()))
+        if broadcasts.count() > 0:
+            self.info('found {0} ready broadcast(s)'.format(broadcasts.count()))
         for broadcast in Broadcast.ready.all():
             # TODO: make sure this process is atomic
             count = broadcast.queue_outgoing_messages()
@@ -162,7 +163,8 @@ class BroadcastApp(AppBase):
     def send_messages(self):
         """ send queued for delivery messages """
         messages = BroadcastMessage.objects.filter(status='queued')[:50]
-        self.info('found {0} message(s) to send'.format(messages.count()))
+        if messages.count() > 0:
+            self.info('found {0} message(s) to send'.format(messages.count()))
         for message in messages:
             connection = message.recipient.default_connection
             msg = OutgoingMessage(connection=connection,
