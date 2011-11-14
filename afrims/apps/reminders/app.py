@@ -139,7 +139,7 @@ class RemindersApp(AppBase):
         month_for_translate = ugettext(month_for_translate)
         msg_data = {
             'days': num_days,
-            'date': '%s %s' % (month_for_translate ,appt_date.strftime('%d, %Y')),
+            'date': '%s %s' % (appt_date.strftime('%d'), month_for_translate),
             'confirm_response': confirm_response,
         }
         if num_days == 0:
