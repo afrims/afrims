@@ -12,3 +12,4 @@ static_files/
 localsettings*
 settings_*.py
 GIT_LAST_COMMIT
+afrims/build/

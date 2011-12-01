@@ -53,9 +53,10 @@ class SentNotificationManager(models.Manager):
         ).distinct()
 
     def unconfirmed_for_range(self, start_date, end_date):
-        return self.for_current_appointment().filter(
-            ~Q(status__in=['confirmed', 'manual']),
+        return self.filter(
             appt_date__range=(start_date, end_date),  
+        ).exclude(
+            status__in=['confirmed', 'manual'],
         ).distinct()
 
 
