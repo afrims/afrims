@@ -41,7 +41,8 @@ class GroupForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)
         self.fields['contacts'].help_text = ''
-        qs = Contact.objects.filter(patient__isnull=True).order_by('name')
+#        qs = Contact.objects.filter(patient__isnull=True).order_by('name')
+        qs = Contact.objects.all().order_by('patient__subject_number')
         self.fields['contacts'].queryset = qs
         self.fields['contacts'].widget.attrs['class'] = 'horitzonal-multiselect'
 
