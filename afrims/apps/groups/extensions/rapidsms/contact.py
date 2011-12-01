@@ -26,3 +26,14 @@ class ContactExtra(models.Model):
     @property
     def formatted_phone(self):
         return format_number(self.phone)
+
+    def __unicode__(self):
+        try:
+            patient = self.patient_set.all()[0]
+            if(patient.subject_number):
+                return patient.subject_number
+            else:
+                return self.name
+        except:
+            return self.name
+
