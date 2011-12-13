@@ -106,22 +106,43 @@ class BroadcastApp(AppBase):
         rules = ForwardingRule.objects.all()
         return dict([(self._clean_keyword(rule.keyword.lower()), rule) for rule in rules])
 
+    def _should_forward_all_from_this_source(self, msg):
+        contact = msg.connection.contact
+        identifier = contact.name
+        rules = self._forwarding_rules()
+        for key in rules:
+            rule = rules[key]
+            if not rule.forward_all_from_source:
+                continue
+            else: #has checked forward everything from specific source
+                if rule.source.contacts.filter(pk=contact.pk).exists(): #this contact is in the group listed as 'source'
+                  return (True, rule)
+        return (False, None)
+
+
     def handle(self, msg):
         """
         Handles messages that match the forwarding rules in this app.
         """
-        msg_parts = msg.text.split()
         rules = self._forwarding_rules()
+        contact = msg.connection.contact
+        if not contact:
+            self.debug('No contact found. Returning True')
+            msg.respond(self.not_registered)
+            return True
+        identifier = contact.name
+        msg_parts = msg.text.split()
         if not msg_parts:
+            self.debug('No message parts. Returning False')
             return False
+        forward_all_from_source, forward_all_rule = self._should_forward_all_from_this_source(msg)
         keyword = self._clean_keyword(msg_parts[0].lower())
-        if keyword not in rules:
+        if (keyword not in rules) and not forward_all_from_source:
             self.debug(u'{0} keyword not found in rules'.format(keyword))
             return False
-        rule = rules[keyword]
-        contact = msg.connection.contact
-        if not contact or \
-          (rule.source and not rule.source.contacts.filter(pk=contact.pk).exists()):
+        rule = forward_all_rule if forward_all_from_source else rules[keyword]
+        if rule.source and not rule.source.contacts.filter(pk=contact.pk).exists():
+            self.debug('Responding not registered for regular forwarding rule then Return True')
             msg.respond(self.not_registered)
             return True
         now = datetime.datetime.now()

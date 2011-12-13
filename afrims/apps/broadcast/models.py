@@ -207,6 +207,10 @@ class ForwardingRule(models.Model):
     source = models.ForeignKey(Group, related_name='source_rules',
                                blank=True, null=True)
     dest = models.ForeignKey(Group, related_name='dest_rules')
+    forward_all_from_source = models.BooleanField(help_text="""
+        Forward all messages from Source to Destination, regardless of keyword or message content.
+        WARNING: Using this option will disable all other TrialConnect functionality for this source!
+        """)
     message = models.CharField(max_length=160, blank=True)
     rule_type = models.CharField(verbose_name='type', max_length=100,
         blank=True, null=True,
@@ -219,6 +223,7 @@ class ForwardingRule(models.Model):
             For instance you might give rules with the same source or destination a common label.
             Examples would be 'System Messages' or 'To Staff'."""
     )
+
 
     def __unicode__(self):
         return self.keyword
