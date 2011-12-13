@@ -158,6 +158,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'pagination.middleware.PaginationMiddleware',
     'django_sorting.middleware.SortingMiddleware',
+    'afrims.apps.utils.login_middleware.RequireLoginMiddleware',
     'auditcare.middleware.AuditMiddleware',
 ]
     
@@ -206,6 +207,7 @@ ROOT_URLCONF = "afrims.urls"
 TIME_ZONE = 'America/New_York'
 
 LOGIN_URL = '/account/login/'
+REQUIRE_LOGIN_PATH = LOGIN_URL
 
 SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'afrims.migrations.rapidsms',
