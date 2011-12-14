@@ -39,6 +39,7 @@ urlpatterns = patterns('',
     (r'^crm/', include('afrims.apps.groups.urls')),
     (r'^rosetta/', include('rosetta.urls')),
     (r'^couchlog/', include('couchlog.urls')),
+    (r'^i18n/', include('django.conf.urls.i18n')),
 )
 
 if settings.DEBUG:

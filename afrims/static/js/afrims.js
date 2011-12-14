@@ -5,4 +5,8 @@ $(document).ready(function() {
     $('a.button').button({text: false});
     $('a.button.add').button("option", "icons", {primary: 'ui-icon-circle-plus'});
     $('a.button.add').button("option", "text", true);
+
+    $('#lang-selector').change(function (e) {
+        $(this).closest('form').submit();
+    });
 });

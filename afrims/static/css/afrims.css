@@ -113,3 +113,27 @@ table.sortable tbody tr.odd {
 table.sortable td.actions .ui-button-text-only .ui-button-text {
     padding: 2px;
 }
+
+#language-select-form {
+    float: left;
+    border: 0px;
+    top: -2px;
+    right: 130px;
+    margin: 0px;
+    padding: 0px;
+    font-size: 80%;
+    position: absolute;
+    line-height: 22px;
+}
+
+#branding h1 {
+    background: no-repeat 100% 50%;
+    height: 65px;
+    color: #fff;
+    margin: 0;
+}
+
+#lang-selector-label {
+    color: white;
+    line-height: 22px;
+}
