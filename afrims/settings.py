@@ -278,3 +278,6 @@ INTERNATIONAL_DIALLING_CODE = '+'
 RAPIDSMS_HANDLERS_EXCLUDE_APPS = ['staticfiles']
 
 SERVER_EMAIL = "afrims-dev@dimagi.com"
+
+NO_LOGIN_REQUIRED_FOR = ["/reminders/post",
+                         "/reminders/post/"]
