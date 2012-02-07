@@ -183,3 +183,23 @@ class Patient(models.Model):
     @property
     def formatted_phone(self):
         return format_number(self.mobile_number)
+
+
+class PatientAppointment(models.Model):
+    """
+    An interim Appointment
+    """
+    appt_date = models.DateField(help_text='The date of the appointment.')
+    confirmed_0day = models.CharField(max_length=20, choices=SentNotification.STATUS_CHOICES,
+                                                null=True, blank=True)
+    confirmed_4day = models.CharField(max_length=20, choices=SentNotification.STATUS_CHOICES,
+                                                null=True, blank=True)
+    confirmed_5day = models.CharField(max_length=20, choices=SentNotification.STATUS_CHOICES,
+                                                null=True, blank=True)
+    patient = models.ForeignKey(Patient)
+    confirmed = models.BooleanField()
+    avg_num_notifications = models.DecimalField(max_digits=6, decimal_places=5)
+    num_confirmations = models.IntegerField(max_length=2)
+
+    def __unicode__(self):
+        return 'Patient Appointment - %s - %s' % (self.patient.subject_number, self.appt_date)

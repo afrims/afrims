@@ -68,4 +68,8 @@ class PatientDataPayloadAdmin(admin.ModelAdmin):
             parse_payload(obj)
         except Exception as e:
             messages.error(request, u"Error parsing patient data: %s" % unicode(e))
+
+class PatientAppointmentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'appt_date', 'patient', 'confirmed', 'confirmed_0day', 'confirmed_4day', 'confirmed_5day')
 admin.site.register(reminders.PatientDataPayload, PatientDataPayloadAdmin)
+admin.site.register(reminders.PatientAppointment, PatientAppointmentAdmin)
