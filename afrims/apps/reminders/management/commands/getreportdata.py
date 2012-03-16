@@ -11,9 +11,14 @@ from afrims.apps.utils.odict import odict
 
 import calendar
 import pprint
+
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1")
+
 class Command(BaseCommand):
     args = "<report_year report_month report_day>"
     help = "Specify a report start date (optional) to generate a report"
+    is_cebu = False
     def populateAppointments(self):
         def isConfirmed(status):
             return status == 'confirmed' or status == 'manual'
@@ -27,6 +32,11 @@ class Command(BaseCommand):
                 count += 1.0
             if activity.__contains__(appt.confirmed_5day):
                 count += 1.0
+
+            if self.is_cebu:
+                if activity.__contains__(appt.cebu_confirmed_10day):
+                    count += 1.0
+
             return str(count)
 
         def numConfirmations(appt):
@@ -38,6 +48,11 @@ class Command(BaseCommand):
                 count += 1
             if activity.__contains__(appt.confirmed_5day):
                 count += 1
+
+            if self.is_cebu:
+                if activity.__contains__(appt.cebu_confirmed_10day):
+                    count += 1
+
             return str(count)
 
 
@@ -54,20 +69,42 @@ class Command(BaseCommand):
             if created:
                 appt.confirmed = False #mark it as unconfirmed initially and alter accordingly below.
 
-            if sentnote.notification.num_days == 0:
-                appt.confirmed_0day = sentnote.status
-            elif sentnote.notification.num_days == 4:
-                appt.confirmed_4day = sentnote.status
-            elif sentnote.notification.num_days == 5:
-                appt.confirmed_5day = sentnote.status
-            else:
-                print "Don't know what notification this is %s - %s" % (sentnote.notification, sentnote.notification.num_days)
+            if not self.is_cebu:
+                if sentnote.notification.num_days == 0:
+                    appt.confirmed_0day = sentnote.status
+                elif sentnote.notification.num_days == 4:
+                    appt.confirmed_4day = sentnote.status
+                elif sentnote.notification.num_days == 5:
+                    appt.confirmed_5day = sentnote.status
+                else:
+                    print "Don't know what notification this is %s - %s" % (sentnote.notification, sentnote.notification.num_days)
 
-            status_0day = appt.confirmed_0day
-            status_4day = appt.confirmed_4day
-            status_5day = appt.confirmed_5day
-            if isConfirmed(status_0day) or isConfirmed(status_4day) or isConfirmed(status_5day):
-                appt.confirmed = True
+            elif self.is_cebu:  #Say sorry to the Programming Gods for this horrible atrocity: "Sorry."
+                if sentnote.notification.num_days == 0:
+                    appt.confirmed_0day = sentnote.status
+                elif sentnote.notification.num_days == 1:
+                    appt.confirmed_4day = sentnote.status
+                elif sentnote.notification.num_days == 3:
+                    appt.confirmed_5day = sentnote.status
+                elif sentnote.notification.num_days == 7:
+                    appt.cebu_confirmed_10day = sentnote.status
+                else:
+                    print "Don't know what notification this is %s - %s" % (sentnote.notification, sentnote.notification.num_days)
+
+            if self.is_cebu:
+                status_0day = appt.confirmed_0day
+                status_4day = appt.confirmed_4day
+                status_5day = appt.confirmed_5day
+                status_10day = appt.cebu_confirmed_10day
+                if isConfirmed(status_0day) or isConfirmed(status_4day) or isConfirmed(status_5day) or isConfirmed(status_10day):
+                    appt.confirmed = True
+
+            else:
+                status_0day = appt.confirmed_0day
+                status_4day = appt.confirmed_4day
+                status_5day = appt.confirmed_5day
+                if isConfirmed(status_0day) or isConfirmed(status_4day) or isConfirmed(status_5day):
+                    appt.confirmed = True
 
             appt.avg_num_notifications = numNotifications(appt)
             appt.num_confirmations = numConfirmations(appt)
@@ -76,6 +113,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if len(args) > 0:
             today = datetime.date(year=int(args[0]), month=int(args[1]), day=int(args[2]))
+            self.is_cebu = str2bool(args[3])
         else:
             today = datetime.date.today()
 
