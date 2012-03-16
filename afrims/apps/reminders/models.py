@@ -197,9 +197,9 @@ class PatientAppointment(models.Model):
     confirmed_5day = models.CharField(max_length=20, choices=SentNotification.STATUS_CHOICES,
                                                 null=True, blank=True)
     patient = models.ForeignKey(Patient)
-    confirmed = models.BooleanField()
-    avg_num_notifications = models.DecimalField(max_digits=6, decimal_places=5)
-    num_confirmations = models.IntegerField(max_length=2)
+    confirmed = models.BooleanField(default=False)
+    avg_num_notifications = models.DecimalField(max_digits=6, decimal_places=5, default='0.0')
+    num_confirmations = models.IntegerField(max_length=2, default=0)
 
     def __unicode__(self):
         return 'Patient Appointment - %s - %s' % (self.patient.subject_number, self.appt_date)

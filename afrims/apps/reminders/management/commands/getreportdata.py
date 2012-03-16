@@ -7,6 +7,8 @@ from afrims.apps.broadcast.models import BroadcastMessage
 from afrims.apps.reminders.models import SentNotification, Notification, PatientAppointment
 from afrims.apps.broadcast.views import usage_report_context
 from rapidsms.models import Contact
+from afrims.apps.utils.odict import odict
+
 import calendar
 import pprint
 class Command(BaseCommand):
@@ -16,7 +18,7 @@ class Command(BaseCommand):
         def isConfirmed(status):
             return status == 'confirmed' or status == 'manual'
 
-        def avgNotificationsNum(appt):
+        def numNotifications(appt):
             count = 0.0
             activity = ['sent','confirmed', 'manual','error']
             if activity.__contains__(appt.confirmed_0day):
@@ -49,6 +51,9 @@ class Command(BaseCommand):
             (appt, created) = PatientAppointment.objects.get_or_create(appt_date = sentnote.appt_date,
                 patient=patient)
 
+            if created:
+                appt.confirmed = False #mark it as unconfirmed initially and alter accordingly below.
+
             if sentnote.notification.num_days == 0:
                 appt.confirmed_0day = sentnote.status
             elif sentnote.notification.num_days == 4:
@@ -58,16 +63,13 @@ class Command(BaseCommand):
             else:
                 print "Don't know what notification this is %s - %s" % (sentnote.notification, sentnote.notification.num_days)
 
-            appt.save()
             status_0day = appt.confirmed_0day
             status_4day = appt.confirmed_4day
             status_5day = appt.confirmed_5day
             if isConfirmed(status_0day) or isConfirmed(status_4day) or isConfirmed(status_5day):
                 appt.confirmed = True
-            else:
-                appt.confirmed = False
 
-            appt.avg_num_notifications = avgNotificationsNum(appt)
+            appt.avg_num_notifications = numNotifications(appt)
             appt.num_confirmations = numConfirmations(appt)
             appt.save()
 
@@ -227,61 +229,58 @@ class Command(BaseCommand):
 
 
         def percentage_reminders_confirmed(rep_date=None):
-            numerator = get_total_confirmations(last_month).count()
-            denominator = get_total_sent_notifications(last_month).count()
+            numerator = get_total_confirmations(rep_date).count()
+            denominator = get_total_sent_notifications(rep_date).count()
             if denominator == 0:
                 return 0
             else:
                 return (numerator/(denominator*1.0))*100
 
         pp = pprint.PrettyPrinter(indent=4).pprint
-        reportValues = {}
-        messagesValues = {
-                        "Messages - Incoming - To Date" : messages_in_todate().distinct().count(),
-                        "Messages - Incoming - This Month" :  messages_in_thismonth().distinct().count(),
-                        "Messages - Outgoing - To Date" : messages_out_todate().distinct().count(),
-                        "Messages - Outgoing - This Month" : messages_out_thismonth().distinct().count(),
-                        "Messages - Outgoing - Patients - This Month" : messages_out_thismonth().filter(contact__in=total_patients()).distinct().count(),
-                        "Messages - Outgoing - Staff - This Month": messages_out_thismonth().filter(contact__in=total_internal_staff()).distinct().count(),
-                        "Messages - Incoming - Patients - This Month" : messages_in_thismonth().filter(contact__in=total_patients()).distinct().count(),
-                        "Messages - Incoming - Staff - This Month": messages_in_thismonth().filter(contact__in=total_internal_staff()).distinct().count(),
-                        }
+        reportValues = odict({})
+        messagesValues = odict({})
+        messagesValues["Messages - Incoming - To Date"] =  messages_in_todate().distinct().count()
+        messagesValues["Messages - Incoming - This Month"] =   messages_in_thismonth().distinct().count()
+        messagesValues["Messages - Outgoing - To Date"] =  messages_out_todate().distinct().count()
+        messagesValues["Messages - Outgoing - This Month"] =  messages_out_thismonth().distinct().count()
+        messagesValues["Messages - Outgoing - Patients - This Month"] =  messages_out_thismonth().filter(contact__in=total_patients()).distinct().count()
+        messagesValues["Messages - Outgoing - Staff - This Month"] =  messages_out_thismonth().filter(contact__in=total_internal_staff()).distinct().count()
+        messagesValues["Messages - Incoming - Patients - This Month"] =  messages_in_thismonth().filter(contact__in=total_patients()).distinct().count()
+        messagesValues["Messages - Incoming - Staff - This Month"] =  messages_in_thismonth().filter(contact__in=total_internal_staff()).distinct().count()
         reportValues["Messages"] = messagesValues
 
-        usageValues = {
-            "Total Users - Total": total_users().count(),
-            "Total Users - Patients": total_patients().count(),
-            "Total Users - Study Staff": total_internal_staff().count(),
-            "Percentage Appointments Confirmed - To Date": percentage_appts_confirmed(),
-            "Percentage Appointments Confirmed - This Month": percentage_appts_confirmed(today),
-            "Percentage Reminders Confirmed - To Date": percentage_reminders_confirmed(),
-            "Percentage Reminders Confirmed - This Month": percentage_reminders_confirmed(last_month),
-            "Active Users - Number - Total": active_users().count(),
-            "Active Users - Number - Patients": active_patients().count(),
-            "Active Users - Number - Internal Staff": active_staff().count(),
-            "Active Users - Percentage - Total": (active_users().count()/(total_users().count()*1.0))*100,
-            "Active Users - Percentage - Patients": (active_patients().count()/(total_patients().count()*1.0))*100,
-            "Active Users - Percentage - Staff": (active_staff().count()/(total_internal_staff().count()*1.0))*100,
-            "Messages Outgoing - Avg Per User - Total": (messages_out_thismonth().count()/(total_users().count()*1.0)),
-            "Messages Outgoing - Avg Per User - Patients":messages_out_thismonth().filter(contact__in=total_patients()).count()/(total_patients().count()*1.0),
-            "Messages Outgoing - Avg Per User - Staff": messages_out_thismonth().filter(contact__in=total_internal_staff()).count()/(total_internal_staff().count()*1.0),
-            "Messages Incoming - Avg Per User - Total": messages_in_thismonth().count()/(total_users().count()*1.0),
-            "Messages Incoming - Avg Per User - Patients":messages_in_thismonth().filter(contact__in=total_patients()).count()/(total_patients().count()*1.0),
-            "Messages Incoming - Avg Per User - Staff": messages_in_thismonth().filter(contact__in=total_internal_staff()).count()/(total_internal_staff().count()*1.0),
-        }
+        usageValues = odict({})
+        usageValues["Total Users - Total"] =  total_users().count()
+        usageValues["Total Users - Patients"] =  total_patients().count()
+        usageValues["Total Users - Study Staff"] =  total_internal_staff().count()
+        usageValues["Percentage Appointments Confirmed - To Date"] =  percentage_appts_confirmed()
+        usageValues["Percentage Appointments Confirmed - This Month"] =  percentage_appts_confirmed(today)
+        usageValues["Percentage Reminders Confirmed - To Date"] =  percentage_reminders_confirmed()
+        usageValues["Percentage Reminders Confirmed - This Month"] =  percentage_reminders_confirmed(last_month)
+        usageValues["Active Users - Number - Total"] =  active_users().count()
+        usageValues["Active Users - Number - Patients"] =  active_patients().count()
+        usageValues["Active Users - Number - Internal Staff"] =  active_staff().count()
+        usageValues["Active Users - Percentage - Total"] =  (active_users().count()/(total_users().count()*1.0))*100
+        usageValues["Active Users - Percentage - Patients"] =  (active_patients().count()/(total_patients().count()*1.0))*100
+        usageValues["Active Users - Percentage - Staff"] =  (active_staff().count()/(total_internal_staff().count()*1.0))*100
+        usageValues["Messages Outgoing - Avg Per User - Total"] =  (messages_out_thismonth().count()/(total_users().count()*1.0))
+        usageValues["Messages Outgoing - Avg Per User - Patients"] = messages_out_thismonth().filter(contact__in=total_patients()).count()/(total_patients().count()*1.0)
+        usageValues["Messages Outgoing - Avg Per User - Staff"] =  messages_out_thismonth().filter(contact__in=total_internal_staff()).count()/(total_internal_staff().count()*1.0)
+        usageValues["Messages Incoming - Avg Per User - Total"] =  messages_in_thismonth().count()/(total_users().count()*1.0)
+        usageValues["Messages Incoming - Avg Per User - Patients"] = messages_in_thismonth().filter(contact__in=total_patients()).count()/(total_patients().count()*1.0)
+        usageValues["Messages Incoming - Avg Per User - Staff"] =  messages_in_thismonth().filter(contact__in=total_internal_staff()).count()/(total_internal_staff().count()*1.0)
 
-        apptReminders = {
-            "Total Reminders Sent - Last Month": get_total_sent_notifications(last_month).count(),
-            "Total Reminders Sent - This Month": get_total_sent_notifications(today).count(),
-            "Percentage Appts Confirmed - Last Month": percentage_appts_confirmed(last_month),
-            "Percentage Appts Confirmed - This Month": percentage_appts_confirmed(today),
-            "Percentage Reminders Confirmed - Last Month": percentage_reminders_confirmed(last_month),
-            "Percentage Reminders Confirmed - This Month": percentage_reminders_confirmed(last_month),
-            "Avg Number Reminders Per Appt - Last Month": get_all_appointments(last_month).aggregate(Avg('avg_num_notifications'))["avg_num_notifications__avg"],
-            "Avg Number Reminders Per Appt - This Month": get_all_appointments(today).aggregate(Avg('avg_num_notifications'))["avg_num_notifications__avg"],
-            "Avg Number of Confirmations per Appointment - Last Month": get_all_appointments(last_month).aggregate(Avg('num_confirmations'))["num_confirmations__avg"],
-            "Avg Number of Confirmations per Appointment - This Month":get_all_appointments(today).aggregate(Avg('num_confirmations'))["num_confirmations__avg"]
-        }
+        apptReminders = odict({})
+        apptReminders["Total Reminders Sent - Last Month"] =  get_total_sent_notifications(last_month).count()
+        apptReminders["Total Reminders Sent - This Month"] =  get_total_sent_notifications(today).count()
+        apptReminders["Percentage Appts Confirmed - Last Month"] =  percentage_appts_confirmed(last_month)
+        apptReminders["Percentage Appts Confirmed - This Month"] =  percentage_appts_confirmed(today)
+        apptReminders["Percentage Reminders Confirmed - Last Month"] =  percentage_reminders_confirmed(last_month)
+        apptReminders["Percentage Reminders Confirmed - This Month"] =  percentage_reminders_confirmed(last_month)
+        apptReminders["Avg Number Reminders Per Appt - Last Month"] =  get_all_appointments(last_month).aggregate(Avg('avg_num_notifications'))["avg_num_notifications__avg"]
+        apptReminders["Avg Number Reminders Per Appt - This Month"] =  get_all_appointments(today).aggregate(Avg('avg_num_notifications'))["avg_num_notifications__avg"]
+        apptReminders["Avg Number of Confirmations per Appointment - Last Month"] =  get_all_appointments(last_month).aggregate(Avg('num_confirmations'))["num_confirmations__avg"]
+        apptReminders["Avg Number of Confirmations per Appointment - This Month"] =  get_all_appointments(today).aggregate(Avg('num_confirmations'))["num_confirmations__avg"]
 
         def getBroadcastMessages(rep_date=None,recipient=None):
             bm = BroadcastMessage.objects.filter(status='sent')
@@ -312,18 +311,18 @@ class Command(BaseCommand):
                 return None
             return bms/recps
 
-        broadcastMessages = {
-            "Total Broadcast Messages Sent - This Month":getBroadcastMessages(last_month).count(),
-            "Total Broadcast Messages Sent - Last Month":getBroadcastMessages(today).count(),
-            "Num Broadcast Messages Received by Patients - This Month":getBroadcastMessages(today,'patient').count(),
-            "Num Broadcast Messages Received by Patients - Last Month":getBroadcastMessages(last_month,'patient').count(),
-            "Avg Num Broadcast Messages Received per Patient - This Month": avgBroadcastMessages(today,'patient'),
-            "Avg Num Broadcast Messages Received per Patient - Last Month": avgBroadcastMessages(last_month,'patient'),
-            "Num Broadcast Messages Received by Staff - This Month":getBroadcastMessages(today,'staff').count(),
-            "Num Broadcast Messages Received by Staff - Last Month":getBroadcastMessages(last_month,'staff').count(),
-            "Avg Num Broadcast Messages Received per Staff - This Month":avgBroadcastMessages(today,'staff'),
-            "Avg Num Broadcast Messages Received per Staff - Last Month":avgBroadcastMessages(last_month,'staff'),
-        }
+        broadcastMessages = odict({})
+        broadcastMessages["Note:"] = "Month means the entire Calendar Month's worth of data unless otherwise specified."
+        broadcastMessages["Total Broadcast Messages Sent - This Month"] = getBroadcastMessages(today).count()
+        broadcastMessages["Total Broadcast Messages Sent - Last Month"] = getBroadcastMessages(last_month).count()
+        broadcastMessages["Num Broadcast Messages Received by Patients - This Month"] = getBroadcastMessages(today,'patient').count()
+        broadcastMessages["Num Broadcast Messages Received by Patients - Last Month"] = getBroadcastMessages(last_month,'patient').count()
+        broadcastMessages["Avg Num Broadcast Messages Received per Patient - This Month"] =  avgBroadcastMessages(today,'patient')
+        broadcastMessages["Avg Num Broadcast Messages Received per Patient - Last Month"] =  avgBroadcastMessages(last_month,'patient')
+        broadcastMessages["Num Broadcast Messages Received by Staff - This Month"] = getBroadcastMessages(today,'staff').count()
+        broadcastMessages["Num Broadcast Messages Received by Staff - Last Month"] = getBroadcastMessages(last_month,'staff').count()
+        broadcastMessages["Avg Num Broadcast Messages Received per Staff - This Month"] = avgBroadcastMessages(today,'staff')
+        broadcastMessages["Avg Num Broadcast Messages Received per Staff - Last Month"] = avgBroadcastMessages(last_month,'staff')
 
         def get_callback_request(start_date,end_date):
             stuff = usage_report_context(start_date,end_date)
@@ -337,12 +336,11 @@ class Command(BaseCommand):
         stuff_last_month = usage_report_context(last_month_start,last_month_end)
 
 
-        otherMessages = {
-            "Callback requests - Last Month":get_callback_request(last_month_start,last_month_end),
-            "Callback requests - This Month":get_callback_request(this_month_start,today),
-            "Cold Chain Messages Received - Last Month":get_coldchain_incoming(last_month_start,last_month_end),
-            "Cold Chain Messages Received - This Month":get_coldchain_incoming(this_month_start,today),
-        }
+        otherMessages = odict({})
+        otherMessages["Callback requests - Last Month"] = get_callback_request(last_month_start,last_month_end)
+        otherMessages["Callback requests - This Month"] = get_callback_request(this_month_start,today)
+        otherMessages["Cold Chain Messages Received - Last Month"] = get_coldchain_incoming(last_month_start,last_month_end)
+        otherMessages["Cold Chain Messages Received - This Month"] = get_coldchain_incoming(this_month_start,today)
 
         apptConfs8Months = []
         reminderConfs8Months = []
@@ -356,8 +354,7 @@ class Command(BaseCommand):
 
         def get_n_months_ago(n):
             """
-            Returns the start of the month date of n months ago from today
-            Returns number of years past, then month that it would fall on.
+            Returns the start of the month date of n months ago
             """
             def get_month(start_month,sub):
                 if sub == 0:
@@ -380,12 +377,14 @@ class Command(BaseCommand):
             start_month = today.month
             start_month_day = this_month_start.day
             start_month_days = calendar.mdays[start_month]
-            (years_ago,month) = get_month(start_month,i)
-            return datetime.date(year=(today.year-years_ago),month=month,day=today.day)
+            (years_ago,month) = get_month(start_month,n)
+            return datetime.date(year=(today.year-years_ago),month=month,day=1)
 
+        last8monthsStartEndDates = []
         for i in range(8):
             d = get_n_months_ago(i)
             d_end = datetime.date(year=d.year, month=d.month, day=calendar.mdays[d.month])
+            last8monthsStartEndDates.append('%s to %s' % (str(d),str(d_end)))
             apptConfs8Months.append(percentage_appts_confirmed(d))
             reminderConfs8Months.append(percentage_reminders_confirmed(d))
             actApps8Months.append(get_all_appointments(d).count())
@@ -393,18 +392,18 @@ class Command(BaseCommand):
             actCallbacks8Months.append(get_callback_request(d,d_end))
             actColdChain8Months.append(get_coldchain_incoming(d,d_end))
 
-        systemUsageByActivity = {
-            "This Month - Appointments": get_all_appointments(today).count(),
-            "This Month - Broadcast Messages": getBroadcastMessages(today).count(),
-            "This Month - Callback Services": get_callback_request(this_month_start,today),
-            "This Month - Cold Chain": get_coldchain_incoming(this_month_start,today),
-            "Last 8 Months % Appointments Confirmed": apptConfs8Months,
-            "Last 8 Months % Reminders Confirmed": reminderConfs8Months,
-            "Last 8 Months Total Appointments":actApps8Months,
-            "Last 8 Months Total Broadcast Messages":actBroadcasts8Months,
-            "Last 8 Months Total Callback Services":actCallbacks8Months,
-            "Last 8 Months Total Cold Chain":actColdChain8Months,
-        }
+        systemUsageByActivity = odict({})
+        systemUsageByActivity["This Month - Appointments"] =  get_all_appointments(today).count()
+        systemUsageByActivity["This Month - Broadcast Messages"] =  getBroadcastMessages(today).count()
+        systemUsageByActivity["This Month - Callback Services"] =  get_callback_request(this_month_start,today)
+        systemUsageByActivity["This Month - Cold Chain"] =  get_coldchain_incoming(this_month_start,today)
+        systemUsageByActivity["Last 8 Months Dates"] =  last8monthsStartEndDates
+        systemUsageByActivity["Last 8 Months % Appointments Confirmed"] =  apptConfs8Months
+        systemUsageByActivity["Last 8 Months % Reminders Confirmed"] =  reminderConfs8Months
+        systemUsageByActivity["Last 8 Months Total Appointments"] = actApps8Months
+        systemUsageByActivity["Last 8 Months Total Broadcast Messages"] = actBroadcasts8Months
+        systemUsageByActivity["Last 8 Months Total Callback Services"] = actCallbacks8Months
+        systemUsageByActivity["Last 8 Months Total Cold Chain"] = actColdChain8Months
 
         reportValues["Usage Values"] = usageValues
         reportValues["Appointment Reminders"] = apptReminders
@@ -420,8 +419,8 @@ class Command(BaseCommand):
             for k, v in value.items():
                 if isinstance(v,list):
                     v = map(str, v)
-                    v = ','.join(v)
-                print '%s,%s,' % (k, v)
+                    v = '\t'.join(v)
+                print '%s\t%s' % (k, v)
 
 #        pp(reportValues)
 
