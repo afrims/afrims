@@ -137,13 +137,13 @@ class Command(BaseCommand):
             return Message.objects.filter(direction='I')
 
         def messages_in_thismonth():
-            return Message.objects.filter(direction='I', date__month=month)
+            return Message.objects.filter(direction='I', date__month=month, date__year=year)
 
         def messages_out_todate():
             return Message.objects.filter(direction='O')
 
         def messages_out_thismonth():
-            return Message.objects.filter(direction='O', date__month=month)
+            return Message.objects.filter(direction='O', date__month=month, date__year=year)
 
         def get_confirmed_appts_for_month(rep_date):
             if not rep_date:
@@ -213,7 +213,7 @@ class Command(BaseCommand):
             """
             sn = SentNotification.objects.filter(status__in=['confirmed','manual'])
             if rep_date:
-                sn = sn.filter(date_sent__month=rep_date.month,date_sent__year=rep_date.year)
+                sn = sn.filter(appt_date__month=rep_date.month,appt_date__year=rep_date.year)
             return sn
 
         def get_total_sent_notifications(rep_date=None):
@@ -223,7 +223,7 @@ class Command(BaseCommand):
             """
             sn = SentNotification.objects.all()
             if rep_date:
-                sn = sn.filter(date_sent__month=rep_date.month,date_sent__year=rep_date.year)
+                sn = sn.filter(appt_date__month=rep_date.month,appt_date__year=rep_date.year)
             return sn
 
         def active_users():
@@ -294,7 +294,7 @@ class Command(BaseCommand):
         usageValues["Percentage Appointments Confirmed - To Date"] =  percentage_appts_confirmed()
         usageValues["Percentage Appointments Confirmed - This Month"] =  percentage_appts_confirmed(today)
         usageValues["Percentage Reminders Confirmed - To Date"] =  percentage_reminders_confirmed()
-        usageValues["Percentage Reminders Confirmed - This Month"] =  percentage_reminders_confirmed(last_month)
+        usageValues["Percentage Reminders Confirmed - This Month"] =  percentage_reminders_confirmed(today)
         usageValues["Active Users - Number - Total"] =  active_users().count()
         usageValues["Active Users - Number - Patients"] =  active_patients().count()
         usageValues["Active Users - Number - Internal Staff"] =  active_staff().count()
@@ -314,7 +314,7 @@ class Command(BaseCommand):
         apptReminders["Percentage Appts Confirmed - Last Month"] =  percentage_appts_confirmed(last_month)
         apptReminders["Percentage Appts Confirmed - This Month"] =  percentage_appts_confirmed(today)
         apptReminders["Percentage Reminders Confirmed - Last Month"] =  percentage_reminders_confirmed(last_month)
-        apptReminders["Percentage Reminders Confirmed - This Month"] =  percentage_reminders_confirmed(last_month)
+        apptReminders["Percentage Reminders Confirmed - This Month"] =  percentage_reminders_confirmed(today)
         apptReminders["Avg Number Reminders Per Appt - Last Month"] =  get_all_appointments(last_month).aggregate(Avg('avg_num_notifications'))["avg_num_notifications__avg"]
         apptReminders["Avg Number Reminders Per Appt - This Month"] =  get_all_appointments(today).aggregate(Avg('avg_num_notifications'))["avg_num_notifications__avg"]
         apptReminders["Avg Number of Confirmations per Appointment - Last Month"] =  get_all_appointments(last_month).aggregate(Avg('num_confirmations'))["num_confirmations__avg"]
