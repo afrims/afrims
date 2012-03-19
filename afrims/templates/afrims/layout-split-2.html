@@ -11,7 +11,7 @@
     <form action="/i18n/setlang/" method="post" id="language-select-form">
     {% csrf_token %}
         <input name="next" type="hidden" value="{{ request.path }}" />
-        <label id="lang-selector-label">Langauge: </label>
+        <label id="lang-selector-label">Language: </label>
         <select name="language" id="lang-selector">
         {% for lang in LANGUAGES %}
         <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %} selected="selected" {% endif %}>{{ lang.1 }}</option>
