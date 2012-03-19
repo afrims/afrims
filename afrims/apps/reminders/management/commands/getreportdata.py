@@ -232,7 +232,7 @@ class Command(BaseCommand):
             """
             active_start = ninety_days_ago_datetime
             active_end = today
-            active_contacts = total_users().filter(message__date__range=(active_start,active_end)).distinct()
+            active_contacts = total_users().filter(message__date__range=(active_start,active_end), message__direction='I').distinct()
             return active_contacts
 
         def active_patients():
@@ -241,7 +241,7 @@ class Command(BaseCommand):
             """
             active_start = ninety_days_ago_datetime
             active_end = today
-            active_contacts = total_patients().filter(message__date__range=(active_start,active_end)).distinct()
+            active_contacts = total_patients().filter(message__date__range=(active_start,active_end), message__direction='I').distinct()
             return active_contacts
 
         def active_staff():
@@ -250,7 +250,7 @@ class Command(BaseCommand):
             """
             active_start = ninety_days_ago_datetime
             active_end = today
-            active_contacts = total_internal_staff().filter(message__date__range=(active_start,active_end)).distinct()
+            active_contacts = total_internal_staff().filter(message__date__range=(active_start,active_end), message__direction='I').distinct()
             return active_contacts
 
         def percentage_appts_confirmed(rep_date=None):
