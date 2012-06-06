@@ -166,7 +166,7 @@ class Patient(models.Model):
     contact = models.ForeignKey(rapidsms.Contact, unique=True)
     subject_number = models.CharField(max_length=20, unique=True)
     date_enrolled = models.DateField()
-    mobile_number = models.CharField(max_length=30)
+    mobile_number = models.CharField(max_length=30, blank=True, default=u'')
     pin = models.CharField(max_length=4, blank=True,
                            help_text="A 4-digit pin code for sms "
                                      "authentication workflows.")

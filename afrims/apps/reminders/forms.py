@@ -29,8 +29,10 @@ class PatientForm(forms.ModelForm):
         exclude = ('raw_data', 'contact')
 
     def clean_mobile_number(self):
-        mobile_number = normalize_number(self.cleaned_data['mobile_number'])
-        validate_phone(mobile_number)
+        mobile_number =  self.cleaned_data.get('mobile_number', u'')
+        if mobile_number:
+            mobile_number = normalize_number(mobile_number)
+            validate_phone(mobile_number)
         return mobile_number
 
     def save(self, payload):
