@@ -116,3 +116,12 @@ COUNTRY_CODE = '1'
 # INSTALLED_APPS = list(INSTALLED_APPS)
 # INSTALLED_APPS.append('debug_toolbar')
 # DEBUG_TOOLBAR_CONFIG = {'INTERCEPT_REDIRECTS': False}
+
+# Remove auditcare/couchlog settings to disable auditing locally
+INSTALLED_APPS.remove('auditcare')
+INSTALLED_APPS.remove('couchlog')
+MIDDLEWARE_CLASSES.remove('auditcare.middleware.AuditMiddleware')
+AUDIT_DJANGO_USER = False
+AUDIT_ALL_VIEWS = False
+AUDIT_VIEWS = []
+AUDIT_MODEL_SAVE = []
