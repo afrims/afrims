@@ -134,5 +134,63 @@
         </tr>
     </table>
 </div>
-
+<div class="module">
+    <table id="broadcasts-table">
+        <thead>
+            <tr>
+                <th colspan="2">Broadcast Messages</th>
+                <th>Last Month</th>
+                <th>This Month</th>
+            </tr>
+        </thead>
+        <tr>
+            <td colspan="2">Total Sent</td>
+            <td>{{ last_month.broadcasts.total|default:0 }}</td>
+            <td>{{ this_month.broadcasts.total|default:0 }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2">Patients</td>
+            <td>Received</td>
+            <td>{{ last_month.broadcasts.patients|default:0 }}</td>
+            <td>{{ this_month.broadcasts.patients|default:0 }}</td>
+        </tr>
+        <tr>
+            <td>Avg. per Patient</td>
+            <td>{{ last_month.broadcasts.patients|divide:last_month.users.patients }}</td>
+            <td>{{ this_month.broadcasts.patients|default:this_month.users.patients }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2">Internal Staff</td>
+            <td>Received</td>
+            <td>{{ last_month.broadcasts.staff|default:0 }}</td>
+            <td>{{ this_month.broadcasts.staff|default:0 }}</td>
+        </tr>
+        <tr>
+            <td>Avg. per Internal Staff</td>
+            <td>{{ last_month.broadcasts.staff|divide:last_month.users.staff }}</td>
+            <td>{{ this_month.broadcasts.staff|divide:this_month.users.staff }}</td>
+        </tr>
+    </table>
+</div>
+<div class="module">
+    <table id="other-table">
+        <thead>
+            <tr>
+                <th>Other Messages, by Activity</th>
+                <th>Last Month</th>
+                <th>This Month</th>
+            </tr>
+        </thead>
+        <tr>
+            <td>Callback Requests</td>
+            <td>{{ last_month.broadcasts.callbacks|default:0 }}</td>
+            <td>{{ this_month.broadcasts.callbacks|default:0 }}</td>
+        </tr>
+        <tr>
+            <td>Cold Chain</td>
+            <td>{{ last_month.broadcasts.coldchain|default:0 }}</td>
+            <td>{{ this_month.broadcasts.coldchain|default:0 }}</td>
+        </tr>
+    </table>
+</div>
 {% endblock %}

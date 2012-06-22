@@ -7,6 +7,7 @@ from django.views.generic.simple import direct_to_template as render
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 
+from afrims.apps.broadcast.models import BroadcastMessage
 from afrims.apps.reminders.models import SentNotification
 
 
@@ -29,11 +30,14 @@ def dashboard(request):
         'staff_messages': messages_by_direction(day=today, filters={'contact__in': Contact.objects.filter(patient__isnull=True)}),
         'appointments': appointment_stats(day=today),
         'reminders': reminder_stats(day=today),
+        'broadcasts': broadcast_stats(day=today),
     }
     prev_month = today - datetime.timedelta(days=today.day + 1)
     last_month = {
         'appointments': appointment_stats(day=prev_month),
         'reminders': reminder_stats(day=prev_month),
+        'broadcasts': broadcast_stats(day=prev_month),
+        'users': user_stats(day=prev_month),
     }
     context['to_date'] = to_date
     context['this_month'] = this_month
@@ -119,3 +123,44 @@ def count_users(day=None, filters=None):
     if filters is not None:
         filter_q = Q(**filters)
     return Contact.objects.filter(date_q, filter_q).distinct().count()
+
+
+def broadcast_stats(day=None):
+    "Total sent broadcats, # recieved by patients, # recieved by staff, # callbacks, # cold chains."
+    base_filter = {'status': 'sent'}
+    total = count_broadcasts(day=day, filters=base_filter)
+    patient_filter = base_filter.copy()
+    patient_filter['recipient__in'] = Contact.objects.filter(patient__isnull=False)
+    patients = count_broadcasts(day=day, filters=patient_filter)
+    staff_filter = base_filter.copy()
+    staff_filter['recipient__in'] = Contact.objects.filter(patient__isnull=True)
+    staff = count_broadcasts(day=day, filters=staff_filter)
+    callback_filter = base_filter.copy()
+    callback_filter['broadcast__schedule_frequency__isnull'] =  True
+    callback_filter['broadcast__forward__rule_type'] = 'Subject'
+    callback_filter['broadcast__forward__label'] = 'Callback Request'
+    callbacks = count_broadcasts(day=day, filters=callback_filter)
+    coldchain_filter = base_filter.copy()
+    coldchain_filter['broadcast__schedule_frequency__isnull'] =  True
+    callback_filter['broadcast__forward__rule_type'] = 'Cold Chain'
+    callback_filter['broadcast__forward__label'] = 'Cold Chain Alert'
+    coldchain = count_broadcasts(day=day, filters=coldchain_filter)
+    stats = {
+        'total': total,
+        'patients': patients,
+        'staff': staff,
+        'callbacks': callbacks,
+        'coldchain': coldchain,
+    }
+    return stats
+
+
+def count_broadcasts(day=None, filters=None):
+    "The number of broadcasts matching a set of filters."
+    date_q  = Q()
+    if day is not None:
+        date_q = Q(date_sent__month=day.month, date_sent__year=day.year)
+    filter_q = Q()
+    if filters is not None:
+        filter_q = Q(**filters)
+    return BroadcastMessage.objects.filter(date_q, filter_q).distinct().count()
