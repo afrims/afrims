@@ -1,3 +1,4 @@
+import datetime
 import string
 import random
 from contextlib import contextmanager
@@ -7,6 +8,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.core.management import call_command
 from django.contrib.auth.models import User, Permission
 
+from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 
@@ -63,6 +65,18 @@ class CreateDataTest(TestCase):
         }
         defaults.update(data)
         return Group.objects.create(**defaults)
+
+    def create_message(self, data=None):
+        data = data or {}
+        defaults = {
+            'direction': 'I',
+            'date': datetime.datetime.now(),
+            'text': 'Oh Hai!',
+        }
+        defaults.update(data)
+        if 'contact' not in defaults:
+            defaults['contact'] = self.create_contact()
+        return Message.objects.create(**defaults)
 
 
 class FlushTestScript(TestScript):

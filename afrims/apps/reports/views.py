@@ -61,7 +61,7 @@ def messages_by_direction(day=None, filters=None):
     filter_q = Q()
     if filters is not None:
         filter_q = Q(**filters)
-    messages = Message.objects.filter(date_q, filter_q).annotate(count=Count('id')).values('direction', 'count')
+    messages = Message.objects.filter(date_q, filter_q).values('direction').annotate(count=Count('id')).values('direction', 'count')
     return reduce(transform, messages, {})
 
 
