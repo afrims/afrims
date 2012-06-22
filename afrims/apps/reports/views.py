@@ -142,8 +142,8 @@ def broadcast_stats(day=None):
     callbacks = count_broadcasts(day=day, filters=callback_filter)
     coldchain_filter = base_filter.copy()
     coldchain_filter['broadcast__schedule_frequency__isnull'] =  True
-    callback_filter['broadcast__forward__rule_type'] = 'Cold Chain'
-    callback_filter['broadcast__forward__label'] = 'Cold Chain Alert'
+    coldchain_filter['broadcast__forward__rule_type'] = 'Cold Chain'
+    coldchain_filter['broadcast__forward__label'] = 'Cold Chain Alert'
     coldchain = count_broadcasts(day=day, filters=coldchain_filter)
     stats = {
         'total': total,

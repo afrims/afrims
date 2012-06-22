@@ -179,7 +179,7 @@ class UserStatsTest(ReportDataTest):
         results = views.user_stats()
         self.assertEqual(results['total'], 2)
         self.assertEqual(results['patients'], 1)
-        self.assertAlmostEqual(results['staff'], 1)
+        self.assertEqual(results['staff'], 1)
 
     def test_date_filtered_no_messages(self):
         "No one is active if there are no incoming messages."
@@ -187,7 +187,7 @@ class UserStatsTest(ReportDataTest):
         results = views.user_stats(day=today)
         self.assertEqual(results['total'], 0)
         self.assertEqual(results['patients'], 0)
-        self.assertAlmostEqual(results['staff'], 0)
+        self.assertEqual(results['staff'], 0)
 
     def test_date_filtered(self):
         "Filter users who were active in a given month. Sent message within 90 days."
@@ -200,4 +200,136 @@ class UserStatsTest(ReportDataTest):
         results = views.user_stats(day=today)
         self.assertEqual(results['total'], 2)
         self.assertEqual(results['patients'], 1)
-        self.assertAlmostEqual(results['staff'], 1)
+        self.assertEqual(results['staff'], 1)
+
+
+class BroadcastStatsTest(ReportDataTest):
+    "Broadcast message usage statistics by month or to date."
+
+    def setUp(self):
+        super(BroadcastStatsTest, self).setUp()
+        # Create the Cold Chain and Callback request forwarding rules
+        self.coldchain = self.create_forwarding_rule(data={
+            'rule_type': 'Cold Chain',
+            'label': 'Cold Chain Alert',
+        })
+        self.callback = self.create_forwarding_rule(data={
+            'rule_type': 'Subject',
+            'label': 'Callback Request',
+        })
+
+    def create_broadcast_message(self, data=None):
+        data = data or {}
+        defaults = {
+            'date_sent': datetime.datetime.now(),
+            'status': 'sent',
+        }
+        defaults.update(data)
+        return super(BroadcastStatsTest, self).create_broadcast_message(data=defaults)
+
+    def test_all_broadcasts(self):
+        "Current broadcast usage to date."
+        self.create_broadcast_message(data={'recipient': self.test_staff})
+        self.create_broadcast_message(data={'recipient': self.test_staff})
+        self.create_broadcast_message(data={'recipient': self.test_patient.contact})
+        results = views.broadcast_stats()
+        self.assertEqual(results['total'], 3)
+        self.assertEqual(results['patients'], 1)
+        self.assertEqual(results['staff'], 2)
+        self.assertEqual(results['callbacks'], 0)
+        self.assertEqual(results['coldchain'], 0)
+
+    def test_all_callbacks(self):
+        "Count callback requests."
+        # Callbacks are as one-time broadcasts which have null frequency once they are sent
+        broadcast = self.create_broadcast(data={'forward': self.callback, 'schedule_frequency': None})
+        self.create_broadcast_message(data={'recipient': self.test_staff, 'broadcast': broadcast})
+        self.create_broadcast_message(data={'recipient': self.test_staff})
+        self.create_broadcast_message(data={'recipient': self.test_patient.contact})
+        self.create_broadcast_message(data={'recipient': self.test_patient.contact, 'broadcast': broadcast})
+        results = views.broadcast_stats()
+        self.assertEqual(results['total'], 4)
+        self.assertEqual(results['patients'], 2)
+        self.assertEqual(results['staff'], 2)
+        self.assertEqual(results['callbacks'], 2)
+        self.assertEqual(results['coldchain'], 0)
+
+    def test_all_coldchain(self):
+        "Count cold chain forwards."
+        # Cold chains are as one-time broadcasts which have null frequency once they are sent
+        broadcast = self.create_broadcast(data={'forward': self.coldchain, 'schedule_frequency': None})
+        self.create_broadcast_message(data={'recipient': self.test_staff, 'broadcast': broadcast})
+        self.create_broadcast_message(data={'recipient': self.test_staff})
+        self.create_broadcast_message(data={'recipient': self.test_patient.contact})
+        results = views.broadcast_stats()
+        self.assertEqual(results['total'], 3)
+        self.assertEqual(results['patients'], 1)
+        self.assertEqual(results['staff'], 2)
+        self.assertEqual(results['callbacks'], 0)
+        self.assertEqual(results['coldchain'], 1)
+
+    def test_broadcasts_by_date(self):
+        "Filter broadcasts to a given month."
+        today = datetime.datetime.now()
+        last_month = today - datetime.timedelta(days=today.day + 1)
+        self.create_broadcast_message(data={'recipient': self.test_staff, 'date_sent': last_month})
+        self.create_broadcast_message(data={'recipient': self.test_staff})
+        self.create_broadcast_message(data={'recipient': self.test_patient.contact})
+        results = views.broadcast_stats(day=today)
+        self.assertEqual(results['total'], 2)
+        self.assertEqual(results['patients'], 1)
+        self.assertEqual(results['staff'], 1)
+        results = views.broadcast_stats(day=last_month)
+        self.assertEqual(results['total'], 1)
+        self.assertEqual(results['patients'], 0)
+        self.assertEqual(results['staff'], 1)
+
+    def test_callbacks_by_date(self):
+        "Filter callback requests to a given month."
+        today = datetime.datetime.now()
+        last_month = today - datetime.timedelta(days=today.day + 1)
+        broadcast = self.create_broadcast(data={'forward': self.callback, 'schedule_frequency': None})
+        self.create_broadcast_message(data={
+            'recipient': self.test_staff, 'broadcast': broadcast, 'date_sent': last_month
+        })
+        self.create_broadcast_message(data={'recipient': self.test_staff})
+        results = views.broadcast_stats(day=today)
+        self.assertEqual(results['total'], 1)
+        self.assertEqual(results['patients'], 0)
+        self.assertEqual(results['staff'], 1)
+        self.assertEqual(results['callbacks'], 0)
+        results = views.broadcast_stats(day=last_month)
+        self.assertEqual(results['total'], 1)
+        self.assertEqual(results['patients'], 0)
+        self.assertEqual(results['staff'], 1)
+        self.assertEqual(results['callbacks'], 1)
+
+    def test_coldchain_by_date(self):
+        "Filter coldchain requests to a given month."
+        today = datetime.datetime.now()
+        last_month = today - datetime.timedelta(days=today.day + 1)
+        broadcast = self.create_broadcast(data={'forward': self.coldchain, 'schedule_frequency': None})
+        self.create_broadcast_message(data={
+            'recipient': self.test_staff, 'broadcast': broadcast, 'date_sent': last_month
+        })
+        self.create_broadcast_message(data={'recipient': self.test_staff})
+        results = views.broadcast_stats(day=today)
+        self.assertEqual(results['total'], 1)
+        self.assertEqual(results['patients'], 0)
+        self.assertEqual(results['staff'], 1)
+        self.assertEqual(results['coldchain'], 0)
+        results = views.broadcast_stats(day=last_month)
+        self.assertEqual(results['total'], 1)
+        self.assertEqual(results['patients'], 0)
+        self.assertEqual(results['staff'], 1)
+        self.assertEqual(results['coldchain'], 1)
+
+    def test_queued_messages(self):
+        "Don't count messages which haven't been sent."
+        self.create_broadcast_message(data={'recipient': self.test_staff, 'status': 'queued'})
+        self.create_broadcast_message(data={'recipient': self.test_staff})
+        self.create_broadcast_message(data={'recipient': self.test_patient.contact})
+        results = views.broadcast_stats()
+        self.assertEqual(results['total'], 2)
+        self.assertEqual(results['patients'], 1)
+        self.assertEqual(results['staff'], 1)
