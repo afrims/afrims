@@ -1,5 +1,7 @@
 {% extends "afrims/layout-split-2.html" %}
 
+{% load report_tags %}
+
 {% block content %}
 <h1>TrialConnect Performance Report</h1>
 <div class="module">
@@ -61,9 +63,9 @@
         </tr>
         <tr>
             <td>% of Total Users</td>
-            <td>100</td>
-            <td>75</td>
-            <td>25</td>
+            <td>{{ this_month.users.total|percent:to_date.users.total }}</td>
+            <td>{{ this_month.users.patients|percent:to_date.users.patients }}</td>
+            <td>{{ this_month.users.staff|percent:to_date.users.staff }}</td>
         </tr>
         <tr>
             <td colspan="5">Messages</td>
@@ -77,9 +79,9 @@
         </tr>
         <tr>
             <td>Avg. per User</td>
-            <td>100</td>
-            <td>75</td>
-            <td>25</td>
+            <td>{{ this_month.messages.outgoing|divide:to_date.users.total }}</td>
+            <td>{{ this_month.patient_messages.outgoing|divide:to_date.users.patients }}</td>
+            <td>{{ this_month.staff_messages.outgoing|divide:to_date.users.staff }}</td>
         </tr>
         <tr>
             <td rowspan="2">Messages - Incoming</td>
@@ -90,9 +92,9 @@
         </tr>
         <tr>
             <td>Avg. per User</td>
-            <td>100</td>
-            <td>75</td>
-            <td>25</td>
+            <td>{{ this_month.messages.incoming|divide:to_date.users.total }}</td>
+            <td>{{ this_month.patient_messages.incoming|divide:to_date.users.patients }}</td>
+            <td>{{ this_month.staff_messages.incoming|divide:to_date.users.staff }}</td>
         </tr>
     </table>
 </div>
