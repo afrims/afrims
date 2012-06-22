@@ -1,0 +1,99 @@
+{% extends "afrims/layout-split-2.html" %}
+
+{% block content %}
+<h1>TrialConnect Performance Report</h1>
+<div class="module">
+    <table id="overview-table">
+        <thead>
+            <tr>
+                <th>Overview</th>                
+                <th>To Date</th>
+                <th>This Month</th>
+            </tr>
+        </thead>
+        <tr class="odd">
+            <td>Messages - Outgoing</td>
+            <td>{{ to_date.messages.outgoing|default:0 }}</td>
+            <td>{{ this_month.messages.outgoing|default:0 }}</td>
+        </tr>
+        <tr class="even">
+            <td>Messages - Incoming</td>
+            <td>{{ to_date.messages.incoming|default:0 }}</td>
+            <td>{{ this_month.messages.incoming|default:0 }}</td>
+        </tr>
+        <tr class="even">
+            <td>% of Appointments Confirmed</td>
+            <td>{{ to_date.confirmed_appointments_percent|default:0 }} %</td>
+            <td>{{ this_month.confirmed_appointments_percent|default:0 }} %</td>
+        </tr>
+        <tr class="even">
+            <td>% of Reminders Confirmed</td>
+            <td>{{ to_date.confirmed_reminders_percent|default:0 }} %</td>
+            <td>{{ this_month.confirmed_reminders_percent|default:0 }} %</td>
+        </tr>
+    </table>
+</div>
+<div class="module">
+    <table id="system-usage">
+        <thead>
+            <tr>
+                <th colspan="2">Overall System Usage, This Month</th>                
+                <th>Total </th>
+                <th>Patients</th>
+                <th>Internal Staff</th>
+            </tr>
+        </thead>
+        <tr>
+            <td colspan="5">Users</td>
+        <tr>
+        <tr>
+            <td colspan="2">Total</td>
+            <td>{{ to_date.users.total }}</td>
+            <td>{{ to_date.users.patients }}</td>
+            <td>{{ to_date.users.staff }}</td>
+        </tr>
+        <tr>
+            <td rowspan="2">Active Users</td>
+            <td>Number</td>
+            <td>{{ this_month.users.total }}</td>
+            <td>{{ this_month.users.patients }}</td>
+            <td>{{ this_month.users.staff }}</td>
+        </tr>
+        <tr>
+            <td>% of Total Users</td>
+            <td>100</td>
+            <td>75</td>
+            <td>25</td>
+        </tr>
+        <tr>
+            <td colspan="5">Messages</td>
+        <tr>
+        <tr>
+            <td rowspan="2">Messages - Outgoing</td>
+            <td>Number</td>
+            <td>{{ this_month.messages.outgoing|default:0 }}</td>
+            <td>{{ this_month.patient_messages.outgoing|default:0 }}</td>
+            <td>{{ this_month.staff_messages.outgoing|default:0 }}</td>
+        </tr>
+        <tr>
+            <td>Avg. per User</td>
+            <td>100</td>
+            <td>75</td>
+            <td>25</td>
+        </tr>
+        <tr>
+            <td rowspan="2">Messages - Incoming</td>
+            <td>Number</td>
+            <td>{{ this_month.messages.incoming|default:0 }}</td>
+            <td>{{ this_month.patient_patient.incoming|default:0 }}</td>
+            <td>{{ this_month.staff_messages.incoming|default:0 }}</td>
+        </tr>
+        <tr>
+            <td>Avg. per User</td>
+            <td>100</td>
+            <td>75</td>
+            <td>25</td>
+        </tr>
+    </table>
+</div>
+{% endblock %}

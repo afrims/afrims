@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "afrims.apps.reminders",
     "afrims.apps.test_messager",
     "afrims.apps.default_connection",
+    "afrims.apps.reports",
 
     # the rapidsms contrib apps.
     # "rapidsms.contrib.export",
