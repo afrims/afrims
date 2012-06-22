@@ -115,3 +115,57 @@ class AppointmentStatsTest(ReportDataTest):
         self.assertEqual(results['total'], 1)
         self.assertEqual(results['confirmed'], 1)
         self.assertAlmostEqual(results['percent'], 100.0)
+
+
+class ReminderStatsTest(ReportDataTest):
+    "Reminder statistics by month or to date."
+
+    def test_reminders_to_date(self):
+        "Aggregrate reminder stats to date."
+        today = datetime.datetime.now()
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=today)
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=today + datetime.timedelta(days=1))
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=today + datetime.timedelta(days=2))
+        self.create_unconfirmed_notification(patient=self.test_patient, appt_date=today + datetime.timedelta(days=3))
+        results = views.reminder_stats()
+        self.assertEqual(results['total'], 4)
+        self.assertEqual(results['confirmed'], 3)
+        self.assertAlmostEqual(results['percent'], 75.0)
+
+    def test_no_reminders(self):
+        "Handle no reminders for the given range."
+        results = views.reminder_stats()
+        self.assertEqual(results['total'], 0)
+        self.assertEqual(results['confirmed'], 0)
+        self.assertAlmostEqual(results['percent'], 0.0)
+
+    def test_multiple_reminders(self):
+        "Multiple reminders per appointment date should be counted separately."
+        today = datetime.datetime.now()
+        # Today's appointment is both confirmed and unconfirmed
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=today)
+        self.create_unconfirmed_notification(patient=self.test_patient, appt_date=today)
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=today + datetime.timedelta(days=1))
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=today + datetime.timedelta(days=2))
+        self.create_unconfirmed_notification(patient=self.test_patient, appt_date=today + datetime.timedelta(days=3))
+        results = views.reminder_stats()
+        self.assertEqual(results['total'], 5)
+        self.assertEqual(results['confirmed'], 3)
+        self.assertAlmostEqual(results['percent'], 60.0)
+
+    def test_date_filtered(self):
+        "Restrict report to dates in a given month."
+        today = datetime.datetime.now()
+        last_month = today - datetime.timedelta(days=today.day + 1)
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=today)
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=last_month)
+        self.create_confirmed_notification(patient=self.test_patient, appt_date=today + datetime.timedelta(days=2))
+        self.create_unconfirmed_notification(patient=self.test_patient, appt_date=today + datetime.timedelta(days=3))
+        results = views.reminder_stats(today)
+        self.assertEqual(results['total'], 3)
+        self.assertEqual(results['confirmed'], 2)
+        self.assertAlmostEqual(results['percent'], 66.666666666666)
+        results = views.reminder_stats(last_month)
+        self.assertEqual(results['total'], 1)
+        self.assertEqual(results['confirmed'], 1)
+        self.assertAlmostEqual(results['percent'], 100.0)
