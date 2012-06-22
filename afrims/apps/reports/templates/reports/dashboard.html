@@ -25,13 +25,13 @@
         </tr>
         <tr class="even">
             <td>% of Appointments Confirmed</td>
-            <td>{{ to_date.confirmed_appointments_percent|default:0 }} %</td>
-            <td>{{ this_month.confirmed_appointments_percent|default:0 }} %</td>
+            <td>{{ to_date.appointments.percent|default:0 }} %</td>
+            <td>{{ this_month.appointments.percent|default:0 }} %</td>
         </tr>
         <tr class="even">
             <td>% of Reminders Confirmed</td>
-            <td>{{ to_date.confirmed_reminders_percent|default:0 }} %</td>
-            <td>{{ this_month.confirmed_reminders_percent|default:0 }} %</td>
+            <td>{{ to_date.reminders.percent|default:0 }} %</td>
+            <td>{{ this_month.reminders.percent|default:0 }} %</td>
         </tr>
     </table>
 </div>
@@ -98,4 +98,41 @@
         </tr>
     </table>
 </div>
+<div class="module">
+    <table id="reminders-table">
+        <thead>
+            <tr>
+                <th>Appointment Reminders</th>
+                <th>Last Month</th>
+                <th>This Month</th>
+            </tr>
+        </thead>
+        <tr>
+            <td>Total Reminders Sent</td>
+            <td>{{ last_month.reminders.total|default:0 }}</td>
+            <td>{{ this_month.reminders.total|default:0 }}</td>
+        </tr>
+        <tr>
+            <td>% of Appointments Confirmed</td>
+            <td>{{ last_month.appointments.percent|default:0 }}</td>
+            <td>{{ this_month.appointments.percent|default:0 }}</td>
+        </tr>
+        <tr>
+            <td>% of Reminders Confirmed</td>
+            <td>{{ last_month.reminders.percent|default:0 }}</td>
+            <td>{{ this_month.reminders.percent|default:0 }}</td>
+        </tr>
+        <tr>
+            <td>Avg. Number Reminders per Appointment</td>
+            <td>{{ last_month.reminders.total|divide:last_month.appointments.total }}</td>
+            <td>{{ this_month.reminders.total|divide:this_month.appointments.total }}</td>
+        </tr>
+        <tr>
+            <td>Avg. Number of Confirmations per Appointment</td>
+            <td>{{ last_month.reminders.confirmed|divide:last_month.appointments.total }}</td>
+            <td>{{ this_month.reminders.confirmed|divide:this_month.appointments.total }}</td>
+        </tr>
+    </table>
+</div>
+
 {% endblock %}

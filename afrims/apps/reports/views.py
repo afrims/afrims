@@ -15,12 +15,11 @@ from afrims.apps.reminders.models import SentNotification
 def dashboard(request):
     "Reporting dashboard."
     today = datetime.date.today()
-    ninety_days_ago = today - datetime.timedelta(days=90)
     context = {}
     to_date = {
         'messages': messages_by_direction(),
         'users': user_stats(),
-        'appointements': appointment_stats(),
+        'appointments': appointment_stats(),
         'reminders': reminder_stats(),
     }
     this_month = {
@@ -28,11 +27,17 @@ def dashboard(request):
         'users': user_stats(day=today),
         'patient_messages': messages_by_direction(day=today, filters={'contact__in': Contact.objects.filter(patient__isnull=False)}),
         'staff_messages': messages_by_direction(day=today, filters={'contact__in': Contact.objects.filter(patient__isnull=True)}),
-        'appointements': appointment_stats(day=today),
+        'appointments': appointment_stats(day=today),
         'reminders': reminder_stats(day=today),
+    }
+    prev_month = today - datetime.timedelta(days=today.day + 1)
+    last_month = {
+        'appointments': appointment_stats(day=prev_month),
+        'reminders': reminder_stats(day=prev_month),
     }
     context['to_date'] = to_date
     context['this_month'] = this_month
+    context['last_month'] = last_month
     return render(request, 'reports/dashboard.html', context)
 
 
