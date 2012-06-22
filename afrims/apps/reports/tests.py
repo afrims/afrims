@@ -169,3 +169,35 @@ class ReminderStatsTest(ReportDataTest):
         self.assertEqual(results['total'], 1)
         self.assertEqual(results['confirmed'], 1)
         self.assertAlmostEqual(results['percent'], 100.0)
+
+
+class UserStatsTest(ReportDataTest):
+    "User statistics by month or to date."
+
+    def test_all_users(self):
+        "Get staff/patient breakdown to date."
+        results = views.user_stats()
+        self.assertEqual(results['total'], 2)
+        self.assertEqual(results['patients'], 1)
+        self.assertAlmostEqual(results['staff'], 1)
+
+    def test_date_filtered_no_messages(self):
+        "No one is active if there are no incoming messages."
+        today = datetime.datetime.now()
+        results = views.user_stats(day=today)
+        self.assertEqual(results['total'], 0)
+        self.assertEqual(results['patients'], 0)
+        self.assertAlmostEqual(results['staff'], 0)
+
+    def test_date_filtered(self):
+        "Filter users who were active in a given month. Sent message within 90 days."
+        self.create_message(data={'direction': 'I', 'contact': self.test_staff})
+        self.create_message(data={'direction': 'I', 'contact': self.test_patient.contact})
+        today = datetime.datetime.now()
+        ninety_days_ago = today - datetime.timedelta(days=90)
+        inactive_staff = self.create_contact()
+        self.create_message(data={'direction': 'I', 'contact': inactive_staff, 'date': ninety_days_ago - datetime.timedelta(days=3)})        
+        results = views.user_stats(day=today)
+        self.assertEqual(results['total'], 2)
+        self.assertEqual(results['patients'], 1)
+        self.assertAlmostEqual(results['staff'], 1)

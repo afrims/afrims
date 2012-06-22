@@ -107,8 +107,8 @@ def count_reminders(day=None, filters=None):
 
 def user_stats(day=None):
     "Patients, staff and total users. If day is given filters active users from that date."
-    patients = count_users(filters={'patient__isnull': False})
-    staff = count_users(filters={'patient__isnull': True})
+    patients = count_users(day=day, filters={'patient__isnull': False})
+    staff = count_users(day=day, filters={'patient__isnull': True})
     total = patients + staff
     return {'patients': patients, 'total': total, 'staff': staff}
 
@@ -118,7 +118,7 @@ def count_users(day=None, filters=None):
     date_q  = Q()
     if day is not None:
         ninety_days_ago = day - datetime.timedelta(days=90)
-        date_q = Q(message__date__range=(ninety_days_ago, day))
+        date_q = Q(message__date__range=(ninety_days_ago, day), message__isnull=False)
     filter_q = Q()
     if filters is not None:
         filter_q = Q(**filters)
