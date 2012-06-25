@@ -369,7 +369,14 @@ class ReminderGraphViewTest(BaseGraphViewTest):
         "Without giving a range will return the totals to date."
         results = self.get(self.url)
         self.assertTrue('to_date' in results)
+        self.assertFalse('range' in results)
 
+    def test_data_range(self):
+        "Ask for a given date range in months prior to now."
+        results = self.get(self.url, {'months': 4})
+        self.assertFalse('to_date' in results)
+        self.assertTrue('range' in results)
+        self.assertEqual(len(results['range']), 5) # Current month + 4
 
 class UsageGraphViewTest(BaseGraphViewTest):
     "View for generating data for the system usage graphs."
@@ -380,3 +387,10 @@ class UsageGraphViewTest(BaseGraphViewTest):
         "Without giving a range will return the totals to date."
         results = self.get(self.url)
         self.assertTrue('to_date' in results)
+
+    def test_data_range(self):
+        "Ask for a given date range in months prior to now."
+        results = self.get(self.url, {'months': 4})
+        self.assertFalse('to_date' in results)
+        self.assertTrue('range' in results)
+        self.assertEqual(len(results['range']), 5) # Current month + 4
