@@ -16,8 +16,8 @@
 
 {% block content %}
 <h1>TrialConnect Performance Report</h1>
-<div class="module">
-    <table id="overview-table" class="half-width">
+<div class="module overview">
+    <table id="overview-table" class="half-width pull-left">
         <thead>
             <tr>
                 <th>Overview</th>                
@@ -46,6 +46,7 @@
             <td>{{ this_month.reminders.percent|default:0 }} %</td>
         </tr>
     </table>
+    <div id='usage-breakdown' class="half-width"></div>
 </div>
 <div class="module">
     <table id="system-usage" class="full-width">
@@ -110,6 +111,7 @@
         </tr>
     </table>
 </div>
+<div id='usage-chart' style="width: 900px; height: 240px;" data-url="{% url broadcast-usage-graph-data %}"></div>
 <div class="module">
     <table id="reminders-table" class="full-width">
         <thead>
@@ -146,6 +148,7 @@
         </tr>
     </table>
 </div>
+<div id='reminders-chart' style="width: 900px; height: 240px;" data-url="{% url broadcast-usage-graph-data %}"></div>
 <div class="module">
     <table id="broadcasts-table" class="full-width">
         <thead>

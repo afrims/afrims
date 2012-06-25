@@ -7,10 +7,19 @@ table tbody .sub-header {
     color: #000;
 }
 
-table.half-width {
+.half-width {
     width: 50%;
 }
 
-table.full-width {
+.full-width {
     width: 100%;
+}
+
+.module.overview {
+    margin-bottom: -140px;
+}
+
+.module.overview #usage-breakdown {
+    left: 50%;
+    top: -140px;
 }
