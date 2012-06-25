@@ -23,11 +23,13 @@ def dashboard(request):
         'appointments': appointment_stats(),
         'reminders': reminder_stats(),
     }
+    patients = Contact.objects.filter(patient__isnull=False)
+    staff = Contact.objects.filter(patient__isnull=True)
     this_month = {
         'messages': messages_by_direction(day=today),
         'users': user_stats(day=today),
-        'patient_messages': messages_by_direction(day=today, filters={'contact__in': Contact.objects.filter(patient__isnull=False)}),
-        'staff_messages': messages_by_direction(day=today, filters={'contact__in': Contact.objects.filter(patient__isnull=True)}),
+        'patient_messages': messages_by_direction(day=today, filters={'contact__in': patients}),
+        'staff_messages': messages_by_direction(day=today, filters={'contact__in':staff}),
         'appointments': appointment_stats(day=today),
         'reminders': reminder_stats(day=today),
         'broadcasts': broadcast_stats(day=today),
