@@ -15,6 +15,27 @@ function drawChart(response, title, element) {
     chart.draw(data, {displayAnnotations: false, title: title});
 }
 
+function drawRemindersChart(response) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Date');
+    data.addColumn('number', '% of Appointments Confirmed');
+    data.addColumn('number', '% of Reminders Confirmed');
+    var rows =[];
+    $.each(response.range, function(i, r) {
+        var day = new Date(r[0]);
+        var stats = r[1];
+        rows.push([day, stats.appointments.percent, stats.reminders.percent]);
+    });
+    data.addRows(rows);
+    var chart = new google.visualization.LineChart(document.getElementById('reminders-chart'));
+    var options = {
+        title: 'Appointment Reminders, Last 8 Months',
+        vAxis: {maxValue: 100.0, minValue: 0.0},
+        legend: {position: 'bottom'}
+    };
+    chart.draw(data, options);
+}
+
 function getChartData() {
     // Fetch chart data and render on callback
     // System usage for past 8 months
@@ -37,5 +58,5 @@ function getChartData() {
     // Appointment reminders for past 8 months
     var url = $('#reminders-chart').data('url');
     var now = new Date().getTime();
-    $.getJSON(url, {timestamp: now}, function(data) {drawChart(data, 'Appointment Reminders, Last 8 Months', 'reminders-chart')});
+    $.getJSON(url, {timestamp: now}, drawRemindersChart);
 }

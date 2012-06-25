@@ -2,13 +2,17 @@ import datetime
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count, Q
+from django.http import HttpResponse
+from django.utils import simplejson as json
 from django.views.generic.simple import direct_to_template as render
 
+from dateutil.rrule import rrule, MONTHLY
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 
 from afrims.apps.broadcast.models import BroadcastMessage
 from afrims.apps.reminders.models import SentNotification
+from afrims.apps.reports.forms import GraphRangeForm
 
 
 @login_required
@@ -45,6 +49,31 @@ def dashboard(request):
     context['this_month'] = this_month
     context['last_month'] = last_month
     return render(request, 'reports/dashboard.html', context)
+
+
+@login_required
+@permission_required('groups.can_use_dashboard_tab', login_url='/access_denied/')
+def reminder_usage(request):
+    "Return JSON data for reminder/appointment confirmations either for a date range or to date."
+    # Start date/months or to date
+    range_form = GraphRangeForm(request.GET)
+    start_date = None
+    months = None
+    data = {}
+    if range_form.is_valid():
+        start_date = range_form.cleaned_data.get('start_date', None)
+        months = range_form.cleaned_data.get('months', None)
+    if start_date is not None and months is not None:
+        # Generate report for each month requested
+        rows = []
+        for day in rrule(MONTHLY, bymonthday=(start_date.day, -1), bysetpos=1, count=months):
+            stats = {'reminders': reminder_stats(day=day), 'appointments': appointment_stats(day=day)}
+            rows.append((day.date().isoformat(), stats))
+        data['range'] = rows
+    else:
+        # Report data to date
+        data['to_date'] = {'reminders': reminder_stats(), 'appointments': appointment_stats()}
+    return HttpResponse(json.dumps(data), mimetype='application/json')
 
 
 def transform(x, y):

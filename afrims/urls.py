@@ -40,6 +40,7 @@ urlpatterns = patterns('',
     (r'^i18n/', include('django.conf.urls.i18n')),
 
     url(r'^report/$', 'afrims.apps.reports.views.dashboard', name='rapidsms-report'),
+    (r'^reports/', include('afrims.apps.reports.urls')),
 )
 
 if 'auditcare' in settings.INSTALLED_APPS:
