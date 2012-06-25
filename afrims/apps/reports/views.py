@@ -1,3 +1,4 @@
+import calendar
 import datetime
 
 from django.contrib.auth.decorators import login_required, permission_required
@@ -6,13 +7,13 @@ from django.http import HttpResponse
 from django.utils import simplejson as json
 from django.views.generic.simple import direct_to_template as render
 
-from dateutil.rrule import rrule, MONTHLY
+from dateutil.relativedelta import relativedelta
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 
 from afrims.apps.broadcast.models import BroadcastMessage
 from afrims.apps.reminders.models import SentNotification
-from afrims.apps.reports.forms import GraphRangeForm
+from afrims.apps.reports.forms import GraphRangeForm, ReportForm
 
 
 @login_required
@@ -20,6 +21,14 @@ from afrims.apps.reports.forms import GraphRangeForm
 def dashboard(request):
     "Reporting dashboard."
     today = datetime.date.today()
+    report_date = today
+    initial = {'report_year': report_date.year, 'report_month': report_date.month}
+    form = ReportForm(request.GET or None, initial=initial)
+    if form.is_valid():
+        report_year = form.cleaned_data.get('report_year') or report_date.year
+        report_month = form.cleaned_data.get('report_month') or report_date.month
+        last_day = calendar.monthrange(report_year, report_month)[1]
+        report_date = datetime.date(report_year, report_month, last_day)
     context = {}
     to_date = {
         'messages': messages_by_direction(),
@@ -30,15 +39,15 @@ def dashboard(request):
     patients = Contact.objects.filter(patient__isnull=False)
     staff = Contact.objects.filter(patient__isnull=True)
     this_month = {
-        'messages': messages_by_direction(day=today),
-        'users': user_stats(day=today),
-        'patient_messages': messages_by_direction(day=today, filters={'contact__in': patients}),
-        'staff_messages': messages_by_direction(day=today, filters={'contact__in':staff}),
-        'appointments': appointment_stats(day=today),
-        'reminders': reminder_stats(day=today),
-        'broadcasts': broadcast_stats(day=today),
+        'messages': messages_by_direction(day=report_date),
+        'users': user_stats(day=report_date),
+        'patient_messages': messages_by_direction(day=report_date, filters={'contact__in': patients}),
+        'staff_messages': messages_by_direction(day=report_date, filters={'contact__in':staff}),
+        'appointments': appointment_stats(day=report_date),
+        'reminders': reminder_stats(day=report_date),
+        'broadcasts': broadcast_stats(day=report_date),
     }
-    prev_month = today - datetime.timedelta(days=today.day + 1)
+    prev_month = report_date - datetime.timedelta(days=report_date.day + 1)
     last_month = {
         'appointments': appointment_stats(day=prev_month),
         'reminders': reminder_stats(day=prev_month),
@@ -48,6 +57,8 @@ def dashboard(request):
     context['to_date'] = to_date
     context['this_month'] = this_month
     context['last_month'] = last_month
+    context['report_date'] = report_date
+    context['report_form'] = form
     return render(request, 'reports/dashboard.html', context)
 
 
@@ -66,9 +77,10 @@ def reminder_usage(request):
     if start_date is not None and months is not None:
         # Generate report for each month requested
         rows = []
-        for day in rrule(MONTHLY, bymonthday=(start_date.day, -1), bysetpos=1, count=months):
+        for i in range(months + 1):
+            day = start_date - relativedelta(months=i)
             stats = {'reminders': reminder_stats(day=day), 'appointments': appointment_stats(day=day)}
-            rows.append((day.date().isoformat(), stats))
+            rows.append((day.isoformat(), stats))
         data['range'] = rows
     else:
         # Report data to date
@@ -91,9 +103,11 @@ def system_usage(request):
     if start_date is not None and months is not None:
         # Generate report for each month requested
         rows = []
-        for day in rrule(MONTHLY, bymonthday=(start_date.day, -1), bysetpos=1, count=months):
+        day = start_date
+        for i in range(months + 1):
+            day = start_date - relativedelta(months=i)
             stats = {'appointments': appointment_stats(day=day), 'broadcasts': broadcast_stats(day=day)}
-            rows.append((day.date().isoformat(), stats))
+            rows.append((day.isoformat(), stats))
         data['range'] = rows
     else:
         # Report data to date

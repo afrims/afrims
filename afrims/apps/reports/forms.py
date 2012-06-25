@@ -1,6 +1,7 @@
 import datetime
 
 from django import forms
+from django.utils.dates import MONTHS
 
 
 class GraphRangeForm(forms.Form):
@@ -20,3 +21,12 @@ class GraphRangeForm(forms.Form):
             # Use today for start
             cleaned_data['start_date'] = datetime.date.today()
         return cleaned_data
+
+
+class ReportForm(forms.Form):
+    report_month = forms.TypedChoiceField(label='Report Month', required=False,
+        coerce=int, choices=MONTHS.items(), 
+    )
+    report_year = forms.IntegerField(label='Report Year', required=False,
+        min_value=1970, max_value=datetime.date.today().year
+    )
