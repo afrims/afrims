@@ -1,5 +1,8 @@
 import datetime
 
+from django.core.urlresolvers import reverse
+from django.utils import simplejson as json
+
 from rapidsms.models import Contact
 
 from afrims.apps.broadcast.tests import BroadcastCreateDataTest
@@ -333,3 +336,47 @@ class BroadcastStatsTest(ReportDataTest):
         self.assertEqual(results['total'], 2)
         self.assertEqual(results['patients'], 1)
         self.assertEqual(results['staff'], 1)
+
+
+class BaseGraphViewTest(ReportDataTest):
+    "Base test case for testing graph data AJAX views."
+
+    url_name = ''
+
+    def setUp(self):
+        super(BaseGraphViewTest, self).setUp()
+        # Create a super user
+        username = 'super'
+        password = 'abc'
+        self.user = self.create_user(data={'username': username, 'password': password})
+        self.user.is_superuser = True        
+        self.user.save()
+        self.client.login(username=username, password=password)
+        self.url = reverse(self.url_name)
+
+    def get(self, *args, **kwargs):
+        "Wrapper around client.get to load json data."
+        response = self.client.get(*args, **kwargs)
+        return json.loads(response.content)
+
+
+class ReminderGraphViewTest(BaseGraphViewTest):
+    "View for generating data for the reminder usage graph."
+
+    url_name = 'report-reminder-usage'
+
+    def test_data_to_date(self):
+        "Without giving a range will return the totals to date."
+        results = self.get(self.url)
+        self.assertTrue('to_date' in results)
+
+
+class UsageGraphViewTest(BaseGraphViewTest):
+    "View for generating data for the system usage graphs."
+
+    url_name = 'report-system-usage'
+
+    def test_data_to_date(self):
+        "Without giving a range will return the totals to date."
+        results = self.get(self.url)
+        self.assertTrue('to_date' in results)

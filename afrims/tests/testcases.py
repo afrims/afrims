@@ -78,6 +78,17 @@ class CreateDataTest(TestCase):
             defaults['contact'] = self.create_contact()
         return Message.objects.create(**defaults)
 
+    def create_user(self, data=None):
+        data = data or {}
+        defaults = {
+            'username': self.random_string(),
+            'email': '',
+            'password': self.random_string(),
+        }
+        defaults.update(data)
+        return User.objects.create_user(**defaults)
+        
+
 
 class FlushTestScript(TestScript):
     """ 
