@@ -1,0 +1,16 @@
+table tbody tr td.bottom {
+    border-bottom-color: #ddd;
+}
+
+table tbody .sub-header {
+    background: #e1e1e1;
+    color: #000;
+}
+
+table.half-width {
+    width: 50%;
+}
+
+table.full-width {
+    width: 100%;
+}

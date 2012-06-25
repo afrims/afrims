@@ -2,10 +2,22 @@
 
 {% load report_tags %}
 
+{% block stylesheets %}
+    {{ block.super }}
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}reports/css/reports.css" />
+{% endblock %}
+
+{% block javascripts %}
+    {{ block.super }}
+    <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+    <script src="{{ STATIC_URL }}reports/js/graphs.js" type="text/javascript"></script>
+{% endblock %}
+
+
 {% block content %}
 <h1>TrialConnect Performance Report</h1>
 <div class="module">
-    <table id="overview-table">
+    <table id="overview-table" class="half-width">
         <thead>
             <tr>
                 <th>Overview</th>                
@@ -36,7 +48,7 @@
     </table>
 </div>
 <div class="module">
-    <table id="system-usage">
+    <table id="system-usage" class="full-width">
         <thead>
             <tr>
                 <th colspan="2">Overall System Usage, This Month</th>                
@@ -45,8 +57,8 @@
                 <th>Internal Staff</th>
             </tr>
         </thead>
-        <tr>
-            <td colspan="5">Users</td>
+        <tr class="sub-header">
+            <th colspan="5">Users</th>
         <tr>
         <tr>
             <td colspan="2">Total</td>
@@ -67,8 +79,8 @@
             <td>{{ this_month.users.patients|percent:to_date.users.patients }}</td>
             <td>{{ this_month.users.staff|percent:to_date.users.staff }}</td>
         </tr>
-        <tr>
-            <td colspan="5">Messages</td>
+        <tr class="sub-header">
+            <th colspan="5">Messages</th>
         <tr>
         <tr>
             <td rowspan="2">Messages - Outgoing</td>
@@ -84,7 +96,7 @@
             <td>{{ this_month.staff_messages.outgoing|divide:to_date.users.staff }}</td>
         </tr>
         <tr>
-            <td rowspan="2">Messages - Incoming</td>
+            <td rowspan="2" class="bottom">Messages - Incoming</td>
             <td>Number</td>
             <td>{{ this_month.messages.incoming|default:0 }}</td>
             <td>{{ this_month.patient_patient.incoming|default:0 }}</td>
@@ -99,7 +111,7 @@
     </table>
 </div>
 <div class="module">
-    <table id="reminders-table">
+    <table id="reminders-table" class="full-width">
         <thead>
             <tr>
                 <th>Appointment Reminders</th>
@@ -135,7 +147,7 @@
     </table>
 </div>
 <div class="module">
-    <table id="broadcasts-table">
+    <table id="broadcasts-table" class="full-width">
         <thead>
             <tr>
                 <th colspan="2">Broadcast Messages</th>
@@ -160,7 +172,7 @@
             <td>{{ this_month.broadcasts.patients|default:this_month.users.patients }}</td>
         </tr>
         <tr>
-            <td rowspan="2">Internal Staff</td>
+            <td rowspan="2" class="bottom">Internal Staff</td>
             <td>Received</td>
             <td>{{ last_month.broadcasts.staff|default:0 }}</td>
             <td>{{ this_month.broadcasts.staff|default:0 }}</td>
@@ -173,7 +185,7 @@
     </table>
 </div>
 <div class="module">
-    <table id="other-table">
+    <table id="other-table" class="full-width">
         <thead>
             <tr>
                 <th>Other Messages, by Activity</th>
