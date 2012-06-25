@@ -1,18 +1,25 @@
 google.load('visualization', '1', {'packages':['corechart', 'annotatedtimeline']});
 google.setOnLoadCallback(getChartData);
 
-function drawChart(response, title, element) {
+function drawUsageChart(response) {
     var data = new google.visualization.DataTable();
     data.addColumn('date', 'Date');
-    data.addColumn('number', 'Incoming Messages');
-    data.addColumn('number', 'Outgoing Messages');
-    var rows =[];
-    $.each(response, function(i, r) {
-        rows.push([new Date(r[0]), r[1], r[2]]);
+    data.addColumn('number', 'Appointments');
+    data.addColumn('number', 'Broadcast Messages');
+    data.addColumn('number', 'Callback Service');
+    data.addColumn('number', 'Cold Chain');
+    var rows =[]; 
+    $.each(response.range, function(i, r) {
+        var day = new Date(r[0]);
+        var stats = r[1];
+        rows.push([day, stats.appointments.total, stats.broadcasts.total, stats.broadcasts.callbacks, stats.broadcasts.coldchain]);
     });
     data.addRows(rows);
-    var chart = new google.visualization.LineChart(document.getElementById(element));
-    chart.draw(data, {displayAnnotations: false, title: title});
+    var chart = new google.visualization.LineChart(document.getElementById('usage-chart'));
+    var options = {
+        title: 'System Usage by Activity, Last 8 Months'
+    };
+    chart.draw(data, options);
 }
 
 function drawRemindersChart(response) {
@@ -36,27 +43,32 @@ function drawRemindersChart(response) {
     chart.draw(data, options);
 }
 
-function getChartData() {
-    // Fetch chart data and render on callback
-    // System usage for past 8 months
-    var url = $('#usage-chart').data('url');
-    var now = new Date().getTime();
-    $.getJSON(url, {timestamp: now}, function(data) {drawChart(data, 'System Usage by Activity, Last 8 Months', 'usage-chart')});
-    // System usage to date
+function drawUsageBreakdown(response) {
+    var stats = response.to_date;
     var data = google.visualization.arrayToDataTable([
         ['Activity', 'Messages'],
-        ['Appointements',     11],
-        ['Broadcast Messages',      2],
-        ['Callback Service',  2],
-        ['Cold Chain', 2],
+        ['Appointments', stats.appointments.total],
+        ['Broadcast Messages', stats.broadcasts.total],
+        ['Callback Service',  stats.broadcasts.callbacks],
+        ['Cold Chain', stats.broadcasts.coldchain]
     ]);
+    var chart = new google.visualization.PieChart(document.getElementById('usage-breakdown'));
     var options = {
         title: 'System Usage by Activity, To Date'
     };
-    var chart = new google.visualization.PieChart(document.getElementById('usage-breakdown'));
     chart.draw(data, options);
-    // Appointment reminders for past 8 months
-    var url = $('#reminders-chart').data('url');
+    // Fix positioning after render
+    $('#usage-breakdown').css({'top': '-140px'});
+    $('#usage-breakdown').parents('.module').css({'margin-bottom': '-140px'});
+}
+
+function getChartData() {
+    // Fetch chart data and render on callback
     var now = new Date().getTime();
-    $.getJSON(url, {timestamp: now}, drawRemindersChart);
+    // System usage for past 8 months    
+    $.getJSON($('#usage-chart').data('url'), {timestamp: now}, drawUsageChart);
+    // System usage to date
+    $.getJSON($('#usage-breakdown').data('url'), {timestamp: now}, drawUsageBreakdown);
+    // Appointment reminders for past 8 months
+    $.getJSON($('#reminders-chart').data('url'), {timestamp: now}, drawRemindersChart);
 }

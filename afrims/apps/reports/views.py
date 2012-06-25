@@ -76,6 +76,31 @@ def reminder_usage(request):
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
 
+@login_required
+@permission_required('groups.can_use_dashboard_tab', login_url='/access_denied/')
+def system_usage(request):
+    "Return JSON data for overall system usage either for a date range or to date."
+    # Start date/months or to date
+    range_form = GraphRangeForm(request.GET)
+    start_date = None
+    months = None
+    data = {}
+    if range_form.is_valid():
+        start_date = range_form.cleaned_data.get('start_date', None)
+        months = range_form.cleaned_data.get('months', None)
+    if start_date is not None and months is not None:
+        # Generate report for each month requested
+        rows = []
+        for day in rrule(MONTHLY, bymonthday=(start_date.day, -1), bysetpos=1, count=months):
+            stats = {'appointments': appointment_stats(day=day), 'broadcasts': broadcast_stats(day=day)}
+            rows.append((day.date().isoformat(), stats))
+        data['range'] = rows
+    else:
+        # Report data to date
+        data['to_date'] = {'appointments': appointment_stats(), 'broadcasts': broadcast_stats()}
+    return HttpResponse(json.dumps(data), mimetype='application/json')
+
+
 def transform(x, y):
     "Transform the lists from the values query to a flat dictionary."
     direction = {'I': 'incoming', 'O': 'outgoing'}.get(y['direction'], None)

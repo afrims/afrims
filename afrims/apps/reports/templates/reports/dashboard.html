@@ -46,7 +46,7 @@
             <td>{{ this_month.reminders.percent|default:0 }} %</td>
         </tr>
     </table>
-    <div id='usage-breakdown' class="half-width"></div>
+    <div id='usage-breakdown' class="half-width" data-url="{% url report-system-usage %}"></div>
 </div>
 <div class="module">
     <table id="system-usage" class="full-width">
@@ -111,7 +111,7 @@
         </tr>
     </table>
 </div>
-<div id='usage-chart' style="width: 900px; height: 240px;" data-url="{% url broadcast-usage-graph-data %}"></div>
+<div id='usage-chart' style="width: 900px; height: 240px;" data-url="{% url report-system-usage %}?months=8"></div>
 <div class="module">
     <table id="reminders-table" class="full-width">
         <thead>
