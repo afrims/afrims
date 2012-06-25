@@ -16,7 +16,7 @@ urlpatterns = patterns('',
 
     # RapidSMS core URLs
     (r'^account/', include('rapidsms.urls.login_logout')),
-    url(r'^$', 'afrims.apps.broadcast.views.dashboard', name='rapidsms-dashboard'),
+#    url(r'^$', 'afrims.apps.broadcast.views.dashboard', name='rapidsms-dashboard'),
 
     url(r'^settings/$', direct_to_template,
         {'template': 'afrims/not_implemented.html'}, name='settings'),
@@ -38,9 +38,8 @@ urlpatterns = patterns('',
     (r'^crm/', include('afrims.apps.groups.urls')),
     (r'^rosetta/', include('rosetta.urls')),
     (r'^i18n/', include('django.conf.urls.i18n')),
-
-    url(r'^report/$', 'afrims.apps.reports.views.dashboard', name='rapidsms-report'),
     (r'^reports/', include('afrims.apps.reports.urls')),
+    url(r'^$', 'afrims.apps.reports.views.dashboard', name='rapidsms-dashboard'),
 )
 
 if 'auditcare' in settings.INSTALLED_APPS:
