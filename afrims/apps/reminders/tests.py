@@ -611,6 +611,13 @@ class ImportTest(RemindersCreateDataTest):
         patient = payload.patients.all()[0]
         self.assertFalse(patient.reminder_time)
 
+    def test_mobile_number_not_required(self):
+        """ Mobile_Number shoudn't be required """
+        node = self.create_xml_patient({'Mobile_Number': ''})
+        payload = self.create_payload([node])
+        parse_patient(node, payload)
+        self.assertEqual(payload.patients.count(), 1)
+
 
 class PatientManagerTest(RemindersCreateDataTest):
     """Tests for patient manager methods"""
