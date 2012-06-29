@@ -136,6 +136,7 @@ def delete_rule(request, rule_id):
 @login_required
 @permission_required('groups.can_use_dashboard_tab',login_url='/access_denied/')
 def dashboard(request):
+    # TODO: Remove this view. It has been replaced by a dashboard in reports
     today = datetime.date.today()
     report_date = today
     initial = {'report_year': report_date.year, 'report_month': report_date.month}
@@ -226,6 +227,7 @@ def usage_report_context(start_date, end_date):
 @login_required
 @permission_required('groups.can_use_dashboard_tab', login_url='/access_denied/')
 def report_graph_data(request):
+    # TODO: Remove this view. It has been replaced by a dashboard in reports
     today = datetime.date.today()
     report_date = today
     initial = {'report_year': report_date.year, 'report_month': report_date.month}

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "afrims.apps.reminders",
     "afrims.apps.test_messager",
     "afrims.apps.default_connection",
+    "afrims.apps.reports",
 
     # the rapidsms contrib apps.
     # "rapidsms.contrib.export",
@@ -70,25 +71,14 @@ INSTALLED_APPS = [
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
-    ("afrims.apps.broadcast.views.dashboard", "Dashboard"),    
-    ("afrims.apps.broadcast.views.send_message", "Send a Message"),
-    ("afrims.apps.reminders.views.dashboard", "Appointment Reminders"),
+    # URL pattern name, Tab name
+    ("rapidsms-dashboard", "Dashboard"),    
+    ("send-message", "Send a Message"),
+    ("reminders_dashboard", "Appointment Reminders"),
     ("broadcast-forwarding", "Forwarding"),
-    ("afrims.apps.groups.views.list_groups", "Groups"),
-    ("afrims.apps.groups.views.list_contacts","People"),
-#    ("settings", "Settings"),
-#    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
-
-#    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
-#    ("rapidsms.contrib.locations.views.locations",          "Map"),
-#    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
- #   ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
-
-#    ("afrims.apps.reminder.views.dashboard", "Reminder"),
-
+    ("list-groups", "Groups"),
+    ("list-contacts", "People"),
 ]
-
-
 
 # -------------------------------------------------------------------- #
 #                         BORING CONFIGURATION                         #

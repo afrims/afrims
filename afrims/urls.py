@@ -6,18 +6,12 @@ from django.views.generic.simple import direct_to_template
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^my-project/', include('my_project.foo.urls')),
-
     # Uncomment the admin/doc line below to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
     (r'^admin/', include(admin.site.urls)),
 
     # RapidSMS core URLs
     (r'^account/', include('rapidsms.urls.login_logout')),
-    url(r'^$', 'afrims.apps.broadcast.views.dashboard', name='rapidsms-dashboard'),
-
     url(r'^settings/$', direct_to_template,
         {'template': 'afrims/not_implemented.html'}, name='settings'),
     url(r'^access_denied/$', direct_to_template,
@@ -38,6 +32,7 @@ urlpatterns = patterns('',
     (r'^crm/', include('afrims.apps.groups.urls')),
     (r'^rosetta/', include('rosetta.urls')),
     (r'^i18n/', include('django.conf.urls.i18n')),
+    (r'^', include('afrims.apps.reports.urls')),
 )
 
 if 'auditcare' in settings.INSTALLED_APPS:

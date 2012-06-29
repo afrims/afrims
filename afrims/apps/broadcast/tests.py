@@ -16,7 +16,7 @@ from rapidsms.messages.incoming import IncomingMessage
 from afrims.tests.testcases import CreateDataTest, FlushTestScript, \
                                    TabPermissionsTest
 from afrims.apps.broadcast.models import Broadcast, DateAttribute,\
-                                         ForwardingRule
+                                         ForwardingRule, BroadcastMessage
 from afrims.apps.broadcast.app import BroadcastApp, scheduler_callback
 from afrims.apps.broadcast.forms import BroadcastForm
 from afrims.apps.reminders.tests import RemindersCreateDataTest
@@ -95,6 +95,18 @@ class BroadcastCreateDataTest(CreateDataTest):
         }
         defaults.update(data)
         return ForwardingRule.objects.create(**defaults)
+
+    def create_broadcast_message(self, data=None):
+        data = data or {}
+        defaults = {
+            'date_created': datetime.datetime.now(),
+        }
+        defaults.update(data)
+        if 'broadcast' not in defaults:
+            defaults['broadcast'] = self.create_broadcast()
+        if 'recipient' not in defaults:
+            defaults['recipient'] = self.create_contact()
+        return BroadcastMessage.objects.create(**defaults)
 
     def get_weekday(self, day):
         return DateAttribute.objects.get(name__iexact=day,

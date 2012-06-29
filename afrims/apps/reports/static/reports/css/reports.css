@@ -1,0 +1,20 @@
+table tbody tr td.bottom {
+    border-bottom-color: #ddd;
+}
+
+table tbody .sub-header {
+    background: #e1e1e1;
+    color: #000;
+}
+
+.half-width {
+    width: 50%;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.module.overview #usage-breakdown {
+    left: 50%;
+}
