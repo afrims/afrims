@@ -36,7 +36,6 @@ env.home = '/home/afrims'
 env.project = 'afrims'
 env.code_repo = 'git://github.com/afrims/afrims.git'
 
-
 def _join(*args):
     """
     We're deploying on Linux, so hard-code that path separator here.
@@ -98,6 +97,7 @@ def demo():
 def production():
     """ use production environment on remote host"""
     env.code_branch = 'master'
+    env.user = 'afrims'
     env.sudo_user = 'afrims'
     env.environment = 'production'
     env.router_port = '9089'
