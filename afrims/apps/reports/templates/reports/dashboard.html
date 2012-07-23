@@ -185,7 +185,7 @@
         <tr>
             <td>Avg. per Patient</td>
             <td>{{ last_month.broadcasts.patients|divide:last_month.users.patients|floatformat:2 }}</td>
-            <td>{{ this_month.broadcasts.patients|default:this_month.users.patients|floatformat:2 }}</td>
+            <td>{{ this_month.broadcasts.patients|divide:this_month.users.patients|floatformat:2 }}</td>
         </tr>
         <tr>
             <td rowspan="2" class="bottom">Internal Staff</td>
