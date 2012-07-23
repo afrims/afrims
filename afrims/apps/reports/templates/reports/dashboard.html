@@ -50,13 +50,13 @@
         </tr>
         <tr class="even">
             <td>% of Appointments Confirmed</td>
-            <td>{{ to_date.appointments.percent|default:0 }} %</td>
-            <td>{{ this_month.appointments.percent|default:0 }} %</td>
+            <td>{{ to_date.appointments.percent|default:0|floatformat:2 }} %</td>
+            <td>{{ this_month.appointments.percent|default:0|floatformat:2 }} %</td>
         </tr>
         <tr class="even">
             <td>% of Reminders Confirmed</td>
-            <td>{{ to_date.reminders.percent|default:0 }} %</td>
-            <td>{{ this_month.reminders.percent|default:0 }} %</td>
+            <td>{{ to_date.reminders.percent|default:0|floatformat:2 }} %</td>
+            <td>{{ this_month.reminders.percent|default:0|floatformat:2 }} %</td>
         </tr>
     </table>
     <div id='usage-breakdown' class="half-width" data-url="{% url report-system-usage %}"></div>
@@ -89,9 +89,9 @@
         </tr>
         <tr>
             <td>% of Total Users</td>
-            <td>{{ this_month.users.total|percent:to_date.users.total }}</td>
-            <td>{{ this_month.users.patients|percent:to_date.users.patients }}</td>
-            <td>{{ this_month.users.staff|percent:to_date.users.staff }}</td>
+            <td>{{ this_month.users.total|percent:to_date.users.total|floatformat:2 }}</td>
+            <td>{{ this_month.users.patients|percent:to_date.users.patients|floatformat:2 }}</td>
+            <td>{{ this_month.users.staff|percent:to_date.users.staff|floatformat:2 }}</td>
         </tr>
         <tr class="sub-header">
             <th colspan="5">Messages</th>
@@ -105,9 +105,9 @@
         </tr>
         <tr>
             <td>Avg. per User</td>
-            <td>{{ this_month.messages.outgoing|divide:to_date.users.total }}</td>
-            <td>{{ this_month.patient_messages.outgoing|divide:to_date.users.patients }}</td>
-            <td>{{ this_month.staff_messages.outgoing|divide:to_date.users.staff }}</td>
+            <td>{{ this_month.messages.outgoing|divide:to_date.users.total|floatformat:2 }}</td>
+            <td>{{ this_month.patient_messages.outgoing|divide:to_date.users.patients|floatformat:2 }}</td>
+            <td>{{ this_month.staff_messages.outgoing|divide:to_date.users.staff|floatformat:2 }}</td>
         </tr>
         <tr>
             <td rowspan="2" class="bottom">Messages - Incoming</td>
@@ -118,9 +118,9 @@
         </tr>
         <tr>
             <td>Avg. per User</td>
-            <td>{{ this_month.messages.incoming|divide:to_date.users.total }}</td>
-            <td>{{ this_month.patient_messages.incoming|divide:to_date.users.patients }}</td>
-            <td>{{ this_month.staff_messages.incoming|divide:to_date.users.staff }}</td>
+            <td>{{ this_month.messages.incoming|divide:to_date.users.total|floatformat:2 }}</td>
+            <td>{{ this_month.patient_messages.incoming|divide:to_date.users.patients|floatformat:2 }}</td>
+            <td>{{ this_month.staff_messages.incoming|divide:to_date.users.staff|floatformat:2 }}</td>
         </tr>
     </table>
 </div>
@@ -141,23 +141,23 @@
         </tr>
         <tr>
             <td>% of Appointments Confirmed</td>
-            <td>{{ last_month.appointments.percent|default:0 }}</td>
-            <td>{{ this_month.appointments.percent|default:0 }}</td>
+            <td>{{ last_month.appointments.percent|default:0|floatformat:2 }}</td>
+            <td>{{ this_month.appointments.percent|default:0|floatformat:2 }}</td>
         </tr>
         <tr>
             <td>% of Reminders Confirmed</td>
-            <td>{{ last_month.reminders.percent|default:0 }}</td>
-            <td>{{ this_month.reminders.percent|default:0 }}</td>
+            <td>{{ last_month.reminders.percent|default:0|floatformat:2 }}</td>
+            <td>{{ this_month.reminders.percent|default:0|floatformat:2 }}</td>
         </tr>
         <tr>
             <td>Avg. Number Reminders per Appointment</td>
-            <td>{{ last_month.reminders.total|divide:last_month.appointments.total }}</td>
-            <td>{{ this_month.reminders.total|divide:this_month.appointments.total }}</td>
+            <td>{{ last_month.reminders.total|divide:last_month.appointments.total|floatformat:2 }}</td>
+            <td>{{ this_month.reminders.total|divide:this_month.appointments.total|floatformat:2 }}</td>
         </tr>
         <tr>
             <td>Avg. Number of Confirmations per Appointment</td>
-            <td>{{ last_month.reminders.confirmed|divide:last_month.appointments.total }}</td>
-            <td>{{ this_month.reminders.confirmed|divide:this_month.appointments.total }}</td>
+            <td>{{ last_month.reminders.confirmed|divide:last_month.appointments.total|floatformat:2 }}</td>
+            <td>{{ this_month.reminders.confirmed|divide:this_month.appointments.total|floatformat:2 }}</td>
         </tr>
     </table>
 </div>
@@ -184,8 +184,8 @@
         </tr>
         <tr>
             <td>Avg. per Patient</td>
-            <td>{{ last_month.broadcasts.patients|divide:last_month.users.patients }}</td>
-            <td>{{ this_month.broadcasts.patients|default:this_month.users.patients }}</td>
+            <td>{{ last_month.broadcasts.patients|divide:last_month.users.patients|floatformat:2 }}</td>
+            <td>{{ this_month.broadcasts.patients|divide:this_month.users.patients|floatformat:2 }}</td>
         </tr>
         <tr>
             <td rowspan="2" class="bottom">Internal Staff</td>
@@ -195,8 +195,8 @@
         </tr>
         <tr>
             <td>Avg. per Internal Staff</td>
-            <td>{{ last_month.broadcasts.staff|divide:last_month.users.staff }}</td>
-            <td>{{ this_month.broadcasts.staff|divide:this_month.users.staff }}</td>
+            <td>{{ last_month.broadcasts.staff|divide:last_month.users.staff|floatformat:2 }}</td>
+            <td>{{ this_month.broadcasts.staff|divide:this_month.users.staff|floatformat:2 }}</td>
         </tr>
     </table>
 </div>
