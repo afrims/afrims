@@ -40,9 +40,10 @@ def dashboard(request):
     staff = Contact.objects.filter(patient__isnull=True)
     this_month = {
         'messages': messages_by_direction(day=report_date),
-        'users': user_stats(day=report_date),
+        'users': user_stats(day=report_date),       
         'patient_messages': messages_by_direction(day=report_date, filters={'contact__in': patients}),
-        'staff_messages': messages_by_direction(day=report_date, filters={'contact__in':staff}),
+        'staff_messages': messages_by_direction(day=report_date, filters={'contact__in': staff}),
+        'other_messages': messages_by_direction(day=report_date, filters={'contact__isnull': True}),
         'appointments': appointment_stats(day=report_date),
         'reminders': reminder_stats(day=report_date),
         'broadcasts': broadcast_stats(day=report_date),

@@ -69,16 +69,18 @@
                 <th>Total </th>
                 <th>Patients</th>
                 <th>Internal Staff</th>
+                <th>Unregistered</th>
             </tr>
         </thead>
         <tr class="sub-header">
-            <th colspan="5">Users</th>
+            <th colspan="6">Users</th>
         <tr>
         <tr>
             <td colspan="2">Total</td>
             <td>{{ to_date.users.total }}</td>
             <td>{{ to_date.users.patients }}</td>
             <td>{{ to_date.users.staff }}</td>
+            <td>N/A</td>
         </tr>
         <tr>
             <td rowspan="2">Active Users</td>
@@ -86,15 +88,17 @@
             <td>{{ this_month.users.total }}</td>
             <td>{{ this_month.users.patients }}</td>
             <td>{{ this_month.users.staff }}</td>
+            <td>N/A</td>
         </tr>
         <tr>
             <td>% of Total Users</td>
             <td>{{ this_month.users.total|percent:to_date.users.total|floatformat:2 }}</td>
             <td>{{ this_month.users.patients|percent:to_date.users.patients|floatformat:2 }}</td>
             <td>{{ this_month.users.staff|percent:to_date.users.staff|floatformat:2 }}</td>
+            <td>N/A</td>
         </tr>
         <tr class="sub-header">
-            <th colspan="5">Messages</th>
+            <th colspan="6">Messages</th>
         <tr>
         <tr>
             <td rowspan="2">Messages - Outgoing</td>
@@ -102,12 +106,14 @@
             <td>{{ this_month.messages.outgoing|default:0 }}</td>
             <td>{{ this_month.patient_messages.outgoing|default:0 }}</td>
             <td>{{ this_month.staff_messages.outgoing|default:0 }}</td>
+            <td>{{ this_month.other_messages.outgoing|default:0 }}</td>
         </tr>
         <tr>
             <td>Avg. per User</td>
             <td>{{ this_month.messages.outgoing|divide:to_date.users.total|floatformat:2 }}</td>
             <td>{{ this_month.patient_messages.outgoing|divide:to_date.users.patients|floatformat:2 }}</td>
             <td>{{ this_month.staff_messages.outgoing|divide:to_date.users.staff|floatformat:2 }}</td>
+            <td>N/A</td>
         </tr>
         <tr>
             <td rowspan="2" class="bottom">Messages - Incoming</td>
@@ -115,12 +121,14 @@
             <td>{{ this_month.messages.incoming|default:0 }}</td>
             <td>{{ this_month.patient_patient.incoming|default:0 }}</td>
             <td>{{ this_month.staff_messages.incoming|default:0 }}</td>
+            <td>{{ this_month.other_messages.incoming|default:0 }}</td>
         </tr>
         <tr>
             <td>Avg. per User</td>
             <td>{{ this_month.messages.incoming|divide:to_date.users.total|floatformat:2 }}</td>
             <td>{{ this_month.patient_messages.incoming|divide:to_date.users.patients|floatformat:2 }}</td>
             <td>{{ this_month.staff_messages.incoming|divide:to_date.users.staff|floatformat:2 }}</td>
+            <td>N/A</td>
         </tr>
     </table>
 </div>
