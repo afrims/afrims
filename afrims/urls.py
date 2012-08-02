@@ -17,6 +17,8 @@ urlpatterns = patterns('',
     url(r'^access_denied/$', direct_to_template,
         {'template': 'afrims/access_denied.html'}, name='access-denied'),
 
+    url(r'^survey/export/(?P<tree_id>\d+)/$', 'decisiontree.views.export', name='export_tree'),
+
     # RapidSMS contrib app URLs
     (r'^ajax/', include('rapidsms.contrib.ajax.urls')),
     (r'^export/', include('rapidsms.contrib.export.urls')),
@@ -31,7 +33,7 @@ urlpatterns = patterns('',
     (r'^test-messager/', include('afrims.apps.test_messager.urls')),
     (r'^crm/', include('afrims.apps.groups.urls')),
     (r'^rosetta/', include('rosetta.urls')),
-    (r'^i18n/', include('django.conf.urls.i18n')),
+    (r'^i18n/', include('django.conf.urls.i18n')),    
     (r'^', include('afrims.apps.reports.urls')),
 )
 
