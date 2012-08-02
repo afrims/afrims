@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
 
+    "decisiontree",
+
     "couchlog",
 
     # this app should be last, as it will always reply with a help message
@@ -271,3 +273,5 @@ SERVER_EMAIL = "afrims-dev@dimagi.com"
 
 NO_LOGIN_REQUIRED_FOR = ["/reminders/post",
                          "/reminders/post/"]
+
+DECISIONTREE_SESSION_END_TRIGGER = '#makeitstop'
