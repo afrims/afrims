@@ -3,19 +3,20 @@ South==0.7.3
 gunicorn==0.12.0
 python-dateutil==1.5
 nose==1.0
--e git+http://github.com/dimagi/rapidsms.git#egg=rapidsms
--e git+http://github.com/adammck/djtables#egg=djtables
 django-pagination==1.0.7
 lxml==2.3
 twilio==2.0.6
--e git+http://github.com/caktus/rapidsms-twilio.git@ac99162da98303b63775#egg=rtwilio
 django-sorting==0.1
 psycopg2==2.4
 django-staticfiles==1.0
 django-rosetta==0.6.0
--e git+https://github.com/dimagi/rapidsms-mach-backend.git#egg=rmach
 couchdbkit==0.5.4
-pytz
+pytz==2012c
+-e git+http://github.com/dimagi/rapidsms.git#egg=rapidsms
+-e git+http://github.com/adammck/djtables#egg=djtables
+-e git+http://github.com/caktus/rapidsms-twilio.git@ac99162da98303b63775#egg=rtwilio
+-e git+https://github.com/dimagi/rapidsms-mach-backend.git#egg=rmach
 -e git+https://github.com/dimagi/couchlog.git#egg=couchlog
 -e git+https://github.com/dimagi/auditcare.git#egg=auditcare
 -e git+https://github.com/dimagi/dimagi-utils.git#egg=dimagi_utils
+-e git+https://github.com/caktus/rapidsms-decisiontree-app.git@develop#egg=decisiontree
