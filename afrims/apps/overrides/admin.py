@@ -61,6 +61,7 @@ class AnswerAdmin(admin.ModelAdmin):
 
 class StateTransistionInline(TransistionInline):
     "Transision has more than FK to state so set fk_name."
+
     fk_name = 'current_state'
 
 
@@ -73,6 +74,7 @@ class StateAdmin(admin.ModelAdmin):
 
 class SessionAdmin(admin.ModelAdmin):
     "List sessions with better filtering."
+
     list_display = ('connection', 'tree', 'current_state', 'start_date', 'last_modified', )
     list_filter = ('start_date', 'last_modified', 'tree', )
 
