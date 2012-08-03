@@ -66,6 +66,7 @@ INSTALLED_APPS = [
 
     # this app should be last, as it will always reply with a help message
     "afrims.apps.catch_all",
+    "afrims.apps.overrides",
 ]
 
 
