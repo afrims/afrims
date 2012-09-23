@@ -17,6 +17,6 @@ pytz==2012c
 -e git+http://github.com/caktus/rapidsms-twilio.git@ac99162da98303b63775#egg=rtwilio
 -e git+https://github.com/dimagi/rapidsms-mach-backend.git#egg=rmach
 -e git+https://github.com/dimagi/couchlog.git#egg=couchlog
--e git+https://github.com/dimagi/auditcare.git#egg=auditcare
+-e git+https://github.com/dimagi/auditcare.git@3d4740d703e0adc52985d6509152e873d9372928#egg=auditcare
 -e git+https://github.com/dimagi/dimagi-utils.git#egg=dimagi_utils
 -e git+https://github.com/caktus/rapidsms-decisiontree-app.git@develop#egg=decisiontree
