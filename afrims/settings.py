@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 	"staticfiles",
     "rosetta",
     # "gunicorn",
+    "decisiontree",
     "afrims.apps.groups",
     "afrims.apps.broadcast",
     "afrims.apps.reminders",
@@ -59,8 +60,6 @@ INSTALLED_APPS = [
     "rapidsms.contrib.messaging",
     "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
-
-    "decisiontree",
 
     "couchlog",
 

@@ -1,0 +1,291 @@
+[
+    {
+        "pk": 1, 
+        "model": "decisiontree.question", 
+        "fields": {
+            "text": "Mas Makahinumdum baka kung makadawat ka ug text kabahin sa schedule sa imong sunod na pagbisita?", 
+            "error_response": ""
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "decisiontree.question", 
+        "fields": {
+            "text": "Nakadawat kaba ug mga SMS/ Text nga pahinumdum sa imong sunod na pagbisita?", 
+            "error_response": ""
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "decisiontree.question", 
+        "fields": {
+            "text": "Sa imong paminaw, kinahanglan pa ba nimong suta-on ang imong appointment reminder human nadawat nimo ang pahinumdum.", 
+            "error_response": ""
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "decisiontree.question", 
+        "fields": {
+            "text": "Gipadad-an ka namo ug lain na mga text na mensahe gawas sa pahinumdum. Nakita ba nimo nga mapuslanon sila?", 
+            "error_response": ""
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "decisiontree.question", 
+        "fields": {
+            "text": "Mas sayon ba ma-abot ang mga study staff pina-agi sa \u201ctext\u201d kaysa telepono o pag adto sa clinic?", 
+            "error_response": ""
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "decisiontree.question", 
+        "fields": {
+            "text": "Pila ka text nga pahinumdum ang ganahan nimo madawat kada semana?", 
+            "error_response": ""
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "decisiontree.question", 
+        "fields": {
+            "text": "Nakahibaw ka ba nga makapadala ka ug text gamit ang mensahe \u201ccall me back\u201d ug ang \u201cstudy staff\u201d manawag nimo.", 
+            "error_response": ""
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "decisiontree.tree", 
+        "fields": {
+            "root_state": 1, 
+            "trigger": "survey", 
+            "completion_text": "", 
+            "summary": ""
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "decisiontree.answer", 
+        "fields": {
+            "answer": "1", 
+            "type": "A", 
+            "name": "Yes", 
+            "description": ""
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "decisiontree.answer", 
+        "fields": {
+            "answer": "2", 
+            "type": "A", 
+            "name": "No", 
+            "description": ""
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "decisiontree.answer", 
+        "fields": {
+            "answer": "\\d+", 
+            "type": "R", 
+            "name": "Any Number", 
+            "description": ""
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "decisiontree.treestate", 
+        "fields": {
+            "num_retries": null, 
+            "question": 1, 
+            "name": "Question 1"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "decisiontree.treestate", 
+        "fields": {
+            "num_retries": null, 
+            "question": 2, 
+            "name": "Question 2"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "decisiontree.treestate", 
+        "fields": {
+            "num_retries": null, 
+            "question": 3, 
+            "name": "Question 3"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "decisiontree.treestate", 
+        "fields": {
+            "num_retries": null, 
+            "question": 4, 
+            "name": "Question 4"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "decisiontree.treestate", 
+        "fields": {
+            "num_retries": null, 
+            "question": 5, 
+            "name": "Question 5"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "decisiontree.treestate", 
+        "fields": {
+            "num_retries": null, 
+            "question": 6, 
+            "name": "Question 6"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "decisiontree.treestate", 
+        "fields": {
+            "num_retries": null, 
+            "question": 7, 
+            "name": "Question 7"
+        }
+    }, 
+    {
+        "pk": 17, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 1, 
+            "tags": [], 
+            "current_state": 1, 
+            "next_state": 2
+        }
+    }, 
+    {
+        "pk": 18, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 2, 
+            "tags": [], 
+            "current_state": 1, 
+            "next_state": 2
+        }
+    }, 
+    {
+        "pk": 19, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 1, 
+            "tags": [], 
+            "current_state": 2, 
+            "next_state": 3
+        }
+    }, 
+    {
+        "pk": 20, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 2, 
+            "tags": [], 
+            "current_state": 2, 
+            "next_state": 3
+        }
+    }, 
+    {
+        "pk": 21, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 1, 
+            "tags": [], 
+            "current_state": 3, 
+            "next_state": 4
+        }
+    }, 
+    {
+        "pk": 22, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 2, 
+            "tags": [], 
+            "current_state": 3, 
+            "next_state": 4
+        }
+    }, 
+    {
+        "pk": 23, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 1, 
+            "tags": [], 
+            "current_state": 4, 
+            "next_state": 5
+        }
+    }, 
+    {
+        "pk": 24, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 2, 
+            "tags": [], 
+            "current_state": 4, 
+            "next_state": 5
+        }
+    }, 
+    {
+        "pk": 25, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 1, 
+            "tags": [], 
+            "current_state": 5, 
+            "next_state": 6
+        }
+    }, 
+    {
+        "pk": 26, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 2, 
+            "tags": [], 
+            "current_state": 5, 
+            "next_state": 6
+        }
+    }, 
+    {
+        "pk": 27, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 3, 
+            "tags": [], 
+            "current_state": 6, 
+            "next_state": 7
+        }
+    }, 
+    {
+        "pk": 28, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 1, 
+            "tags": [], 
+            "current_state": 7, 
+            "next_state": null
+        }
+    }, 
+    {
+        "pk": 29, 
+        "model": "decisiontree.transition", 
+        "fields": {
+            "answer": 2, 
+            "tags": [], 
+            "current_state": 7, 
+            "next_state": null
+        }
+    }
+]
