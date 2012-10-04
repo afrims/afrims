@@ -3,7 +3,7 @@ import datetime
 
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Count, Q
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.utils import simplejson as json
 from django.views.generic.simple import direct_to_template as render
 
@@ -75,6 +75,8 @@ def reminder_usage(request):
     if range_form.is_valid():
         start_date = range_form.cleaned_data.get('start_date', None)
         months = range_form.cleaned_data.get('months', None)
+    else:
+        return HttpResponseBadRequest(json.dumps({'error': 'Invalid report range'}), mimetype='application/json')
     if start_date is not None and months is not None:
         # Generate report for each month requested
         rows = []
@@ -101,6 +103,8 @@ def system_usage(request):
     if range_form.is_valid():
         start_date = range_form.cleaned_data.get('start_date', None)
         months = range_form.cleaned_data.get('months', None)
+    else:
+        return HttpResponseBadRequest(json.dumps({'error': 'Invalid report range'}), mimetype='application/json')
     if start_date is not None and months is not None:
         # Generate report for each month requested
         rows = []
