@@ -375,6 +375,15 @@ class ReminderGraphViewTest(BaseGraphViewTest):
         self.assertTrue('range' in results)
         self.assertEqual(len(results['range']), 5) # Current month + 4
 
+    def test_invalid_range(self):
+        "Ask for invalid date range."
+        response = self.client.get(self.url, {'months': 'XXX'})
+        self.assertEqual(response.status_code, 400)
+        results = json.loads(response.content)
+        self.assertFalse('to_date' in results)
+        self.assertFalse('range' in results)
+
+
 class UsageGraphViewTest(BaseGraphViewTest):
     "View for generating data for the system usage graphs."
 
@@ -391,3 +400,11 @@ class UsageGraphViewTest(BaseGraphViewTest):
         self.assertFalse('to_date' in results)
         self.assertTrue('range' in results)
         self.assertEqual(len(results['range']), 5) # Current month + 4
+
+    def test_invalid_range(self):
+        "Ask for invalid date range."
+        response = self.client.get(self.url, {'months': 'XXX'})
+        self.assertEqual(response.status_code, 400)
+        results = json.loads(response.content)
+        self.assertFalse('to_date' in results)
+        self.assertFalse('range' in results)
