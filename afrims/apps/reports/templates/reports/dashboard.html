@@ -132,7 +132,7 @@
         </tr>
     </table>
 </div>
-<div id='usage-chart' style="width: 900px; height: 240px;" data-url="{% url report-system-usage %}?months=8&start_date={{ report_date }}"></div>
+<div id='usage-chart' style="width: 900px; height: 240px;" data-url="{% url report-system-usage %}?months=8&start_date={{ report_date.isoformat }}"></div>
 <div class="module">
     <table id="reminders-table" class="full-width">
         <thead>
@@ -169,7 +169,7 @@
         </tr>
     </table>
 </div>
-<div id='reminders-chart' style="width: 900px; height: 240px;" data-url="{% url report-reminder-usage %}?months=8&start_date={{ report_date }}"></div>
+<div id='reminders-chart' style="width: 900px; height: 240px;" data-url="{% url report-reminder-usage %}?months=8&start_date={{ report_date.isoformat }}"></div>
 <div class="module">
     <table id="broadcasts-table" class="full-width">
         <thead>
