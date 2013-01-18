@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django_nose",
 	"staticfiles",
     "rosetta",
+    "taggit",
     # "gunicorn",
     "decisiontree",
     "afrims.apps.groups",

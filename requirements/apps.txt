@@ -11,6 +11,7 @@ psycopg2==2.4
 django-staticfiles==1.0
 django-rosetta==0.6.0
 couchdbkit==0.5.4
+django-taggit==0.9.3
 pytz==2012c
 -e git+http://github.com/dimagi/rapidsms.git#egg=rapidsms
 -e git+http://github.com/adammck/djtables#egg=djtables
