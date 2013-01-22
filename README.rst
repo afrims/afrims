@@ -1,7 +1,8 @@
-AFRIMS
+TrialConnect
 ======
 
-The RapidSMS AFRIMS project...
+The RapidSMS TrialConnect project. A system for supporting clinical trials
+with SMS reminders and outreach.
 
 Development Workflow
 ====================
